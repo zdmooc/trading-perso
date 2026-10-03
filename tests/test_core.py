@@ -176,3 +176,12 @@ def test_portefeuille_et_fraicheur():
     seance, perimes, retard = fraicheur(d, d["A"].index[-1] + pd.Timedelta(days=1))
     assert seance == d["A"].index[-1] and perimes == {"B"} and not retard
     assert fraicheur(d, seance + pd.Timedelta(days=10))[2]
+
+
+def test_detention():
+    from tradeperso import portefeuille
+    idx = pd.bdate_range("2020-01-01", periods=4)
+    m = portefeuille.detention(pd.Series([100.0, 80.0, 90.0, 120.0], index=idx), idx[0], idx[-1])
+    assert m["rendement_total_pct"] == 20.0 and m["drawdown_max_pct"] == -20.0
+    panier = pd.DataFrame({"A": [1.0, 2.0, 2.0, 2.0], "B": [1.0, 1.0, 1.0, 1.0]}, index=idx)
+    assert portefeuille.detention(panier, idx[0], idx[-1])["rendement_total_pct"] == 50.0

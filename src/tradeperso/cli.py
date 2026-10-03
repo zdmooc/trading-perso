@@ -113,6 +113,35 @@ VARIANTES = [
 ]
 
 
+GAFAM_NVDA = ["AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA"]
+REPERES = {"SPY": "S&P 500 (ETF SPY, dividendes inclus)", "QQQ": "Nasdaq 100 (ETF QQQ, dividendes inclus)"}
+
+
+def section_detention(data, ref, risque) -> str:
+    """Compare le système à « acheter et garder » sur la même période."""
+    debut, fin = ref["debut"], ref["fin"]
+    try:
+        reperes = download(list(REPERES), period="max")
+    except Exception:
+        reperes = {}
+    lignes = [("**Ce système** (4 positions, risque " + f"{risque:.0%} par trade)", ref)]
+    for tic, nom in REPERES.items():
+        if tic in reperes:
+            lignes.append((f"Garder le {nom}", portefeuille.detention(reperes[tic]["Close"], debut, fin)))
+    panier = [s for s in GAFAM_NVDA if s in data]
+    if panier:
+        prix = pd.DataFrame({s: data[s]["Close"] for s in panier})
+        lignes.append(("Garder Apple, Microsoft, Alphabet, Amazon, Meta et Nvidia (parts égales)",
+                       portefeuille.detention(prix, debut, fin)))
+    md = [f"### Comparaison avec « acheter et garder » ({debut:%m/%Y} à {fin:%m/%Y})\n",
+          "| Méthode | Rendement par an | Total | Pire baisse | Plus longue période sous un sommet |",
+          "| --- | --- | --- | --- | --- |"]
+    for nom, m in lignes:
+        md.append(f"| {nom} | {m['rendement_annuel_pct']:+} % | {m['rendement_total_pct']:+} % | "
+                  f"{m['drawdown_max_pct']} % | {m['drawdown_duree_mois']} mois |")
+    return "\n".join(md) + "\n"
+
+
 def section_portefeuille(cfg, data, indices, frais, risque) -> str:
     """Résultat réaliste (limite de positions) et solidité des réglages."""
     f = cfg.get("filtres", {})
@@ -127,6 +156,7 @@ def section_portefeuille(cfg, data, indices, frais, risque) -> str:
     ref = lignes[0][1]
     if not ref.get("trades"):
         return "## Portefeuille\n\nAucun trade.\n"
+    comparaison = section_detention(data, ref, risque)
     md = [f"## Résultat réaliste du portefeuille (stratégies actives, {max_pos} positions au maximum)\n",
           f"**{ref['rendement_annuel_pct']:+} % par an** ({ref['rendement_total_pct']:+} % au total), "
           f"pire baisse **{ref['drawdown_max_pct']} %**, plus longue période sous un ancien sommet : "
@@ -136,6 +166,7 @@ def section_portefeuille(cfg, data, indices, frais, risque) -> str:
           f"| {ref['trades']} | {ref['reussite_pct']} % | {ref['gain_moyen_r']:+} R | {ref['perte_moyenne_r']:+} R | "
           f"{ref['esperance_r']:+} R | {ref['profit_factor']} |\n",
           "Par stratégie : " + ", ".join(f"{s} {n} trades ({r:+} R)" for s, (n, r) in ref["par_strategie"].items()) + ".\n",
+          comparaison,
           "## Solidité des réglages\n",
           "Si un petit changement de réglage fait s'effondrer le résultat, la stratégie est trop ajustée au passé.\n",
           "| Variante | Trades | Espérance par trade | Rendement par an | Pire baisse |",

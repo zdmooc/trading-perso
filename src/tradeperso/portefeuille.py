@@ -83,6 +83,8 @@ def mesures(pris: list[Candidat], courbe: list[tuple]) -> dict:
     annees = max((eq.index[-1] - pris[0].trade.entree_date).days / 365.25, 1e-9)
     gains, pertes = rs[rs > 0], rs[rs < 0]
     return {
+        "debut": pris[0].trade.entree_date,
+        "fin": eq.index[-1],
         "trades": len(rs),
         "reussite_pct": round(100 * (rs > 0).mean(), 1),
         "gain_moyen_r": round(gains.mean(), 2) if len(gains) else 0.0,
@@ -97,3 +99,18 @@ def mesures(pris: list[Candidat], courbe: list[tuple]) -> dict:
                           pd.DataFrame({"s": [c.strategie for c in pris], "r": rs}).groupby("s")["r"]
                           .agg(["count", "sum"]).iterrows()},
     }
+
+
+def detention(prix: pd.DataFrame | pd.Series, debut, fin) -> dict:
+    """« Acheter et garder » de debut à fin (panier à poids égaux, sans rééquilibrage, si plusieurs colonnes)."""
+    p = prix.loc[debut:fin].dropna()
+    eq = (p / p.iloc[0]).mean(axis=1) if isinstance(p, pd.DataFrame) else p / p.iloc[0]
+    dd = eq / eq.cummax() - 1
+    sous = dd < 0
+    blocs = (~sous).cumsum()
+    duree = max((g.index[-1] - g.index[0] for _, g in eq[sous].groupby(blocs[sous])), default=pd.Timedelta(0))
+    annees = max((eq.index[-1] - eq.index[0]).days / 365.25, 1e-9)
+    return {"rendement_annuel_pct": round(100 * (eq.iloc[-1] ** (1 / annees) - 1), 1),
+            "rendement_total_pct": round(100 * (eq.iloc[-1] - 1), 1),
+            "drawdown_max_pct": round(100 * dd.min(), 1),
+            "drawdown_duree_mois": round(duree.days / 30.44, 1)}
