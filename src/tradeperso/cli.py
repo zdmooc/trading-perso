@@ -75,7 +75,7 @@ def cmd_backtest(cfg: dict, out: Path, period: str) -> None:
         for nom_strat, st in STRATEGIES.items():
             trades = [t for sym, df in data.items() if not st.indices_seulement or sym in indices
                       for t in backtest.run(appliquer(nom_strat, df, reg), sym, frais, st.sens, be)]
-            lignes.append({"stratégie": nom_strat, **backtest.metrics(trades, risque)})
+            lignes.append({"stratégie": nom_strat + ("" if st.actif else " (test)"), **backtest.metrics(trades, risque)})
         return "| " + " | ".join(cols) + " |\n|" + " --- |" * len(cols) + "\n" + "".join(
             "| " + " | ".join(str(l.get(c, "")) for c in cols) + " |\n" for l in lignes)
 
@@ -96,6 +96,8 @@ def pareto(data, noms, indices, regime, breakeven_r, frais, ratio_min) -> str:
     """Loi des 20/80 par actif : quelle part du gain vient des meilleurs actifs, et est-ce stable dans le temps ?"""
     trades = []
     for nom_strat, st in STRATEGIES.items():
+        if not st.actif:
+            continue
         for sym, df in data.items():
             if st.indices_seulement and sym not in indices:
                 continue

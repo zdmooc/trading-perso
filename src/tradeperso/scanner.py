@@ -51,7 +51,7 @@ def scan(data: dict[str, pd.DataFrame], noms: dict[str, str], capital: float, ri
         if sym in exclus:
             continue
         for nom_strat, st in STRATEGIES.items():
-            if st.indices_seulement and sym not in indices:
+            if not st.actif or (st.indices_seulement and sym not in indices):
                 continue
             last = appliquer(nom_strat, df, regime).iloc[-1]
             if not last["entry"] or not np.isfinite(last["stop"]):

@@ -34,7 +34,7 @@ def test_strategies_produce_columns_and_trades():
         for t in trades:
             assert t.sortie_date > t.entree_date or t.motif in {"stop", "objectif"}
             assert (t.stop < t.entree) if st.sens > 0 else (t.stop > t.entree)
-            assert t.r >= -1.5
+            assert t.r >= -3  # un écart à l'ouverture peut dépasser 1 R
 
 
 def test_stop_hit_gives_about_minus_one_r():

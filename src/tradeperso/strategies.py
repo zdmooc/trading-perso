@@ -79,12 +79,46 @@ def cassure_20j_vente(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def _repli(df: pd.DataFrame, sens: int, objectif_r: float) -> pd.DataFrame:
+    """Repli dans une tendance établie, entrée sur reprise confirmée, stop sous le creux du repli."""
+    out = df.copy()
+    c = df["Close"] * sens
+    haut, bas = (df["High"], df["Low"]) if sens > 0 else (-df["Low"], -df["High"])
+    m20, m50, m200, a = sma(c, 20), sma(c, 50), sma(c, 200), atr(df)
+    tendance = (c > m50) & (m50 > m200) & (m50 > m50.shift(5))
+    repli = (bas <= m20).rolling(5).max().astype(bool)          # le cours est revenu toucher la MM20
+    reprise = (c > haut.shift(1)) & (c > m20)                    # clôture au-dessus du plus haut de la veille
+    creux = bas.rolling(5).min() - 0.25 * a
+    risque = (c - creux).clip(lower=0.5 * a)                     # stop au moins à 0,5 ATR
+    out["entry"] = tendance & repli & reprise
+    out["stop"] = (c - risque) * sens
+    out["target"] = (c + objectif_r * risque) * sens
+    out["exit"] = c < m50
+    return out
+
+
+def repli_tendance(df: pd.DataFrame) -> pd.DataFrame:
+    """Achat d'un repli sur la MM20 dans une tendance haussière, objectif 3R, sortie sous la MM50."""
+    return _repli(df, 1, 3.0)
+
+
+def repli_tendance_2r(df: pd.DataFrame) -> pd.DataFrame:
+    """Même règle avec un objectif à 2R (comparaison seulement)."""
+    return _repli(df, 1, 2.0)
+
+
+def repli_tendance_vente(df: pd.DataFrame) -> pd.DataFrame:
+    """Vente d'un rebond sur la MM20 dans une tendance baissière, objectif 3R, sortie au-dessus de la MM50."""
+    return _repli(df, -1, 3.0)
+
+
 @dataclass(frozen=True)
 class Strategie:
     fonction: Callable[[pd.DataFrame], pd.DataFrame]
     sens: int            # 1 = achat, -1 = vente à découvert
     type: str = "swing"  # "swing" (bougies journalières, 2 à 15 jours) ou "day" (clôture le jour même)
     indices_seulement: bool = False
+    actif: bool = True   # False : présent dans le backtest seulement, aucun signal envoyé
 
 
 STRATEGIES: dict[str, Strategie] = {
@@ -94,6 +128,10 @@ STRATEGIES: dict[str, Strategie] = {
     # Ventes à découvert : indices uniquement (CFD sur IG et eToro).
     "tendance_mm_vente": Strategie(tendance_mm_vente, -1, indices_seulement=True),
     "cassure_20j_vente": Strategie(cassure_20j_vente, -1, indices_seulement=True),
+    # En test (backtest seulement) : repli dans la tendance.
+    "repli_tendance": Strategie(repli_tendance, 1, actif=False),
+    "repli_tendance_2r": Strategie(repli_tendance_2r, 1, actif=False),
+    "repli_tendance_vente": Strategie(repli_tendance_vente, -1, indices_seulement=True, actif=False),
 }
 TYPES = {nom: s.type for nom, s in STRATEGIES.items()}
 
