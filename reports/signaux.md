@@ -10,11 +10,11 @@ Calculés le 03/10/2026 sur les cours de clôture du 02/10/2026.
 ### Nasdaq 100 (cassure_20j)
 
 Entrée : lun. 05/10/2026 à 15:30 (heure de Paris), à l'ouverture de la Bourse de New York, au prix du marché (≈ 30807.93).  
-IG : ACHETER 0.14 contrat US Tech 100 (1 USD/point) [CFD sur indice] | perte au stop ≈ 96 € | spread + commissions ≈ 0.12 €, financement ≈ 0.68 €/nuit  
+IG : ACHETER 0.14 contrat US Tech 100, 1 USD par point [CFD sur indice] | perte au stop ≈ 96 € | spread + commissions ≈ 0.12 €, financement ≈ 0.68 €/nuit  
 eToro : ACHETER 0.14 unité NSDQ100 [CFD sur indice] | perte au stop ≈ 96 € | spread + commissions ≈ 0.54 €, financement ≈ 1.05 €/nuit
 
 ### Eli Lilly (rsi2_repli)
 
 Entrée : lun. 05/10/2026 à 15:30 (heure de Paris), à l'ouverture de la Bourse de New York, au prix du marché (≈ 1142.85).  
-IG : ACHETER 1 action Eli Lilly (CFD action) [CFD sur action] | perte au stop ≈ 71 € | spread + commissions ≈ 26.85 €, financement ≈ 0.18 €/nuit  
-eToro : ACHETER 1.41 actions LLY (action réelle, sans levier) [action réelle] | perte au stop ≈ 100 € | spread + commissions ≈ 3.55 €, pas de frais de nuit
+IG : ACHETER 1 action Eli Lilly [CFD sur action] | perte au stop ≈ 71 € | spread + commissions ≈ 26.85 €, financement ≈ 0.18 €/nuit  
+eToro : ACHETER 1.41 actions LLY [action réelle sans levier] | perte au stop ≈ 100 € | spread + commissions ≈ 3.55 €, pas de frais de nuit
