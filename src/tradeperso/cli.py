@@ -20,7 +20,7 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     data = {s: df for s, df in data.items() if s not in execution.FX_TICKERS.values()}
     clotures = journal.mettre_a_jour(jrn, data, cfg["capital"]["frais_bps"])
     signaux = scan({s: data[s] for s in noms if s in data}, noms,
-                   cfg["capital"]["montant"], cfg["capital"]["risque_par_trade"])
+                   cfg["capital"]["montant"], cfg["capital"]["risque_par_trade"], cfg["capital"].get("ratio_min", 0.0))
     jrn = journal.ajouter(jrn, signaux)
     journal.sauver(jrn, out / "journal.csv")
     (out / "suivi.md").write_text(journal.to_markdown(jrn), encoding="utf-8")

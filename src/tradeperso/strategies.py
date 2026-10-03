@@ -40,14 +40,14 @@ def rsi2_repli(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def cassure_20j(df: pd.DataFrame) -> pd.DataFrame:
-    """Cassure du plus haut 20 jours (cours > MM200), objectif 2R, sortie sous le plus bas 10 jours."""
+    """Cassure du plus haut 20 jours (cours > MM200), objectif 3R, sortie sous le plus bas 10 jours."""
     out = df.copy()
     m200, a = sma(df["Close"], 200), atr(df)
     plus_haut = df["High"].rolling(20).max().shift(1)
     plus_bas = df["Low"].rolling(10).min().shift(1)
     out["entry"] = (df["Close"] > plus_haut) & (df["Close"] > m200)
     out["stop"] = df["Close"] - 2 * a
-    out["target"] = df["Close"] + 2 * (df["Close"] - out["stop"])
+    out["target"] = df["Close"] + 3 * (df["Close"] - out["stop"])
     out["exit"] = df["Close"] < plus_bas
     return out
 

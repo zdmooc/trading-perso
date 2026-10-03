@@ -96,6 +96,7 @@ def test_plan_execution():
     assert ig.plateforme == "IG" and et.plateforme == "eToro"
     for o in p.ordres:
         assert 0 < o.perte_au_stop_eur <= 100.01 and o.frais_eur > 0
+        assert abs(o.gain_objectif_eur / o.perte_au_stop_eur - 2.0) < 1e-6
     a = Signal("AAPL", "Apple", "rsi2_repli", pd.Timestamp("2026-10-02"), 200.0, 190.0, 215.0, 0)
     ig, et = execution.plan(a, cfg, execution.FX_DEFAUT).ordres
     assert ig.quantite == 11 and et.nuit_eur == 0 and "action réelle" in et.sous_jacent
@@ -104,3 +105,5 @@ def test_plan_execution():
     msgs = alerts.messages([s], [], {"succes": 0, "echecs": 0, "taux_reussite": None, "r_total": 0.0,
                                      "ouverts": 0, "en_attente": 1}, s.date, {id(s): p})
     assert len(msgs) == 2 and "lun. 5 oct. à 15h30" in msgs[0] and "30 000" in msgs[0]
+    assert "Gain si l'objectif est atteint" in msgs[0] and "2,0 pour 1" in msgs[0]
+    assert all(x.ratio >= 3 for x in scan({"X": random_walk()}, {"X": "T"}, 10_000, 0.01, ratio_min=3))

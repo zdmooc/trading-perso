@@ -47,9 +47,13 @@ def _ordre(o) -> str:
     unite = UNITES[o.unite][o.quantite > 1]
     qte = nombre(o.quantite, 0 if float(o.quantite).is_integer() else 2)
     frais = euros(o.frais_eur) + (f" + {euros(o.nuit_eur)} par nuit" if o.nuit_eur else ", sans frais de nuit")
+    net = (o.gain_objectif_eur - o.frais_eur) / (o.perte_au_stop_eur + o.frais_eur)
     return (f"<b>Sur {o.plateforme}</b> : {html.escape(o.sous_jacent)} « {html.escape(o.instrument)} »\n"
             f"Acheter <b>{qte} {unite}</b>\n"
-            f"Perte si le stop est touché : {euros(o.perte_au_stop_eur)}\n"
+            f"✅ Gain si l'objectif est atteint : <b>+{euros(o.gain_objectif_eur)}</b>\n"
+            f"❌ Perte si le stop est touché : <b>−{euros(o.perte_au_stop_eur)}</b>\n"
+            f"⚖️ Ratio gain/perte : <b>{nombre(o.gain_objectif_eur / o.perte_au_stop_eur, 1)} pour 1</b> "
+            f"({nombre(net, 1)} après frais)\n"
             f"Frais : {frais}")
 
 
@@ -64,8 +68,7 @@ def message_signal(s: Signal, p: Plan | None) -> str:
                       f"à l'ouverture de la {p.bourse}")
     lignes += [f"💰 <b>Entrée</b> : au prix du marché, vers {nombre(s.entree)}",
                f"🛑 <b>Stop</b> : {nombre(s.stop)} (−{nombre(s.risque_pct, 1)} %)",
-               f"🎯 <b>Objectif</b> : {nombre(s.objectif)} (+{nombre(gain, 1)} %)",
-               f"⚖️ <b>Gain/perte</b> : {nombre(s.ratio, 1)} pour 1"]
+               f"🎯 <b>Objectif</b> : {nombre(s.objectif)} (+{nombre(gain, 1)} %)"]
     if p:
         lignes += ["", "\n\n".join(_ordre(o) for o in p.ordres)]
     return "\n".join(lignes)
@@ -74,7 +77,7 @@ def message_signal(s: Signal, p: Plan | None) -> str:
 def message_bilan(signaux: list[Signal], clotures: list[dict], bilan: dict, seance) -> str:
     n = len(signaux)
     lignes = [f"📊 <b>Bilan au {date_courte(seance)}</b>",
-              f"{n} nouveau{'x' if n > 1 else ''} signa{'ux' if n > 1 else 'l'}"]
+              f"{n} nouveau{'x' if n > 1 else ''} signa{'ux' if n > 1 else 'l'} (ratio gain/perte d'au moins 3 pour 1)"]
     for c in clotures:
         icone = "✅" if c["statut"] == "succès" else "❌"
         lignes.append(f"{icone} {html.escape(str(c['nom']))} : {c['statut']} ({c['motif']}), "

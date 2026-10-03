@@ -34,7 +34,8 @@ class Signal:
         return (self.objectif - self.entree) / (self.entree - self.stop)
 
 
-def scan(data: dict[str, pd.DataFrame], noms: dict[str, str], capital: float, risque: float) -> list[Signal]:
+def scan(data: dict[str, pd.DataFrame], noms: dict[str, str], capital: float, risque: float,
+         ratio_min: float = 0.0) -> list[Signal]:
     signaux = []
     for sym, df in data.items():
         for nom_strat, strat in STRATEGIES.items():
@@ -42,8 +43,10 @@ def scan(data: dict[str, pd.DataFrame], noms: dict[str, str], capital: float, ri
             if not last["entry"] or not np.isfinite(last["stop"]) or last["stop"] >= last["Close"]:
                 continue
             qte = capital * risque / (last["Close"] - last["stop"])
-            signaux.append(Signal(sym, noms.get(sym, sym), nom_strat, df.index[-1], float(last["Close"]),
-                                  float(last["stop"]), float(last["target"]), round(qte, 2)))
+            s = Signal(sym, noms.get(sym, sym), nom_strat, df.index[-1], float(last["Close"]),
+                       float(last["stop"]), float(last["target"]), round(qte, 2))
+            if s.ratio >= ratio_min - 1e-9:
+                signaux.append(s)
     return signaux
 
 

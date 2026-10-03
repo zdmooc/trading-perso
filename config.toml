@@ -4,6 +4,7 @@
 montant = 10000          # capital de référence, en devise du compte
 risque_par_trade = 0.01  # 1 % du capital risqué par trade
 frais_bps = 5            # frais + slippage par ordre, en points de base (0,05 %)
+ratio_min = 3.0          # seuls les signaux avec un ratio gain/perte d'au moins 3 pour 1 sont envoyés
 
 # 5 grands indices mondiaux (symboles Yahoo Finance)
 [indices]
