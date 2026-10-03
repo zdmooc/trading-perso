@@ -99,3 +99,8 @@ def test_plan_execution():
     a = Signal("AAPL", "Apple", "rsi2_repli", pd.Timestamp("2026-10-02"), 200.0, 190.0, 215.0, 0)
     ig, et = execution.plan(a, cfg, execution.FX_DEFAUT).ordres
     assert ig.quantite == 11 and et.nuit_eur == 0 and "action réelle" in et.sous_jacent
+
+    from tradeperso import alerts
+    msgs = alerts.messages([s], [], {"succes": 0, "echecs": 0, "taux_reussite": None, "r_total": 0.0,
+                                     "ouverts": 0, "en_attente": 1}, s.date, {id(s): p})
+    assert len(msgs) == 2 and "lun. 5 oct. à 15h30" in msgs[0] and "30 000" in msgs[0]

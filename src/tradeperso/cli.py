@@ -25,14 +25,14 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     journal.sauver(jrn, out / "journal.csv")
     (out / "suivi.md").write_text(journal.to_markdown(jrn), encoding="utf-8")
     seance = max(df.index[-1] for df in data.values())
-    plans = {id(s): execution.format_plan(s, execution.plan(s, cfg, fx)) for s in signaux}
+    plans = {id(s): execution.plan(s, cfg, fx) for s in signaux}
     md = (f"# Signaux de la séance du {alerts.date_fr(seance)}\n\n"
           f"Calculés le {date.today():%d/%m/%Y} sur les cours de clôture du {seance:%d/%m/%Y}.\n\n"
           + to_markdown(signaux)
-          + "".join(f"\n### {s.nom} ({s.strategie})\n\n" + plans[id(s)].replace("\n", "  \n") + "\n" for s in signaux))
+          + "".join(f"\n### {s.nom} ({s.strategie})\n\n" + execution.format_plan(s, plans[id(s)]).replace("\n", "  \n") + "\n" for s in signaux))
     (out / "signaux.md").write_text(md, encoding="utf-8")
     print(md)
-    if (signaux or clotures) and alerts.send_telegram(alerts.message(signaux, clotures, journal.bilan(jrn), seance, plans)):
+    if (signaux or clotures) and alerts.send_telegram(alerts.messages(signaux, clotures, journal.bilan(jrn), seance, plans)):
         print("Alerte Telegram envoyée.")
 
 

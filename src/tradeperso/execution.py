@@ -66,7 +66,7 @@ def plan(s: Signal, cfg: dict, fx: dict[str, float]) -> Plan:
         dev, vp = inst["devise"], inst["ig_valeur_point"]
         q = round(_arrondi(risque_eur * fx[dev] / (ecart * vp), 0.01), 2)
         ordres.append(Ordre(
-            "IG", f"{inst['ig']} ({vp:g} {dev}/point)", "CFD sur indice", q, "contrat", dev,
+            "IG", f"{inst['ig']}, {vp:g} {dev} par point", "CFD sur indice", q, "contrat", dev,
             q * vp * ecart / fx[dev], q * vp * inst["ig_spread_points"] / fx[dev],
             q * vp * s.entree * ex["ig_financement_annuel"] / 365 / fx[dev]))
         dev_e = inst.get("etoro_devise", dev)
@@ -80,13 +80,13 @@ def plan(s: Signal, cfg: dict, fx: dict[str, float]) -> Plan:
         q = float(_arrondi(risque_eur * usd / ecart, 1))
         commission = 2 * max(q * ex["ig_action_commission_par_action"], ex["ig_action_commission_min"]) if q else 0
         ordres.append(Ordre(
-            "IG", f"{s.nom} (CFD action)", "CFD sur action", q, "action", "USD",
+            "IG", s.nom, "CFD sur action", q, "action", "USD",
             q * ecart / usd, (commission + q * s.entree * ex["ig_action_spread_pct"] / 100) / usd,
             q * s.entree * ex["ig_financement_annuel"] / 365 / usd))
         # Sans levier, la position ne peut pas dépasser le capital.
         q = round(_arrondi(min(risque_eur / ecart, cfg["capital"]["montant"] / s.entree) * usd, 0.01), 2)
         ordres.append(Ordre(
-            "eToro", f"{s.symbole} (action réelle, sans levier)", "action réelle", q, "action", "USD",
+            "eToro", s.symbole, "action réelle sans levier", q, "action", "USD",
             q * ecart / usd, 2 * ex["etoro_action_commission"] / usd, 0.0))
     return Plan(prochaine_ouverture(s.date, bourse), bourse["nom"], ordres)
 
