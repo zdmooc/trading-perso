@@ -30,3 +30,87 @@ XOM = "Exxon Mobil"
 UNH = "UnitedHealth"
 COST = "Costco"
 NFLX = "Netflix"
+
+# --- Exécution sur IG et eToro --------------------------------------------------------------
+# Sources (consultées le 03/10/2026) :
+#   IG indices  https://www.ig.com/en/help-and-support/articles/691241-what-are-ig-s-indices-cfd-product-details
+#   IG actions  https://www.ig.com/fr/portail-d-aide/trading-sur-cfd/frais-et-commissions/quelles-sont-les-conditions-de-trading-ig-sur-actions
+#   eToro       https://www.etoro.com/trading/fees/cfd-spreads/  et  https://www.etoro.com/trading/fees/
+# Les spreads sont ceux des heures principales ; ils s'élargissent hors séance.
+# Les taux de financement de nuit sont des ESTIMATIONS (taux de référence + marge) : ajustez-les.
+
+[execution]
+devise_compte = "EUR"
+ig_financement_annuel = 0.065      # CFD IG, position acheteuse (estimation)
+etoro_financement_annuel = 0.10    # CFD eToro, position acheteuse (estimation : 6,4 % + taux de référence)
+ig_action_commission_par_action = 0.02  # USD
+ig_action_commission_min = 15.0         # USD par ordre
+ig_action_spread_pct = 0.02             # % du prix (spread du marché, estimation)
+etoro_action_commission = 2.0           # USD par ordre sur action réelle (1 ou 2 $ selon le pays)
+
+[bourses.new_york]
+nom = "Bourse de New York"
+tz = "America/New_York"
+ouverture = "09:30"
+
+[bourses.francfort]
+nom = "Bourse de Francfort"
+tz = "Europe/Berlin"
+ouverture = "09:00"
+
+[bourses.londres]
+nom = "Bourse de Londres"
+tz = "Europe/London"
+ouverture = "08:00"
+
+[bourses.tokyo]
+nom = "Bourse de Tokyo"
+tz = "Asia/Tokyo"
+ouverture = "09:00"
+
+[instruments."^GSPC"]
+bourse = "new_york"
+devise = "USD"
+ig = "US 500"
+ig_valeur_point = 1.0
+ig_spread_points = 0.4
+etoro = "SPX500"
+etoro_spread_pct = 0.007
+
+[instruments."^NDX"]
+bourse = "new_york"
+devise = "USD"
+ig = "US Tech 100"
+ig_valeur_point = 1.0
+ig_spread_points = 1.0
+etoro = "NSDQ100"
+etoro_spread_pct = 0.007
+
+[instruments."^GDAXI"]
+bourse = "francfort"
+devise = "EUR"
+ig = "Allemagne 40"
+ig_valeur_point = 1.0
+ig_spread_points = 1.2
+etoro = "GER40"
+etoro_spread_pct = 0.007
+
+[instruments."^N225"]
+bourse = "tokyo"
+devise = "USD"
+ig = "Japon 225"
+ig_valeur_point = 1.0
+ig_spread_points = 7.0
+etoro = "JPN225"
+etoro_devise = "JPY"
+etoro_spread_pct = 0.005
+
+[instruments."^FTSE"]
+bourse = "londres"
+devise = "GBP"
+ig = "Royaume-Uni 100"
+ig_valeur_point = 2.0
+ig_spread_points = 1.0
+etoro = "UK100"
+etoro_devise = "GBP"
+etoro_spread_pct = 0.01

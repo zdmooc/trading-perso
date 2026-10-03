@@ -81,3 +81,21 @@ def test_journal_suit_les_signaux(tmp_path):
     b = journal.bilan(relu)
     assert (b["clos"], b["succes"], b["echecs"]) == (1, 0, 1)
     assert "1 échecs" in journal.to_markdown(relu)
+
+
+def test_plan_execution():
+    from tradeperso import execution
+    from tradeperso.data import load_config
+    from tradeperso.scanner import Signal
+
+    cfg = load_config("config.toml")
+    s = Signal("^NDX", "Nasdaq 100", "cassure_20j", pd.Timestamp("2026-10-02"), 30000.0, 29000.0, 32000.0, 0)
+    p = execution.plan(s, cfg, execution.FX_DEFAUT)
+    assert f"{p.entree_paris:%Y-%m-%d %H:%M}" == "2026-10-05 15:30"  # vendredi -> lundi, 9h30 New York
+    ig, et = p.ordres
+    assert ig.plateforme == "IG" and et.plateforme == "eToro"
+    for o in p.ordres:
+        assert 0 < o.perte_au_stop_eur <= 100.01 and o.frais_eur > 0
+    a = Signal("AAPL", "Apple", "rsi2_repli", pd.Timestamp("2026-10-02"), 200.0, 190.0, 215.0, 0)
+    ig, et = execution.plan(a, cfg, execution.FX_DEFAUT).ordres
+    assert ig.quantite == 11 and et.nuit_eur == 0 and "action réelle" in et.sous_jacent

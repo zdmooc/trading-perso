@@ -25,6 +25,14 @@ Chaque signal indique son **type** (`swing` pour l'instant ; le day trading arri
 
 Chaque signal est inscrit dans `reports/journal.csv` puis suivi chaque soir : entrée à l'ouverture suivante, puis sortie au stop (**échec**), à l'objectif ou sur signal de sortie (**succès** si le résultat est positif). Un signal dont l'ouverture tombe sous le stop est **annulé**. `reports/suivi.md` donne le nombre de succès et d'échecs, le taux de réussite et le résultat cumulé en R, au total et par stratégie ; le message Telegram rappelle le bilan.
 
+## Comment passer un signal
+
+Chaque signal indique :
+- **Quand entrer** : à l'ouverture de la séance de Bourse qui suit la clôture du signal (New York 15:30, Francfort et Londres 9:00, Tokyo 1:00 ou 2:00, heure de Paris), au prix du marché. C'est l'ouverture de la Bourse, pas la bougie suivante sur IG ou eToro, qui cotent les indices presque 24 h/24. Les jours fériés ne sont pas encore gérés.
+- **Où et quoi** : sur IG, un CFD (indice ou action) ; sur eToro, un CFD pour les indices et une **action réelle sans levier** pour les actions US (pas de frais de nuit).
+- **Combien** : la quantité à ACHETER pour perdre environ 1 % du capital si le stop est touché (positions acheteuses uniquement).
+- **Ce que ça coûte** : spread + commissions aller-retour et financement par nuit pour les CFD, en euros. Les spreads viennent des pages officielles d'IG et d'eToro (heures principales) ; les taux de financement sont des estimations réglables dans `config.toml`.
+
 Taille de position : `capital × risque_par_trade / (entrée − stop)`, réglable dans [`config.toml`](config.toml) avec la liste des actifs.
 
 ## Automatique, sans rien lancer

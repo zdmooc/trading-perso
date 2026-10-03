@@ -49,11 +49,11 @@ def scan(data: dict[str, pd.DataFrame], noms: dict[str, str], capital: float, ri
 
 def to_markdown(signaux: list[Signal]) -> str:
     if not signaux:
-        return "Aucun nouveau signal aujourd'hui.\n"
-    lignes = ["| Actif | Type | Stratégie | Date | Entrée (≈) | Stop | Objectif | Ratio gain/perte | Risque | Quantité |",
-              "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+        return "Aucun nouveau signal sur cette séance.\n"
+    lignes = ["| Actif | Type | Stratégie | Clôture du signal | Cours (≈ entrée) | Stop | Objectif | Ratio gain/perte | Risque |",
+              "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for s in signaux:
         lignes.append(f"| {s.nom} ({s.symbole}) | {s.type_trading} | {s.strategie} | {s.date:%Y-%m-%d} | "
                       f"{s.entree:.2f} | {s.stop:.2f} | {s.objectif:.2f} | {s.ratio:.1f} | "
-                      f"{s.risque_pct:.1f} % | {s.quantite} |")
+                      f"{s.risque_pct:.1f} % |")
     return "\n".join(lignes) + "\n"

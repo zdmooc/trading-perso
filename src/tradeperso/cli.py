@@ -5,7 +5,7 @@ import argparse
 from datetime import date
 from pathlib import Path
 
-from . import alerts, backtest, journal
+from . import alerts, backtest, execution, journal
 from .data import download, load_config, watchlist
 from .scanner import scan, to_markdown
 from .strategies import STRATEGIES
@@ -15,7 +15,9 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     noms = watchlist(cfg)
     jrn = journal.charger(out / "journal.csv")
     en_cours = jrn[jrn["statut"].isin(journal.EN_COURS)]["symbole"]
-    data = download(sorted(set(noms) | set(en_cours)), period="2y")
+    data = download(sorted(set(noms) | set(en_cours) | set(execution.FX_TICKERS.values())), period="2y")
+    fx = execution.taux_change(data)
+    data = {s: df for s, df in data.items() if s not in execution.FX_TICKERS.values()}
     clotures = journal.mettre_a_jour(jrn, data, cfg["capital"]["frais_bps"])
     signaux = scan({s: data[s] for s in noms if s in data}, noms,
                    cfg["capital"]["montant"], cfg["capital"]["risque_par_trade"])
@@ -23,12 +25,14 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     journal.sauver(jrn, out / "journal.csv")
     (out / "suivi.md").write_text(journal.to_markdown(jrn), encoding="utf-8")
     seance = max(df.index[-1] for df in data.values())
+    plans = {id(s): execution.format_plan(s, execution.plan(s, cfg, fx)) for s in signaux}
     md = (f"# Signaux de la séance du {alerts.date_fr(seance)}\n\n"
           f"Calculés le {date.today():%d/%m/%Y} sur les cours de clôture du {seance:%d/%m/%Y}.\n\n"
-          + to_markdown(signaux))
+          + to_markdown(signaux)
+          + "".join(f"\n### {s.nom} ({s.strategie})\n\n" + plans[id(s)].replace("\n", "  \n") + "\n" for s in signaux))
     (out / "signaux.md").write_text(md, encoding="utf-8")
     print(md)
-    if (signaux or clotures) and alerts.send_telegram(alerts.message(signaux, clotures, journal.bilan(jrn), seance)):
+    if (signaux or clotures) and alerts.send_telegram(alerts.message(signaux, clotures, journal.bilan(jrn), seance, plans)):
         print("Alerte Telegram envoyée.")
 
 

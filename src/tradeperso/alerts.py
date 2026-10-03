@@ -17,11 +17,11 @@ def date_fr(d) -> str:
     return f"{JOURS[d.weekday()]} {d.day} {MOIS[d.month - 1]} {d.year}"
 
 
-def format_signal(s: Signal) -> str:
+def format_signal(s: Signal, plan_txt: str = "") -> str:
     return (f"ACHAT {s.nom} ({s.symbole}) | {s.type_trading.upper()} | {s.strategie}\n"
-            f"Signal à la clôture du {s.date:%d/%m/%Y}, entrée à l'ouverture suivante\n"
-            f"Entrée ≈ {s.entree:.2f} | Stop {s.stop:.2f} | Objectif {s.objectif:.2f}\n"
-            f"Ratio gain/perte {s.ratio:.1f} | Risque {s.risque_pct:.1f} % | Quantité {s.quantite}")
+            f"Signal à la clôture du {date_fr(s.date)}\n"
+            f"Stop {s.stop:.2f} | Objectif {s.objectif:.2f} | Ratio gain/perte {s.ratio:.1f} | "
+            f"Risque {s.risque_pct:.1f} % du prix\n" + plan_txt)
 
 
 def format_cloture(c: dict) -> str:
@@ -30,10 +30,13 @@ def format_cloture(c: dict) -> str:
             f"{c['prix_entree']} → {c['prix_sortie']}, {float(c['r']):+.2f} R")
 
 
-def message(signaux: list[Signal], clotures: list[dict], bilan: dict, seance) -> str:
+def message(signaux: list[Signal], clotures: list[dict], bilan: dict, seance, plans: dict | None = None) -> str:
+    plans = plans or {}
     parties = [f"Signaux de la séance du {date_fr(seance)}\n(positions simulées, pas un conseil)"]
     if signaux:
-        parties.append("\n\n".join(format_signal(s) for s in signaux))
+        parties.append("\n\n".join(format_signal(s, plans.get(id(s), "")) for s in signaux))
+        parties.append("Coûts estimés (spreads des heures principales, financement estimé). "
+                       "Vérifiez la taille minimale de contrat sur IG avant de passer l'ordre.")
     if clotures:
         parties.append("Signaux clôturés :\n" + "\n".join(format_cloture(c) for c in clotures))
     taux = f"{bilan['taux_reussite']} %" if bilan["taux_reussite"] is not None else "n.d."
