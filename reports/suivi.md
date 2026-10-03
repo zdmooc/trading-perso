@@ -1,4 +1,4 @@
-# Suivi des signaux
+# Suivi des signaux (mis à jour le 03/10/2026)
 
 **0 signaux clôturés : 0 succès, 0 échecs (réussite n.d., résultat cumulé +0.0 R).** 0 positions ouvertes, 2 en attente d'entrée.
 

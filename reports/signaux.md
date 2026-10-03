@@ -1,4 +1,6 @@
-# Signaux du 03/10/2026
+# Signaux de la séance du vendredi 2 octobre 2026
+
+Calculés le 03/10/2026 sur les cours de clôture du 02/10/2026.
 
 | Actif | Type | Stratégie | Date | Entrée (≈) | Stop | Objectif | Ratio gain/perte | Risque | Quantité |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
