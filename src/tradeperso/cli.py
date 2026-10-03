@@ -5,6 +5,9 @@ import argparse
 from datetime import date
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+
 from . import alerts, backtest, execution, journal
 from .data import download, load_config, prochains_resultats, watchlist
 from .scanner import scan, to_markdown
@@ -82,10 +85,51 @@ def cmd_backtest(cfg: dict, out: Path, period: str) -> None:
           f"Stop ramené au prix d'entrée à +{breakeven_r} R : {'oui' if breakeven_r else 'non'}.\n\n"
           + table(regime, breakeven_r)
           + "\n## Sans protections (pour comparaison)\n\n" + table(None, None)
+          + "\n" + pareto(data, noms, indices, regime, breakeven_r, frais, cfg["capital"].get("ratio_min", 0.0))
           + "\nRésultats passés : aucune garantie pour l'avenir.\n")
     out.mkdir(parents=True, exist_ok=True)
     (out / "backtest.md").write_text(md, encoding="utf-8")
     print(md)
+
+
+def pareto(data, noms, indices, regime, breakeven_r, frais, ratio_min) -> str:
+    """Loi des 20/80 par actif : quelle part du gain vient des meilleurs actifs, et est-ce stable dans le temps ?"""
+    trades = []
+    for nom_strat, st in STRATEGIES.items():
+        for sym, df in data.items():
+            if st.indices_seulement and sym not in indices:
+                continue
+            out = appliquer(nom_strat, df, regime)
+            e = out[out["entry"]]
+            if len(e) and ((e["target"] - e["Close"]).abs() / (e["Close"] - e["stop"]).abs()).median() < ratio_min - 1e-9:
+                break  # stratégie jamais envoyée (ratio trop faible)
+            trades += backtest.run(out, sym, frais, st.sens, breakeven_r)
+    if not trades:
+        return ""
+    t = pd.DataFrame({"sym": [x.symbole for x in trades], "date": [x.sortie_date for x in trades], "r": [x.r for x in trades]})
+    milieu = t["date"].min() + (t["date"].max() - t["date"].min()) / 2
+    t["periode"] = np.where(t["date"] < milieu, "avant", "apres")
+    par = t.groupby("sym")["r"].agg(["count", "sum"]).sort_values("sum", ascending=False)
+    moities = t.pivot_table(index="sym", columns="periode", values="r", aggfunc="sum", fill_value=0.0)
+    par = par.join(moities).fillna(0.0)
+    positif = par["sum"].clip(lower=0).sum()
+    par["cumul"] = 100 * par["sum"].clip(lower=0).cumsum() / positif if positif else 0.0
+    n80 = int((par["cumul"] < 80).sum()) + 1
+    # Test de stabilité : top 20 % choisi sur la 1re moitié, jugé sur la 2e moitié.
+    top = moities.sort_values("avant", ascending=False).index[:max(1, round(0.2 * len(moities)))]
+    apres = t[t["periode"] == "apres"]
+    r_top = apres[apres["sym"].isin(top)]["r"].mean()
+    r_autres = apres[~apres["sym"].isin(top)]["r"].mean()
+    lignes = [f"## Loi des 20/80 par actif (stratégies envoyées, avec protections)\n",
+              f"**{n80} actifs sur {len(par)} ({100 * n80 / len(par):.0f} %) font 80 % des gains.**\n",
+              f"Stabilité : les {len(top)} meilleurs actifs de la 1re moitié ({milieu:%Y}) font {r_top:+.2f} R par trade "
+              f"dans la 2e moitié, contre {r_autres:+.2f} R pour les autres.\n",
+              "| Rang | Actif | Trades | Résultat | Part cumulée du gain | 1re moitié | 2e moitié |",
+              "| --- | --- | --- | --- | --- | --- | --- |"]
+    for i, (sym, r) in enumerate(par.iterrows(), 1):
+        lignes.append(f"| {i} | {noms.get(sym, sym)} | {int(r['count'])} | {r['sum']:+.1f} R | {r['cumul']:.0f} % | "
+                      f"{r.get('avant', 0.0):+.1f} R | {r.get('apres', 0.0):+.1f} R |")
+    return "\n".join(lignes) + "\n"
 
 
 def main() -> None:
