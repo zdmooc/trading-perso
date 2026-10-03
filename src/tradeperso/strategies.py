@@ -128,8 +128,8 @@ STRATEGIES: dict[str, Strategie] = {
     # Ventes à découvert : indices uniquement (CFD sur IG et eToro).
     "tendance_mm_vente": Strategie(tendance_mm_vente, -1, indices_seulement=True),
     "cassure_20j_vente": Strategie(cassure_20j_vente, -1, indices_seulement=True),
-    # En test (backtest seulement) : repli dans la tendance.
-    "repli_tendance": Strategie(repli_tendance, 1, actif=False),
+    "repli_tendance": Strategie(repli_tendance, 1),
+    # En test (backtest seulement).
     "repli_tendance_2r": Strategie(repli_tendance_2r, 1, actif=False),
     "repli_tendance_vente": Strategie(repli_tendance_vente, -1, indices_seulement=True, actif=False),
 }

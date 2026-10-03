@@ -20,6 +20,7 @@ NOMS_STRATEGIES = {
     "cassure_20j": "Cassure du plus haut 20 jours",
     "tendance_mm_vente": "Tendance baissière (moyennes mobiles 20/50)",
     "cassure_20j_vente": "Cassure du plus bas 20 jours",
+    "repli_tendance": "Repli dans la tendance (retour sur la MM20)",
 }
 UNITES = {"contrat": ("contrat", "contrats"), "unité": ("unité", "unités"), "action": ("action", "actions")}
 

@@ -18,6 +18,7 @@ Stratégies (bougies journalières ; achats filtrés par cours > MM200, ventes p
 | `tendance_mm` | MM20 croise au-dessus de MM50 | 2 × ATR | objectif 3R (ratio 3,0), ou MM20 repasse sous MM50 |
 | `rsi2_repli` | RSI(2) < 10 | 2,5 × ATR | objectif 1,5 ATR (ratio 0,6), ou clôture > MM5 |
 | `cassure_20j` | clôture > plus haut 20 jours | 2 × ATR | objectif 3R (ratio 3,0), ou clôture < plus bas 10 jours |
+| `repli_tendance` | tendance haussière (cours > MM50 > MM200), retour sur la MM20, puis clôture au-dessus du plus haut de la veille | sous le creux du repli | objectif 3R, ou clôture sous la MM50 |
 | `tendance_mm_vente` (indices) | MM20 croise sous MM50 | 2 × ATR au-dessus | objectif 3R, ou MM20 repasse au-dessus de MM50 |
 | `cassure_20j_vente` (indices) | clôture < plus bas 20 jours | 2 × ATR au-dessus | objectif 3R, ou clôture > plus haut 10 jours |
 
