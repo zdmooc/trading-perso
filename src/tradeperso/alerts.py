@@ -22,6 +22,7 @@ NOMS_STRATEGIES = {
     "cassure_20j_vente": "Cassure du plus bas 20 jours",
     "repli_tendance": "Repli dans la tendance (retour sur la MM20)",
 }
+FRAIS_MAX = 0.25  # au-delà de 25 % du risque en frais, la plateforme est déconseillée pour ce signal
 UNITES = {"contrat": ("contrat", "contrats"), "unité": ("unité", "unités"), "action": ("action", "actions")}
 
 
@@ -47,6 +48,9 @@ def euros(x: float) -> str:
 def _ordre(o, sens: int = 1) -> str:
     if o.quantite <= 0:
         return f"<b>Sur {o.plateforme}</b>\nQuantité trop faible pour un risque de 1 % : à ignorer."
+    if o.frais_eur > FRAIS_MAX * o.perte_au_stop_eur:
+        return (f"<b>Sur {o.plateforme}</b>\nFrais trop élevés pour cette taille ({euros(o.frais_eur)} pour un risque de "
+                f"{euros(o.perte_au_stop_eur)}) : à éviter.")
     unite = UNITES[o.unite][o.quantite > 1]
     qte = nombre(o.quantite, 0 if float(o.quantite).is_integer() else 2)
     frais = euros(o.frais_eur) + (f" + {euros(o.nuit_eur)} par nuit" if o.nuit_eur else ", sans frais de nuit")

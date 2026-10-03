@@ -1,7 +1,7 @@
 # Configuration du scanner. Modifiez librement.
 
 [capital]
-montant = 10000          # capital de référence, en devise du compte
+montant = 3000           # part « satellite » (30 %) dédiée aux signaux ; le reste est placé sur un ETF gardé
 risque_par_trade = 0.01  # 1 % du capital risqué par trade
 frais_bps = 5            # frais + slippage par ordre, en points de base (0,05 %)
 ratio_min = 3.0          # seuls les signaux avec un ratio gain/perte d'au moins 3 pour 1 sont envoyés

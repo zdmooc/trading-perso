@@ -128,6 +128,7 @@ def test_plan_execution():
     from tradeperso.scanner import Signal
 
     cfg = load_config("config.toml")
+    cfg["capital"]["montant"] = 10_000
     s = Signal("^NDX", "Nasdaq 100", "cassure_20j", pd.Timestamp("2026-10-02"), 30000.0, 29000.0, 32000.0, 0)
     p = execution.plan(s, cfg, execution.FX_DEFAUT)
     assert f"{p.entree_paris:%Y-%m-%d %H:%M}" == "2026-10-05 15:30"  # vendredi -> lundi, 9h30 New York
@@ -185,3 +186,15 @@ def test_detention():
     assert m["rendement_total_pct"] == 20.0 and m["drawdown_max_pct"] == -20.0
     panier = pd.DataFrame({"A": [1.0, 2.0, 2.0, 2.0], "B": [1.0, 1.0, 1.0, 1.0]}, index=idx)
     assert portefeuille.detention(panier, idx[0], idx[-1])["rendement_total_pct"] == 50.0
+
+
+def test_frais_trop_eleves():
+    from tradeperso import alerts, execution
+    from tradeperso.data import load_config
+    from tradeperso.scanner import Signal
+    cfg = load_config("config.toml")
+    cfg["capital"]["montant"] = 3000
+    s = Signal("CSCO", "Cisco", "cassure_20j", pd.Timestamp("2026-10-02"), 112.2, 106.92, 128.04, 0)
+    p = execution.plan(s, cfg, execution.FX_DEFAUT)
+    msg = alerts.message_signal(s, p)
+    assert "Frais trop élevés" in msg and "Acheter" in msg  # IG déconseillé, eToro proposé

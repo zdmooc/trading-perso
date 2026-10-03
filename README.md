@@ -47,6 +47,8 @@ Chaque signal indique :
 
 Taille de position : `capital × risque_par_trade / (entrée − stop)`, réglable dans [`config.toml`](config.toml) avec la liste des actifs.
 
+**Cœur + satellite** : le capital des signaux est fixé à 3 000 € (30 % du total) ; le reste est prévu sur un ETF Nasdaq 100 ou S&P 500 (UCITS) gardé sur la durée, qui a fait mieux que le système sur 2017-2026 (voir `reports/backtest.md`). Avec ce capital, 1 % de risque = 30 € par trade : quand les frais d'une plateforme dépassent 25 % de ce risque (souvent la commission minimum IG sur actions), le signal l'indique « à éviter ».
+
 ## Automatique, sans rien lancer
 
 Le workflow GitHub Actions [`scan.yml`](.github/workflows/scan.yml) tourne gratuitement chaque soir de semaine à 22:30 UTC et le dimanche matin (backtest). Il publie les rapports dans `reports/`.

@@ -104,6 +104,10 @@ def format_plan(s: Signal, p: Plan) -> str:
         if o.quantite <= 0:
             lignes.append(f"{o.plateforme} : quantité trop faible pour respecter le risque de 1 %, signal à ignorer.")
             continue
+        if o.frais_eur > 0.25 * o.perte_au_stop_eur:
+            lignes.append(f"{o.plateforme} : frais trop élevés pour cette taille ({o.frais_eur:.0f} € pour un risque "
+                          f"de {o.perte_au_stop_eur:.0f} €), à éviter.")
+            continue
         nuit = f", financement ≈ {o.nuit_eur:.2f} €/nuit" if o.nuit_eur else ", pas de frais de nuit"
         lignes.append(f"{o.plateforme} : {'ACHETER' if s.sens > 0 else 'VENDRE'} {o.quantite:g} {o.unite}{'s' if o.quantite > 1 else ''} "
                       f"{o.instrument} [{o.sous_jacent}] | gain à l'objectif ≈ {o.gain_objectif_eur:.0f} € | "
