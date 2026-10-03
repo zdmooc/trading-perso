@@ -17,7 +17,9 @@ Stratégies (bougies journalières, achats uniquement, toutes filtrées par cour
 | --- | --- | --- | --- |
 | `tendance_mm` | MM20 croise au-dessus de MM50 | 2 × ATR | objectif 3R (ratio 3,0), ou MM20 repasse sous MM50 |
 | `rsi2_repli` | RSI(2) < 10 | 2,5 × ATR | objectif 1,5 ATR (ratio 0,6), ou clôture > MM5 |
-| `cassure_20j` | clôture > plus haut 20 jours | 2 × ATR | objectif 2R (ratio 2,0), ou clôture < plus bas 10 jours |
+| `cassure_20j` | clôture > plus haut 20 jours | 2 × ATR | objectif 3R (ratio 3,0), ou clôture < plus bas 10 jours |
+
+Seuls les signaux avec un **ratio gain/perte d'au moins 3 pour 1** (`ratio_min` dans `config.toml`) sont envoyés et suivis ; `rsi2_repli` (ratio 0,6) n'en produit donc plus.
 
 Chaque signal indique son **type** (`swing` pour l'instant ; le day trading arrive en phase 3) et son **ratio gain/perte** = (objectif − entrée) / (entrée − stop).
 
