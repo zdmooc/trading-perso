@@ -2,8 +2,8 @@
 
 | stratégie | trades | reussite_pct | r_moyen | profit_factor | rendement_pct | drawdown_max_pct |
 | --- | --- | --- | --- | --- | --- | --- |
-| tendance_mm | 366 | 36.6 | 0.54 | 1.84 | 514.3 | -20.0 |
-| rsi2_repli | 1598 | 65.5 | 0.06 | 1.26 | 135.4 | -34.0 |
-| cassure_20j | 1268 | 43.2 | 0.19 | 1.37 | 885.4 | -23.4 |
+| tendance_mm | 367 | 39.5 | 0.29 | 1.47 | 171.0 | -24.5 |
+| rsi2_repli | 1608 | 66.6 | 0.06 | 1.27 | 136.0 | -32.8 |
+| cassure_20j | 1268 | 43.1 | 0.19 | 1.37 | 880.7 | -23.4 |
 
 Résultats passés : aucune garantie pour l'avenir.
