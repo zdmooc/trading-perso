@@ -1,1 +1,2 @@
 date_signal,symbole,nom,type,strategie,entree_prevue,stop,objectif,ratio,statut,date_entree,prix_entree,date_sortie,prix_sortie,motif,r
+2026-10-02,^NDX,Nasdaq 100,swing,cassure_20j,30807.9297,30035.3943,33125.5358,3.0,en attente,,,,,,
