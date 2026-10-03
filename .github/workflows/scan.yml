@@ -1,0 +1,33 @@
+name: scan-quotidien
+# Chaque soir de semaine après la clôture américaine (22:30 UTC), puis backtest chaque dimanche.
+on:
+  schedule:
+    - cron: "30 22 * * 1-5"
+    - cron: "0 8 * * 0"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Scan des signaux
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: tradeperso scan
+      - name: Backtest hebdomadaire
+        if: github.event.schedule == '0 8 * * 0' || github.event_name == 'workflow_dispatch'
+        run: tradeperso backtest --period 10y
+      - name: Publier les rapports
+        run: |
+          git config user.name "scan-bot"
+          git config user.email "scan-bot@users.noreply.github.com"
+          git add reports
+          git diff --cached --quiet || git commit -m "Rapports du $(date -u +%F)"
+          git push

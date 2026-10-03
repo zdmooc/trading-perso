@@ -1,0 +1,32 @@
+# Configuration du scanner. Modifiez librement.
+
+[capital]
+montant = 10000          # capital de référence, en devise du compte
+risque_par_trade = 0.01  # 1 % du capital risqué par trade
+frais_bps = 5            # frais + slippage par ordre, en points de base (0,05 %)
+
+# 5 grands indices mondiaux (symboles Yahoo Finance)
+[indices]
+"^GSPC" = "S&P 500"
+"^NDX" = "Nasdaq 100"
+"^GDAXI" = "DAX 40"
+"^N225" = "Nikkei 225"
+"^FTSE" = "FTSE 100"
+
+# Actions US surveillées (les plus grosses capitalisations)
+[actions_us]
+AAPL = "Apple"
+MSFT = "Microsoft"
+NVDA = "Nvidia"
+AMZN = "Amazon"
+GOOGL = "Alphabet"
+META = "Meta"
+TSLA = "Tesla"
+AVGO = "Broadcom"
+JPM = "JPMorgan"
+V = "Visa"
+LLY = "Eli Lilly"
+XOM = "Exxon Mobil"
+UNH = "UnitedHealth"
+COST = "Costco"
+NFLX = "Netflix"
