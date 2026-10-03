@@ -21,7 +21,7 @@ def download(symboles: list[str], period: str = "10y") -> dict[str, pd.DataFrame
     import yfinance as yf
 
     raw = yf.download(symboles, period=period, interval="1d", auto_adjust=True,
-                      group_by="ticker", progress=False, threads=True)
+                      group_by="ticker", progress=False, threads=False)
     out = {}
     for s in symboles:
         df = raw[s] if raw.columns.nlevels > 1 else raw
