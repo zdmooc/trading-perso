@@ -5,7 +5,7 @@ import argparse
 from datetime import date
 from pathlib import Path
 
-from . import alerts, backtest
+from . import alerts, backtest, journal
 from .data import download, load_config, watchlist
 from .scanner import scan, to_markdown
 from .strategies import STRATEGIES
@@ -13,13 +13,19 @@ from .strategies import STRATEGIES
 
 def cmd_scan(cfg: dict, out: Path) -> None:
     noms = watchlist(cfg)
-    data = download(list(noms), period="2y")
-    signaux = scan(data, noms, cfg["capital"]["montant"], cfg["capital"]["risque_par_trade"])
+    jrn = journal.charger(out / "journal.csv")
+    en_cours = jrn[jrn["statut"].isin(journal.EN_COURS)]["symbole"]
+    data = download(sorted(set(noms) | set(en_cours)), period="2y")
+    clotures = journal.mettre_a_jour(jrn, data, cfg["capital"]["frais_bps"])
+    signaux = scan({s: data[s] for s in noms if s in data}, noms,
+                   cfg["capital"]["montant"], cfg["capital"]["risque_par_trade"])
+    jrn = journal.ajouter(jrn, signaux)
+    journal.sauver(jrn, out / "journal.csv")
+    (out / "suivi.md").write_text(journal.to_markdown(jrn), encoding="utf-8")
     md = f"# Signaux du {date.today():%d/%m/%Y}\n\n" + to_markdown(signaux)
-    out.mkdir(parents=True, exist_ok=True)
     (out / "signaux.md").write_text(md, encoding="utf-8")
     print(md)
-    if alerts.send_telegram(signaux):
+    if (signaux or clotures) and alerts.send_telegram(alerts.message(signaux, clotures, journal.bilan(jrn))):
         print("Alerte Telegram envoyée.")
 
 

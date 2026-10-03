@@ -53,3 +53,31 @@ def test_metrics_and_scan():
     assert isinstance(to_markdown(signaux), str)
     for s in signaux:
         assert s.stop < s.entree and s.quantite > 0
+
+
+def test_journal_suit_les_signaux(tmp_path):
+    from tradeperso import journal
+    from tradeperso.scanner import Signal
+
+    df = random_walk(n=400, seed=3)
+    d = df.index[300]
+    prix = df["Close"].iloc[300]
+    sig = Signal("X", "Test", "cassure_20j", d, prix, prix * 0.95, prix * 1.10, 1.0)
+    assert round(sig.ratio, 6) == 2.0 and sig.type_trading == "swing"
+
+    jrn = journal.ajouter(journal.charger(tmp_path / "j.csv"), [sig])
+    jrn = journal.ajouter(jrn, [sig])  # doublon ignoré
+    assert len(jrn) == 1 and jrn.loc[0, "statut"] == "en attente"
+
+    # Le prix touche le stop deux jours après l'entrée : échec à -1 R environ.
+    df.loc[df.index[301:], ["Open", "High", "Low", "Close"]] = prix
+    df.loc[df.index[303], "Low"] = prix * 0.90
+    clotures = journal.mettre_a_jour(jrn, {"X": df}, frais_bps=0)
+    assert [c["statut"] for c in clotures] == ["échec"]
+    assert jrn.loc[0, "motif"] == "stop" and round(float(jrn.loc[0, "r"]), 2) == -1.0
+
+    journal.sauver(jrn, tmp_path / "j.csv")
+    relu = journal.charger(tmp_path / "j.csv")
+    b = journal.bilan(relu)
+    assert (b["clos"], b["succes"], b["echecs"]) == (1, 0, 1)
+    assert "1 échecs" in journal.to_markdown(relu)

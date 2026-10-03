@@ -8,16 +8,22 @@ Scanner personnel qui cherche chaque soir des opportunités d'achat swing sur le
 
 | Commande | Rôle |
 | --- | --- |
-| `tradeperso scan` | Signaux du jour → `reports/signaux.md` (+ alerte Telegram si configurée) |
+| `tradeperso scan` | Signaux du jour → `reports/signaux.md`, suivi de tous les signaux → `reports/suivi.md` et `reports/journal.csv` (+ alerte Telegram si configurée) |
 | `tradeperso backtest --period 10y` | Statistiques de chaque stratégie → `reports/backtest.md` |
 
 Stratégies (bougies journalières, achats uniquement, toutes filtrées par cours > MM200) :
 
 | Stratégie | Entrée | Stop | Sortie |
 | --- | --- | --- | --- |
-| `tendance_mm` | MM20 croise au-dessus de MM50 | 2 × ATR | MM20 repasse sous MM50 |
-| `rsi2_repli` | RSI(2) < 10 | 2,5 × ATR | clôture > MM5 |
-| `cassure_20j` | clôture > plus haut 20 jours | 2 × ATR | objectif 2R, ou clôture < plus bas 10 jours |
+| `tendance_mm` | MM20 croise au-dessus de MM50 | 2 × ATR | objectif 3R (ratio 3,0), ou MM20 repasse sous MM50 |
+| `rsi2_repli` | RSI(2) < 10 | 2,5 × ATR | objectif 1,5 ATR (ratio 0,6), ou clôture > MM5 |
+| `cassure_20j` | clôture > plus haut 20 jours | 2 × ATR | objectif 2R (ratio 2,0), ou clôture < plus bas 10 jours |
+
+Chaque signal indique son **type** (`swing` pour l'instant ; le day trading arrive en phase 3) et son **ratio gain/perte** = (objectif − entrée) / (entrée − stop).
+
+## Suivi de chaque signal
+
+Chaque signal est inscrit dans `reports/journal.csv` puis suivi chaque soir : entrée à l'ouverture suivante, puis sortie au stop (**échec**), à l'objectif ou sur signal de sortie (**succès** si le résultat est positif). Un signal dont l'ouverture tombe sous le stop est **annulé**. `reports/suivi.md` donne le nombre de succès et d'échecs, le taux de réussite et le résultat cumulé en R, au total et par stratégie ; le message Telegram rappelle le bilan.
 
 Taille de position : `capital × risque_par_trade / (entrée − stop)`, réglable dans [`config.toml`](config.toml) avec la liste des actifs.
 

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from .strategies import STRATEGIES
+from .strategies import STRATEGIES, TYPES
 
 
 @dataclass
@@ -17,12 +17,21 @@ class Signal:
     date: pd.Timestamp
     entree: float
     stop: float
-    objectif: float | None
+    objectif: float
     quantite: float
+
+    @property
+    def type_trading(self) -> str:
+        return TYPES.get(self.strategie, "swing")
 
     @property
     def risque_pct(self) -> float:
         return 100 * (self.entree - self.stop) / self.entree
+
+    @property
+    def ratio(self) -> float:
+        """Ratio gain/perte : gain visé à l'objectif divisé par la perte au stop."""
+        return (self.objectif - self.entree) / (self.entree - self.stop)
 
 
 def scan(data: dict[str, pd.DataFrame], noms: dict[str, str], capital: float, risque: float) -> list[Signal]:
@@ -33,19 +42,18 @@ def scan(data: dict[str, pd.DataFrame], noms: dict[str, str], capital: float, ri
             if not last["entry"] or not np.isfinite(last["stop"]) or last["stop"] >= last["Close"]:
                 continue
             qte = capital * risque / (last["Close"] - last["stop"])
-            objectif = float(last["target"]) if np.isfinite(last["target"]) else None
-            signaux.append(Signal(sym, noms.get(sym, sym), nom_strat, df.index[-1],
-                                  float(last["Close"]), float(last["stop"]), objectif, round(qte, 2)))
+            signaux.append(Signal(sym, noms.get(sym, sym), nom_strat, df.index[-1], float(last["Close"]),
+                                  float(last["stop"]), float(last["target"]), round(qte, 2)))
     return signaux
 
 
 def to_markdown(signaux: list[Signal]) -> str:
     if not signaux:
         return "Aucun nouveau signal aujourd'hui.\n"
-    lignes = ["| Actif | Stratégie | Date | Entrée (≈) | Stop | Objectif | Risque | Quantité |",
-              "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+    lignes = ["| Actif | Type | Stratégie | Date | Entrée (≈) | Stop | Objectif | Ratio gain/perte | Risque | Quantité |",
+              "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for s in signaux:
-        obj = f"{s.objectif:.2f}" if s.objectif else "sortie sur signal"
-        lignes.append(f"| {s.nom} ({s.symbole}) | {s.strategie} | {s.date:%Y-%m-%d} | {s.entree:.2f} | "
-                      f"{s.stop:.2f} | {obj} | {s.risque_pct:.1f} % | {s.quantite} |")
+        lignes.append(f"| {s.nom} ({s.symbole}) | {s.type_trading} | {s.strategie} | {s.date:%Y-%m-%d} | "
+                      f"{s.entree:.2f} | {s.stop:.2f} | {s.objectif:.2f} | {s.ratio:.1f} | "
+                      f"{s.risque_pct:.1f} % | {s.quantite} |")
     return "\n".join(lignes) + "\n"
