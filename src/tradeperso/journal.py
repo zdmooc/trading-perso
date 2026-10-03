@@ -98,7 +98,7 @@ def bilan(journal: pd.DataFrame) -> dict:
 def to_markdown(journal: pd.DataFrame) -> str:
     b = bilan(journal)
     taux = f"{b['taux_reussite']} %" if b["taux_reussite"] is not None else "n.d."
-    md = [f"# Suivi des signaux\n",
+    md = [f"# Suivi des signaux (mis à jour le {pd.Timestamp.today():%d/%m/%Y})\n",
           f"**{b['clos']} signaux clôturés : {b['succes']} succès, {b['echecs']} échecs "
           f"(réussite {taux}, résultat cumulé {b['r_total']:+} R).** "
           f"{b['ouverts']} positions ouvertes, {b['en_attente']} en attente d'entrée.\n",
