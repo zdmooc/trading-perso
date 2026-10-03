@@ -8,8 +8,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import alerts, backtest, execution, journal
-from .data import download, load_config, prochains_resultats, watchlist
+from . import alerts, backtest, execution, journal, portefeuille
+from .data import download, fraicheur, load_config, prochains_resultats, watchlist
 from .scanner import scan, to_markdown
 from .strategies import STRATEGIES, appliquer, regime_haussier
 
@@ -25,17 +25,17 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     data = download(sorted(set(noms) | en_cours | {SP500} | set(execution.FX_TICKERS.values())), period="2y")
     fx = execution.taux_change(data)
     data = {s: df for s, df in data.items() if s not in execution.FX_TICKERS.values()}
+    seance, perimes, en_retard = fraicheur(data, pd.Timestamp.today())
     clotures = journal.mettre_a_jour(jrn, data, cfg["capital"]["frais_bps"], breakeven_r)
     en_cours = set(jrn[jrn["statut"].isin(journal.EN_COURS)]["symbole"])
     regime = regime_haussier(data[SP500]) if filtres.get("filtre_marche") and SP500 in data else None
     max_pos = filtres.get("max_positions")
-    signaux = scan({s: data[s] for s in noms if s in data}, noms,
+    signaux = [] if en_retard else scan({s: data[s] for s in noms if s in data and s not in perimes}, noms,
                    cfg["capital"]["montant"], cfg["capital"]["risque_par_trade"], cfg["capital"].get("ratio_min", 0.0),
                    regime=regime, indices=set(cfg.get("indices", {})), exclus=en_cours)
     # Actions : pas d'achat dans les jours qui précèdent une publication de résultats.
     jours = filtres.get("jours_avant_resultats", 0)
     resultats = {s.symbole: prochains_resultats(s.symbole) for s in signaux if s.symbole not in cfg.get("indices", {})}
-    seance = max(df.index[-1] for df in data.values())
     signaux = [s for s in signaux if not (jours and resultats.get(s.symbole)
                                           and (resultats[s.symbole] - seance.date()).days <= jours + 2)]
     if max_pos:
@@ -51,6 +51,8 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     md = (f"# Signaux de la séance du {alerts.date_fr(seance)}\n\n"
           f"Calculés le {date.today():%d/%m/%Y} sur les cours de clôture du {seance:%d/%m/%Y}.  \n" + marche
           + f"Positions en cours : {len(en_cours)} sur {max_pos or 'illimité'}.\n\n"
+          + (f"**⚠️ Données en retard : dernière séance du {seance:%d/%m/%Y}. Aucun nouveau signal.**\n\n" if en_retard else "")
+          + (f"Cours non à jour, actifs exclus : {', '.join(sorted(noms.get(s, s) for s in perimes))}.\n\n" if perimes else "")
           + to_markdown(signaux)
           + "".join(f"\n### {s.nom} ({s.strategie})\n\n" + execution.format_plan(s, plans[id(s)]).replace("\n", "  \n") + "\n" for s in signaux))
     (out / "signaux.md").write_text(md, encoding="utf-8")
@@ -58,6 +60,9 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     if (signaux or clotures) and alerts.send_telegram(
             alerts.messages(signaux, clotures, journal.bilan(jrn), seance, plans, breakeven_r)):
         print("Alerte Telegram envoyée.")
+    if en_retard and alerts.send_telegram([f"⚠️ <b>Données en retard</b>\nDernière séance reçue : {alerts.date_courte(seance)}.\n"
+                                           "Aucun signal envoyé ce soir."]):
+        print("Alerte de retard envoyée.")
 
 
 def cmd_backtest(cfg: dict, out: Path, period: str) -> None:
@@ -80,7 +85,10 @@ def cmd_backtest(cfg: dict, out: Path, period: str) -> None:
             "| " + " | ".join(str(l.get(c, "")) for c in cols) + " |\n" for l in lignes)
 
     md = (f"# Backtest sur {period} ({len(data)} actifs, frais {frais} bps, risque {risque:.0%} par trade)\n\n"
-          "Ventes à découvert : indices uniquement. Chaque trade est compté sans limite de positions simultanées.\n\n"
+          + section_portefeuille(cfg, data, indices, frais, risque)
+          + "\n# Détail par stratégie (trades indépendants)\n\n"
+          "Ventes à découvert : indices uniquement. Ici, chaque trade est compté sans limite de positions "
+          "simultanées : les rendements sont donc gonflés. Seuls le gain moyen (R) et le profit factor se comparent.\n\n"
           f"## Avec protections\n\nFiltre de marché S&P 500 / MM200 : {'oui' if regime is not None else 'non'}. "
           f"Stop ramené au prix d'entrée à +{breakeven_r} R : {'oui' if breakeven_r else 'non'}.\n\n"
           + table(regime, breakeven_r)
@@ -90,6 +98,53 @@ def cmd_backtest(cfg: dict, out: Path, period: str) -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / "backtest.md").write_text(md, encoding="utf-8")
     print(md)
+
+
+VARIANTES = [
+    ("Réglage actuel", {}),
+    ("Cassure sur 15 jours", {"n": 15}),
+    ("Cassure sur 25 jours", {"n": 25}),
+    ("Moyenne longue 150 jours", {"lent": 150}),
+    ("Moyenne longue 250 jours", {"lent": 250}),
+    ("Stop à 1,5 ATR", {"k_stop": 1.5}),
+    ("Stop à 2,5 ATR", {"k_stop": 2.5}),
+    ("Sans stop au prix d'entrée", {"breakeven": None}),
+    ("Sans filtre de marché", {"filtre_marche": False}),
+]
+
+
+def section_portefeuille(cfg, data, indices, frais, risque) -> str:
+    """Résultat réaliste (limite de positions) et solidité des réglages."""
+    f = cfg.get("filtres", {})
+    max_pos, ratio_min = f.get("max_positions", 4), cfg["capital"].get("ratio_min", 0.0)
+    lignes = []
+    for libelle, v in VARIANTES:
+        v = dict(v)
+        be = v.pop("breakeven", f.get("stop_a_l_entree_apres_r"))
+        fm = v.pop("filtre_marche", f.get("filtre_marche", False))
+        cands = portefeuille.candidats(data, indices, frais, ratio_min, fm, be, SP500, **v)
+        lignes.append((libelle, portefeuille.simuler(cands, max_positions=max_pos, risque=risque)))
+    ref = lignes[0][1]
+    if not ref.get("trades"):
+        return "## Portefeuille\n\nAucun trade.\n"
+    md = [f"## Résultat réaliste du portefeuille (stratégies actives, {max_pos} positions au maximum)\n",
+          f"**{ref['rendement_annuel_pct']:+} % par an** ({ref['rendement_total_pct']:+} % au total), "
+          f"pire baisse **{ref['drawdown_max_pct']} %**, plus longue période sous un ancien sommet : "
+          f"{ref['drawdown_duree_mois']} mois.\n",
+          "| Trades | Réussite | Gain moyen | Perte moyenne | Espérance par trade | Profit factor |",
+          "| --- | --- | --- | --- | --- | --- |",
+          f"| {ref['trades']} | {ref['reussite_pct']} % | {ref['gain_moyen_r']:+} R | {ref['perte_moyenne_r']:+} R | "
+          f"{ref['esperance_r']:+} R | {ref['profit_factor']} |\n",
+          "Par stratégie : " + ", ".join(f"{s} {n} trades ({r:+} R)" for s, (n, r) in ref["par_strategie"].items()) + ".\n",
+          "## Solidité des réglages\n",
+          "Si un petit changement de réglage fait s'effondrer le résultat, la stratégie est trop ajustée au passé.\n",
+          "| Variante | Trades | Espérance par trade | Rendement par an | Pire baisse |",
+          "| --- | --- | --- | --- | --- |"]
+    for libelle, m in lignes:
+        if m.get("trades"):
+            md.append(f"| {libelle} | {m['trades']} | {m['esperance_r']:+} R | {m['rendement_annuel_pct']:+} % | "
+                      f"{m['drawdown_max_pct']} % |")
+    return "\n".join(md) + "\n"
 
 
 def pareto(data, noms, indices, regime, breakeven_r, frais, ratio_min) -> str:

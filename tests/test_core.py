@@ -151,3 +151,28 @@ def test_plan_execution():
     mv = alerts.message_signal(v, pv, 1.0)
     assert "VENTE" in mv and "Vendre" in mv and "19 500" in mv  # niveau +1 R pour remonter le stop
     assert all(x.ratio >= 3 for x in scan({"X": random_walk()}, {"X": "T"}, 10_000, 0.01, ratio_min=3))
+
+
+def test_portefeuille_et_fraicheur():
+    from tradeperso import portefeuille
+    from tradeperso.data import fraicheur
+    data = {s: random_walk(n=1500, seed=i, drift=0.0006) for i, s in enumerate(["^GSPC", "A", "B", "C", "D", "E", "F"])}
+    cands = portefeuille.candidats(data, {"^GSPC"}, 5, 3.0, True, 1.0)
+    assert cands
+    for limite in (1, 4):
+        m = portefeuille.simuler(cands, max_positions=limite)
+        assert 0 < m["trades"] <= len(cands) and m["drawdown_max_pct"] <= 0
+    # Jamais plus de `limite` positions ouvertes en même temps, ni deux sur le même actif.
+    pris = []
+    cands_tries = sorted(cands, key=lambda c: (c.trade.entree_date, c.trade.symbole, c.strategie))
+    for c in cands_tries:
+        ouverts = [p for p in pris if p.trade.sortie_date >= c.trade.entree_date]
+        if len(ouverts) < 2 and all(p.trade.symbole != c.trade.symbole for p in ouverts):
+            pris.append(c)
+    assert portefeuille.simuler(cands, max_positions=2)["trades"] == len(pris)
+    assert portefeuille.simuler(cands, max_positions=1)["trades"] <= len(pris)
+
+    d = {"A": random_walk(n=50), "B": random_walk(n=40)}
+    seance, perimes, retard = fraicheur(d, d["A"].index[-1] + pd.Timedelta(days=1))
+    assert seance == d["A"].index[-1] and perimes == {"B"} and not retard
+    assert fraicheur(d, seance + pd.Timedelta(days=10))[2]

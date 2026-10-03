@@ -8,6 +8,7 @@ Chaque stratégie ajoute au DataFrame les colonnes :
 """
 from __future__ import annotations
 
+import inspect
 from dataclasses import dataclass
 from typing import Callable
 
@@ -16,27 +17,27 @@ import pandas as pd
 from .indicators import atr, rsi, sma
 
 
-def tendance_mm(df: pd.DataFrame) -> pd.DataFrame:
+def tendance_mm(df: pd.DataFrame, lent: int = 200, k_stop: float = 2.0) -> pd.DataFrame:
     """Croisement MM20/MM50 dans une tendance haussière (cours > MM200), objectif 3R."""
     out = df.copy()
-    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), sma(df["Close"], 200), atr(df)
+    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), sma(df["Close"], lent), atr(df)
     cross_up = (m20 > m50) & (m20.shift(1) <= m50.shift(1))
     cross_down = (m20 < m50) & (m20.shift(1) >= m50.shift(1))
     out["entry"] = cross_up & (df["Close"] > m200)
-    out["stop"] = df["Close"] - 2 * a
+    out["stop"] = df["Close"] - k_stop * a
     out["target"] = df["Close"] + 3 * (df["Close"] - out["stop"])
     out["exit"] = cross_down
     return out
 
 
-def tendance_mm_vente(df: pd.DataFrame) -> pd.DataFrame:
+def tendance_mm_vente(df: pd.DataFrame, lent: int = 200, k_stop: float = 2.0) -> pd.DataFrame:
     """Croisement MM20 sous MM50 dans une tendance baissière (cours < MM200), objectif 3R."""
     out = df.copy()
-    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), sma(df["Close"], 200), atr(df)
+    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), sma(df["Close"], lent), atr(df)
     cross_up = (m20 > m50) & (m20.shift(1) <= m50.shift(1))
     cross_down = (m20 < m50) & (m20.shift(1) >= m50.shift(1))
     out["entry"] = cross_down & (df["Close"] < m200)
-    out["stop"] = df["Close"] + 2 * a
+    out["stop"] = df["Close"] + k_stop * a
     out["target"] = df["Close"] - 3 * (out["stop"] - df["Close"])
     out["exit"] = cross_up
     return out
@@ -53,38 +54,38 @@ def rsi2_repli(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def cassure_20j(df: pd.DataFrame) -> pd.DataFrame:
+def cassure_20j(df: pd.DataFrame, n: int = 20, lent: int = 200, k_stop: float = 2.0) -> pd.DataFrame:
     """Cassure du plus haut 20 jours (cours > MM200), objectif 3R, sortie sous le plus bas 10 jours."""
     out = df.copy()
-    m200, a = sma(df["Close"], 200), atr(df)
-    plus_haut = df["High"].rolling(20).max().shift(1)
+    m200, a = sma(df["Close"], lent), atr(df)
+    plus_haut = df["High"].rolling(n).max().shift(1)
     plus_bas = df["Low"].rolling(10).min().shift(1)
     out["entry"] = (df["Close"] > plus_haut) & (df["Close"] > m200)
-    out["stop"] = df["Close"] - 2 * a
+    out["stop"] = df["Close"] - k_stop * a
     out["target"] = df["Close"] + 3 * (df["Close"] - out["stop"])
     out["exit"] = df["Close"] < plus_bas
     return out
 
 
-def cassure_20j_vente(df: pd.DataFrame) -> pd.DataFrame:
+def cassure_20j_vente(df: pd.DataFrame, n: int = 20, lent: int = 200, k_stop: float = 2.0) -> pd.DataFrame:
     """Cassure du plus bas 20 jours (cours < MM200), objectif 3R, sortie au-dessus du plus haut 10 jours."""
     out = df.copy()
-    m200, a = sma(df["Close"], 200), atr(df)
-    plus_bas = df["Low"].rolling(20).min().shift(1)
+    m200, a = sma(df["Close"], lent), atr(df)
+    plus_bas = df["Low"].rolling(n).min().shift(1)
     plus_haut = df["High"].rolling(10).max().shift(1)
     out["entry"] = (df["Close"] < plus_bas) & (df["Close"] < m200)
-    out["stop"] = df["Close"] + 2 * a
+    out["stop"] = df["Close"] + k_stop * a
     out["target"] = df["Close"] - 3 * (out["stop"] - df["Close"])
     out["exit"] = df["Close"] > plus_haut
     return out
 
 
-def _repli(df: pd.DataFrame, sens: int, objectif_r: float) -> pd.DataFrame:
+def _repli(df: pd.DataFrame, sens: int, objectif_r: float, lent: int = 200) -> pd.DataFrame:
     """Repli dans une tendance établie, entrée sur reprise confirmée, stop sous le creux du repli."""
     out = df.copy()
     c = df["Close"] * sens
     haut, bas = (df["High"], df["Low"]) if sens > 0 else (-df["Low"], -df["High"])
-    m20, m50, m200, a = sma(c, 20), sma(c, 50), sma(c, 200), atr(df)
+    m20, m50, m200, a = sma(c, 20), sma(c, 50), sma(c, lent), atr(df)
     tendance = (c > m50) & (m50 > m200) & (m50 > m50.shift(5))
     repli = (bas <= m20).rolling(5).max().astype(bool)          # le cours est revenu toucher la MM20
     reprise = (c > haut.shift(1)) & (c > m20)                    # clôture au-dessus du plus haut de la veille
@@ -97,19 +98,19 @@ def _repli(df: pd.DataFrame, sens: int, objectif_r: float) -> pd.DataFrame:
     return out
 
 
-def repli_tendance(df: pd.DataFrame) -> pd.DataFrame:
+def repli_tendance(df: pd.DataFrame, lent: int = 200) -> pd.DataFrame:
     """Achat d'un repli sur la MM20 dans une tendance haussière, objectif 3R, sortie sous la MM50."""
-    return _repli(df, 1, 3.0)
+    return _repli(df, 1, 3.0, lent)
 
 
-def repli_tendance_2r(df: pd.DataFrame) -> pd.DataFrame:
+def repli_tendance_2r(df: pd.DataFrame, lent: int = 200) -> pd.DataFrame:
     """Même règle avec un objectif à 2R (comparaison seulement)."""
-    return _repli(df, 1, 2.0)
+    return _repli(df, 1, 2.0, lent)
 
 
-def repli_tendance_vente(df: pd.DataFrame) -> pd.DataFrame:
+def repli_tendance_vente(df: pd.DataFrame, lent: int = 200) -> pd.DataFrame:
     """Vente d'un rebond sur la MM20 dans une tendance baissière, objectif 3R, sortie au-dessus de la MM50."""
-    return _repli(df, -1, 3.0)
+    return _repli(df, -1, 3.0, lent)
 
 
 @dataclass(frozen=True)
@@ -136,15 +137,19 @@ STRATEGIES: dict[str, Strategie] = {
 TYPES = {nom: s.type for nom, s in STRATEGIES.items()}
 
 
-def regime_haussier(sp500: pd.DataFrame) -> pd.Series:
+def regime_haussier(sp500: pd.DataFrame, lent: int = 200) -> pd.Series:
     """True quand le S&P 500 clôture au-dessus de sa moyenne mobile 200 jours."""
-    return sp500["Close"] > sma(sp500["Close"], 200)
+    return sp500["Close"] > sma(sp500["Close"], lent)
 
 
-def appliquer(nom: str, df: pd.DataFrame, regime: pd.Series | None = None) -> pd.DataFrame:
-    """Calcule la stratégie ; avec un régime de marché, n'achète qu'en marché haussier et ne vend qu'en marché baissier."""
+def appliquer(nom: str, df: pd.DataFrame, regime: pd.Series | None = None, **reglages) -> pd.DataFrame:
+    """Calcule la stratégie ; avec un régime de marché, n'achète qu'en marché haussier et ne vend qu'en marché baissier.
+
+    reglages : paramètres facultatifs (n, lent, k_stop) transmis aux stratégies qui les acceptent.
+    """
     st = STRATEGIES[nom]
-    out = st.fonction(df)
+    accepte = inspect.signature(st.fonction).parameters
+    out = st.fonction(df, **{k: v for k, v in reglages.items() if k in accepte})
     if regime is not None:
         r = regime.reindex(out.index, method="ffill").fillna(False).astype(bool)
         out["entry"] = out["entry"] & (r if st.sens > 0 else ~r)
