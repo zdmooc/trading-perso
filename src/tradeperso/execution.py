@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, time
+from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -33,6 +33,7 @@ class Plan:
     entree_paris: datetime
     bourse: str
     ordres: list[Ordre]
+    resultats: date | None = None  # prochaine publication de résultats (actions)
 
 
 def taux_change(data: dict[str, pd.DataFrame]) -> dict[str, float]:
@@ -60,7 +61,7 @@ def plan(s: Signal, cfg: dict, fx: dict[str, float]) -> Plan:
     risque_eur = cfg["capital"]["montant"] * cfg["capital"]["risque_par_trade"]
     inst = cfg.get("instruments", {}).get(s.symbole)
     bourse = cfg["bourses"][inst["bourse"] if inst else "new_york"]
-    ecart = s.entree - s.stop
+    ecart, gain = abs(s.entree - s.stop), abs(s.objectif - s.entree)
     ordres = []
 
     if inst:  # indice : CFD sur IG et sur eToro
@@ -68,14 +69,14 @@ def plan(s: Signal, cfg: dict, fx: dict[str, float]) -> Plan:
         q = round(_arrondi(risque_eur * fx[dev] / (ecart * vp), 0.01), 2)
         ordres.append(Ordre(
             "IG", f"{inst['ig']}, {vp:g} {dev} par point", "CFD sur indice", q, "contrat", dev,
-            q * vp * ecart / fx[dev], q * vp * (s.objectif - s.entree) / fx[dev],
+            q * vp * ecart / fx[dev], q * vp * gain / fx[dev],
             q * vp * inst["ig_spread_points"] / fx[dev],
             q * vp * s.entree * ex["ig_financement_annuel"] / 365 / fx[dev]))
         dev_e = inst.get("etoro_devise", dev)
         q = round(_arrondi(risque_eur * fx[dev_e] / ecart, 0.01), 2)
         ordres.append(Ordre(
             "eToro", inst["etoro"], "CFD sur indice", q, "unité", dev_e,
-            q * ecart / fx[dev_e], q * (s.objectif - s.entree) / fx[dev_e], 2 * q * s.entree * inst["etoro_spread_pct"] / 100 / fx[dev_e],
+            q * ecart / fx[dev_e], q * gain / fx[dev_e], 2 * q * s.entree * inst["etoro_spread_pct"] / 100 / fx[dev_e],
             q * s.entree * ex["etoro_financement_annuel"] / 365 / fx[dev_e]))
     else:  # action US : CFD sur IG, action réelle sur eToro
         usd = fx["USD"]
@@ -83,13 +84,13 @@ def plan(s: Signal, cfg: dict, fx: dict[str, float]) -> Plan:
         commission = 2 * max(q * ex["ig_action_commission_par_action"], ex["ig_action_commission_min"]) if q else 0
         ordres.append(Ordre(
             "IG", s.nom, "CFD sur action", q, "action", "USD",
-            q * ecart / usd, q * (s.objectif - s.entree) / usd, (commission + q * s.entree * ex["ig_action_spread_pct"] / 100) / usd,
+            q * ecart / usd, q * gain / usd, (commission + q * s.entree * ex["ig_action_spread_pct"] / 100) / usd,
             q * s.entree * ex["ig_financement_annuel"] / 365 / usd))
         # Sans levier, la position ne peut pas dépasser le capital.
         q = round(_arrondi(min(risque_eur / ecart, cfg["capital"]["montant"] / s.entree) * usd, 0.01), 2)
         ordres.append(Ordre(
             "eToro", s.symbole, "action réelle sans levier", q, "action", "USD",
-            q * ecart / usd, q * (s.objectif - s.entree) / usd, 2 * ex["etoro_action_commission"] / usd, 0.0))
+            q * ecart / usd, q * gain / usd, 2 * ex["etoro_action_commission"] / usd, 0.0))
     return Plan(prochaine_ouverture(s.date, bourse), bourse["nom"], ordres)
 
 
@@ -104,7 +105,7 @@ def format_plan(s: Signal, p: Plan) -> str:
             lignes.append(f"{o.plateforme} : quantité trop faible pour respecter le risque de 1 %, signal à ignorer.")
             continue
         nuit = f", financement ≈ {o.nuit_eur:.2f} €/nuit" if o.nuit_eur else ", pas de frais de nuit"
-        lignes.append(f"{o.plateforme} : ACHETER {o.quantite:g} {o.unite}{'s' if o.quantite > 1 else ''} "
+        lignes.append(f"{o.plateforme} : {'ACHETER' if s.sens > 0 else 'VENDRE'} {o.quantite:g} {o.unite}{'s' if o.quantite > 1 else ''} "
                       f"{o.instrument} [{o.sous_jacent}] | gain à l'objectif ≈ {o.gain_objectif_eur:.0f} € | "
                       f"perte au stop ≈ {o.perte_au_stop_eur:.0f} € | "
                       f"spread + commissions ≈ {o.frais_eur:.2f} €{nuit}")

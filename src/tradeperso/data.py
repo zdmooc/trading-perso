@@ -29,3 +29,16 @@ def download(symboles: list[str], period: str = "10y") -> dict[str, pd.DataFrame
         if len(df) > 0:
             out[s] = df
     return out
+
+
+def prochains_resultats(symbole: str):
+    """Date de la prochaine publication de résultats (Yahoo), ou None si inconnue."""
+    import yfinance as yf
+
+    try:
+        cal = yf.Ticker(symbole).calendar or {}
+        dates = cal.get("Earnings Date") or []
+        futures = sorted(pd.Timestamp(d).date() for d in dates if pd.Timestamp(d).date() >= pd.Timestamp.today().date())
+        return futures[0] if futures else None
+    except Exception:
+        return None

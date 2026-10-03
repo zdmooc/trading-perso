@@ -12,19 +12,25 @@ class Trade:
     symbole: str
     entree_date: pd.Timestamp
     entree: float
-    stop: float
+    stop: float          # stop initial (définit 1 R)
     sortie_date: pd.Timestamp
     sortie: float
     motif: str
+    sens: int = 1        # 1 = achat, -1 = vente à découvert
 
     @property
     def r(self) -> float:
         """Résultat en multiple du risque initial (R)."""
-        return (self.sortie - self.entree) / (self.entree - self.stop)
+        return self.sens * (self.sortie - self.entree) / abs(self.entree - self.stop)
 
 
-def run(df: pd.DataFrame, symbole: str = "", frais_bps: float = 5.0) -> list[Trade]:
-    """df doit contenir Open/High/Low/Close et les colonnes produites par une stratégie."""
+def run(df: pd.DataFrame, symbole: str = "", frais_bps: float = 5.0, sens: int = 1,
+        breakeven_r: float | None = None) -> list[Trade]:
+    """df doit contenir Open/High/Low/Close et les colonnes produites par une stratégie.
+
+    sens : 1 pour un achat, -1 pour une vente à découvert.
+    breakeven_r : si renseigné, le stop remonte au prix d'entrée dès que le gain latent atteint ce multiple de R.
+    """
     frais = frais_bps / 10_000
     trades: list[Trade] = []
     pos: dict | None = None
@@ -34,21 +40,36 @@ def run(df: pd.DataFrame, symbole: str = "", frais_bps: float = 5.0) -> list[Tra
 
     for i in range(1, len(df)):
         if pos is None:
-            if entry[i - 1] and np.isfinite(stop[i - 1]) and o[i] > stop[i - 1]:
-                pos = {"date": idx[i], "prix": o[i] * (1 + frais), "stop": stop[i - 1], "target": target[i - 1]}
+            ok = np.isfinite(stop[i - 1]) and (o[i] > stop[i - 1] if sens > 0 else o[i] < stop[i - 1])
+            if entry[i - 1] and ok:
+                pos = {"date": idx[i], "brut": o[i], "prix": o[i] * (1 + sens * frais), "stop0": stop[i - 1],
+                       "stop": stop[i - 1], "target": target[i - 1]}
             else:
                 continue
         # Position ouverte : sortie sur signal de la veille, stop, puis objectif.
         sortie = motif = None
+        cible = np.isfinite(pos["target"])
         if exit_[i - 1] and idx[i] != pos["date"]:
             sortie, motif = o[i], "signal"
-        elif l[i] <= pos["stop"]:
+        elif sens > 0 and l[i] <= pos["stop"]:
             sortie, motif = min(o[i], pos["stop"]), "stop"
-        elif np.isfinite(pos["target"]) and h[i] >= pos["target"]:
+        elif sens < 0 and h[i] >= pos["stop"]:
+            sortie, motif = max(o[i], pos["stop"]), "stop"
+        elif sens > 0 and cible and h[i] >= pos["target"]:
             sortie, motif = max(o[i], pos["target"]), "objectif"
+        elif sens < 0 and cible and l[i] <= pos["target"]:
+            sortie, motif = min(o[i], pos["target"]), "objectif"
         if sortie is not None:
-            trades.append(Trade(symbole, pos["date"], pos["prix"], pos["stop"], idx[i], sortie * (1 - frais), motif))
+            trades.append(Trade(symbole, pos["date"], pos["prix"], pos["stop0"], idx[i],
+                                sortie * (1 - sens * frais), motif, sens))
             pos = None
+        elif breakeven_r:
+            # Stop ramené au prix d'entrée une fois +breakeven_r R atteint (effectif dès la bougie suivante).
+            un_r = abs(pos["brut"] - pos["stop0"])
+            if sens > 0 and h[i] >= pos["brut"] + breakeven_r * un_r:
+                pos["stop"] = max(pos["stop"], pos["brut"])
+            elif sens < 0 and l[i] <= pos["brut"] - breakeven_r * un_r:
+                pos["stop"] = min(pos["stop"], pos["brut"])
     return trades
 
 

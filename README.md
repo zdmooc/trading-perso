@@ -1,6 +1,6 @@
 # Trading perso : scanner de signaux swing
 
-Scanner personnel qui cherche chaque soir des opportunités d'achat swing sur les **5 grands indices mondiaux** (S&P 500, Nasdaq 100, DAX 40, Nikkei 225, FTSE 100) et **15 grandes actions US**, avec entrée, stop, objectif et taille de position. Phase 1 (MVP) : **simulation uniquement, aucun ordre n'est passé**.
+Scanner personnel qui cherche chaque soir des opportunités swing sur **6 grands indices** (S&P 500, Nasdaq 100, DAX 40, Nikkei 225, FTSE 100, CAC 40), à l'achat comme à la vente, et sur **50 grandes actions US** (achat seulement), avec entrée, stop, objectif et taille de position. Phase 1 (MVP) : **simulation uniquement, aucun ordre n'est passé**.
 
 > **Avertissement.** Un signal n'est qu'une probabilité, jamais une garantie de gain. Les résultats passés ne préjugent pas des résultats futurs. Outil personnel, pas un conseil en investissement.
 
@@ -11,17 +11,26 @@ Scanner personnel qui cherche chaque soir des opportunités d'achat swing sur le
 | `tradeperso scan` | Signaux du jour → `reports/signaux.md`, suivi de tous les signaux → `reports/suivi.md` et `reports/journal.csv` (+ alerte Telegram si configurée) |
 | `tradeperso backtest --period 10y` | Statistiques de chaque stratégie → `reports/backtest.md` |
 
-Stratégies (bougies journalières, achats uniquement, toutes filtrées par cours > MM200) :
+Stratégies (bougies journalières ; achats filtrés par cours > MM200, ventes par cours < MM200) :
 
 | Stratégie | Entrée | Stop | Sortie |
 | --- | --- | --- | --- |
 | `tendance_mm` | MM20 croise au-dessus de MM50 | 2 × ATR | objectif 3R (ratio 3,0), ou MM20 repasse sous MM50 |
 | `rsi2_repli` | RSI(2) < 10 | 2,5 × ATR | objectif 1,5 ATR (ratio 0,6), ou clôture > MM5 |
 | `cassure_20j` | clôture > plus haut 20 jours | 2 × ATR | objectif 3R (ratio 3,0), ou clôture < plus bas 10 jours |
+| `tendance_mm_vente` (indices) | MM20 croise sous MM50 | 2 × ATR au-dessus | objectif 3R, ou MM20 repasse au-dessus de MM50 |
+| `cassure_20j_vente` (indices) | clôture < plus bas 20 jours | 2 × ATR au-dessus | objectif 3R, ou clôture > plus haut 10 jours |
 
 Seuls les signaux avec un **ratio gain/perte d'au moins 3 pour 1** (`ratio_min` dans `config.toml`) sont envoyés et suivis ; `rsi2_repli` (ratio 0,6) n'en produit donc plus.
 
-Chaque signal indique son **type** (`swing` pour l'instant ; le day trading arrive en phase 3) et son **ratio gain/perte** = (objectif − entrée) / (entrée − stop).
+Chaque signal indique son **sens** (achat ou vente), son **type** (`swing` pour l'instant ; le day trading arrive en phase 3) et son **ratio gain/perte** = |objectif − entrée| / |entrée − stop|.
+
+## Protection du capital (section `[filtres]` de `config.toml`)
+
+- **Filtre de marché** : achats seulement quand le S&P 500 est au-dessus de sa moyenne 200 jours ; ventes à découvert (indices) seulement quand il est en dessous.
+- **Stop au prix d'entrée** : dès que le gain atteint 1 fois le risque (+1 R), le stop remonte au prix d'entrée. Le message donne le niveau à surveiller. Une sortie à ce niveau est comptée **neutre**.
+- **Résultats d'entreprise** : pas d'achat d'une action dans les 5 jours de bourse avant sa publication de résultats (date Yahoo ; si elle est inconnue, le signal est gardé).
+- **4 positions au maximum**, ouvertes ou en attente, et une seule par actif. Si plusieurs signaux tombent le même soir, les meilleurs ratios passent en premier.
 
 ## Suivi de chaque signal
 
@@ -30,9 +39,9 @@ Chaque signal est inscrit dans `reports/journal.csv` puis suivi chaque soir : en
 ## Comment passer un signal
 
 Chaque signal indique :
-- **Quand entrer** : à l'ouverture de la séance de Bourse qui suit la clôture du signal (New York 15:30, Francfort et Londres 9:00, Tokyo 1:00 ou 2:00, heure de Paris), au prix du marché. C'est l'ouverture de la Bourse, pas la bougie suivante sur IG ou eToro, qui cotent les indices presque 24 h/24. Les jours fériés ne sont pas encore gérés.
+- **Quand entrer** : à l'ouverture de la séance de Bourse qui suit la clôture du signal (New York 15:30, Francfort, Paris et Londres 9:00, Tokyo 1:00 ou 2:00, heure de Paris), au prix du marché. C'est l'ouverture de la Bourse, pas la bougie suivante sur IG ou eToro, qui cotent les indices presque 24 h/24. Les jours fériés ne sont pas encore gérés.
 - **Où et quoi** : sur IG, un CFD (indice ou action) ; sur eToro, un CFD pour les indices et une **action réelle sans levier** pour les actions US (pas de frais de nuit).
-- **Combien** : la quantité à ACHETER pour perdre environ 1 % du capital si le stop est touché (positions acheteuses uniquement).
+- **Combien** : la quantité à ACHETER ou à VENDRE pour perdre environ 1 % du capital si le stop est touché. La vente à découvert se fait par CFD, sur les indices uniquement.
 - **Ce que ça coûte** : spread + commissions aller-retour et financement par nuit pour les CFD, en euros. Les spreads viennent des pages officielles d'IG et d'eToro (heures principales) ; les taux de financement sont des estimations réglables dans `config.toml`.
 
 Taille de position : `capital × risque_par_trade / (entrée − stop)`, réglable dans [`config.toml`](config.toml) avec la liste des actifs.

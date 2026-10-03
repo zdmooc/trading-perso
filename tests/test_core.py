@@ -25,14 +25,16 @@ def test_indicators():
 
 def test_strategies_produce_columns_and_trades():
     df = random_walk()
-    for name, strat in STRATEGIES.items():
-        out = strat(df)
+    for name, st in STRATEGIES.items():
+        data = df if st.sens > 0 else random_walk(drift=-0.0005)
+        out = st.fonction(data)
         assert {"entry", "stop", "target", "exit"} <= set(out.columns), name
-        trades = backtest.run(out, "TEST")
+        trades = backtest.run(out, "TEST", sens=st.sens, breakeven_r=1.0)
         assert trades, f"{name} n'a produit aucun trade"
         for t in trades:
             assert t.sortie_date > t.entree_date or t.motif in {"stop", "objectif"}
-            assert t.stop < t.entree
+            assert (t.stop < t.entree) if st.sens > 0 else (t.stop > t.entree)
+            assert t.r >= -1.5
 
 
 def test_stop_hit_gives_about_minus_one_r():
@@ -44,9 +46,45 @@ def test_stop_hit_gives_about_minus_one_r():
     assert t.motif == "stop" and t.sortie == 95.0 and round(t.r, 6) == -1.0
 
 
+def test_vente_et_stop_au_prix_d_entree():
+    # Vente à découvert : le cours monte au stop.
+    df = bars(np.full(10, 100.0))
+    df["entry"] = [True] + [False] * 9
+    df["stop"], df["target"], df["exit"] = 105.0, 85.0, False
+    df.loc[df.index[3], "High"] = 110.0
+    (t,) = backtest.run(df, frais_bps=0, sens=-1)
+    assert t.motif == "stop" and t.sortie == 105.0 and round(t.r, 6) == -1.0
+    # Achat : +1 R atteint (106), puis retour à 100 : sortie au prix d'entrée, résultat nul.
+    df = bars(np.full(10, 100.0))
+    df["entry"] = [True] + [False] * 9
+    df["stop"], df["target"], df["exit"] = 94.0, 118.0, False
+    df.loc[df.index[2], "High"] = 107.0
+    df.loc[df.index[3:], "Low"] = 101.0
+    df.loc[df.index[4], "Low"] = 98.0
+    (t,) = backtest.run(df, frais_bps=0, breakeven_r=1.0)
+    assert t.motif == "stop" and t.r == 0.0 and t.sortie_date == df.index[4]
+
+
+def test_filtres_du_scan():
+    from tradeperso.strategies import regime_haussier
+    hausse, baisse = random_walk(drift=0.002), random_walk(drift=-0.002)
+    assert regime_haussier(hausse).iloc[-1] and not regime_haussier(baisse).iloc[-1]
+    for seed in range(40):
+        df = random_walk(seed=seed, drift=-0.0005)
+        sig = scan({"^X": df, "Y": df}, {}, 10_000, 0.01, regime=regime_haussier(baisse), indices={"^X"})
+        assert all(s.sens == -1 and s.symbole == "^X" for s in sig)  # marché baissier : ventes sur indices seulement
+        sig = scan({"^X": df}, {}, 10_000, 0.01, regime=regime_haussier(hausse), indices={"^X"})
+        assert all(s.sens == 1 for s in sig)
+    df = random_walk()
+    tous = scan({str(i): df for i in range(5)}, {}, 10_000, 0.01)
+    assert len({s.symbole for s in tous}) == len(tous)  # un seul signal par actif
+    assert scan({str(i): df for i in range(5)}, {}, 10_000, 0.01, exclus={"0"}, places=1)[:1] == [
+        s for s in tous if s.symbole != "0"][:1]
+
+
 def test_metrics_and_scan():
     df = random_walk()
-    trades = backtest.run(STRATEGIES["rsi2_repli"](df))
+    trades = backtest.run(STRATEGIES["rsi2_repli"].fonction(df))
     m = backtest.metrics(trades)
     assert m["trades"] == len(trades) and -100 < m["drawdown_max_pct"] <= 0
     signaux = scan({"X": df}, {"X": "Test"}, 10_000, 0.01)
@@ -79,8 +117,9 @@ def test_journal_suit_les_signaux(tmp_path):
     journal.sauver(jrn, tmp_path / "j.csv")
     relu = journal.charger(tmp_path / "j.csv")
     b = journal.bilan(relu)
-    assert (b["clos"], b["succes"], b["echecs"]) == (1, 0, 1)
+    assert (b["clos"], b["succes"], b["echecs"], b["neutres"]) == (1, 0, 1, 0)
     assert "1 échecs" in journal.to_markdown(relu)
+    assert journal.statut(0.01) == "neutre"
 
 
 def test_plan_execution():
@@ -106,4 +145,9 @@ def test_plan_execution():
                                      "ouverts": 0, "en_attente": 1}, s.date, {id(s): p})
     assert len(msgs) == 2 and "lun. 5 oct. à 15h30" in msgs[0] and "30 000" in msgs[0]
     assert "Gain si l'objectif est atteint" in msgs[0] and "2,0 pour 1" in msgs[0]
+    v = Signal("^GDAXI", "DAX 40", "cassure_20j_vente", pd.Timestamp("2026-10-02"), 20000.0, 20500.0, 18500.0, 0, -1)
+    pv = execution.plan(v, cfg, execution.FX_DEFAUT)
+    assert v.ratio == 3.0 and all(abs(o.gain_objectif_eur / o.perte_au_stop_eur - 3) < 1e-6 for o in pv.ordres)
+    mv = alerts.message_signal(v, pv, 1.0)
+    assert "VENTE" in mv and "Vendre" in mv and "19 500" in mv  # niveau +1 R pour remonter le stop
     assert all(x.ratio >= 3 for x in scan({"X": random_walk()}, {"X": "T"}, 10_000, 0.01, ratio_min=3))

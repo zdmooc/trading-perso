@@ -18,6 +18,8 @@ NOMS_STRATEGIES = {
     "tendance_mm": "Suivi de tendance (moyennes mobiles 20/50)",
     "rsi2_repli": "Achat sur repli (RSI 2)",
     "cassure_20j": "Cassure du plus haut 20 jours",
+    "tendance_mm_vente": "Tendance baissière (moyennes mobiles 20/50)",
+    "cassure_20j_vente": "Cassure du plus bas 20 jours",
 }
 UNITES = {"contrat": ("contrat", "contrats"), "unité": ("unité", "unités"), "action": ("action", "actions")}
 
@@ -41,7 +43,7 @@ def euros(x: float) -> str:
     return f"{nombre(x, 0 if x >= 10 else 2)} €"
 
 
-def _ordre(o) -> str:
+def _ordre(o, sens: int = 1) -> str:
     if o.quantite <= 0:
         return f"<b>Sur {o.plateforme}</b>\nQuantité trop faible pour un risque de 1 % : à ignorer."
     unite = UNITES[o.unite][o.quantite > 1]
@@ -49,7 +51,7 @@ def _ordre(o) -> str:
     frais = euros(o.frais_eur) + (f" + {euros(o.nuit_eur)} par nuit" if o.nuit_eur else ", sans frais de nuit")
     net = (o.gain_objectif_eur - o.frais_eur) / (o.perte_au_stop_eur + o.frais_eur)
     return (f"<b>Sur {o.plateforme}</b> : {html.escape(o.sous_jacent)} « {html.escape(o.instrument)} »\n"
-            f"Acheter <b>{qte} {unite}</b>\n"
+            f"{'Acheter' if sens > 0 else 'Vendre'} <b>{qte} {unite}</b>\n"
             f"✅ Gain si l'objectif est atteint : <b>+{euros(o.gain_objectif_eur)}</b>\n"
             f"❌ Perte si le stop est touché : <b>−{euros(o.perte_au_stop_eur)}</b>\n"
             f"⚖️ Ratio gain/perte : <b>{nombre(o.gain_objectif_eur / o.perte_au_stop_eur, 1)} pour 1</b> "
@@ -57,20 +59,27 @@ def _ordre(o) -> str:
             f"Frais : {frais}")
 
 
-def message_signal(s: Signal, p: Plan | None) -> str:
-    gain = 100 * (s.objectif - s.entree) / s.entree
-    lignes = [f"🟢 <b>ACHAT · {html.escape(s.nom)}</b>",
+def message_signal(s: Signal, p: Plan | None, breakeven_r: float | None = None) -> str:
+    gain = 100 * abs(s.objectif - s.entree) / s.entree
+    titre = "🟢 <b>ACHAT" if s.sens > 0 else "🔴 <b>VENTE (à découvert)"
+    lignes = [f"{titre} · {html.escape(s.nom)}</b>",
               f"{s.type_trading.capitalize()} · {NOMS_STRATEGIES.get(s.strategie, s.strategie)}",
               f"Signal à la clôture du {date_courte(s.date)}", ""]
     if p:
         h = p.entree_paris
         lignes.append(f"⏰ <b>Quand</b> : {date_courte(h)} à {h:%Hh%M} (heure de Paris), "
                       f"à l'ouverture de la {p.bourse}")
+    haut, bas = ("+", "−") if s.sens > 0 else ("−", "+")
     lignes += [f"💰 <b>Entrée</b> : au prix du marché, vers {nombre(s.entree)}",
-               f"🛑 <b>Stop</b> : {nombre(s.stop)} (−{nombre(s.risque_pct, 1)} %)",
-               f"🎯 <b>Objectif</b> : {nombre(s.objectif)} (+{nombre(gain, 1)} %)"]
+               f"🛑 <b>Stop</b> : {nombre(s.stop)} ({bas}{nombre(s.risque_pct, 1)} %)",
+               f"🎯 <b>Objectif</b> : {nombre(s.objectif)} ({haut}{nombre(gain, 1)} %)"]
+    if breakeven_r:
+        niveau = s.entree + s.sens * breakeven_r * abs(s.entree - s.stop)
+        lignes.append(f"🔒 Si le cours atteint {nombre(niveau)}, remontez le stop au prix d'entrée")
+    if p and p.resultats:
+        lignes.append(f"📅 Prochains résultats : {date_courte(p.resultats)}")
     if p:
-        lignes += ["", "\n\n".join(_ordre(o) for o in p.ordres)]
+        lignes += ["", "\n\n".join(_ordre(o, s.sens) for o in p.ordres)]
     return "\n".join(lignes)
 
 
@@ -79,12 +88,13 @@ def message_bilan(signaux: list[Signal], clotures: list[dict], bilan: dict, sean
     lignes = [f"📊 <b>Bilan au {date_courte(seance)}</b>",
               f"{n} nouveau{'x' if n > 1 else ''} signa{'ux' if n > 1 else 'l'} (ratio gain/perte d'au moins 3 pour 1)"]
     for c in clotures:
-        icone = "✅" if c["statut"] == "succès" else "❌"
+        icone = {"succès": "✅", "échec": "❌"}.get(c["statut"], "⚪")
         lignes.append(f"{icone} {html.escape(str(c['nom']))} : {c['statut']} ({c['motif']}), "
                       f"{'+' if float(c['r']) >= 0 else ''}{nombre(float(c['r']), 1)} R")
     taux = f"{nombre(bilan['taux_reussite'], 0)} %" if bilan["taux_reussite"] is not None else "pas encore de résultat"
     lignes += ["",
-               f"Depuis le début : {bilan['succes']} succès, {bilan['echecs']} échecs (réussite : {taux})",
+               f"Depuis le début : {bilan['succes']} succès, {bilan['echecs']} échecs, {bilan.get('neutres', 0)} neutres "
+               f"(réussite : {taux})",
                f"Résultat cumulé : {'+' if bilan['r_total'] >= 0 else ''}{nombre(bilan['r_total'], 1)} R",
                f"En cours : {bilan['ouverts']} ouverts, {bilan['en_attente']} en attente d'entrée",
                "",
@@ -94,9 +104,9 @@ def message_bilan(signaux: list[Signal], clotures: list[dict], bilan: dict, sean
 
 
 def messages(signaux: list[Signal], clotures: list[dict], bilan: dict, seance,
-             plans: dict | None = None) -> list[str]:
+             plans: dict | None = None, breakeven_r: float | None = None) -> list[str]:
     plans = plans or {}
-    return [message_signal(s, plans.get(id(s))) for s in signaux] + [message_bilan(signaux, clotures, bilan, seance)]
+    return [message_signal(s, plans.get(id(s)), breakeven_r) for s in signaux] + [message_bilan(signaux, clotures, bilan, seance)]
 
 
 def send_telegram(textes: list[str]) -> bool:

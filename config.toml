@@ -6,15 +6,23 @@ risque_par_trade = 0.01  # 1 % du capital risqué par trade
 frais_bps = 5            # frais + slippage par ordre, en points de base (0,05 %)
 ratio_min = 3.0          # seuls les signaux avec un ratio gain/perte d'au moins 3 pour 1 sont envoyés
 
-# 5 grands indices mondiaux (symboles Yahoo Finance)
+# Protection du capital
+[filtres]
+filtre_marche = true            # achats seulement si le S&P 500 est au-dessus de sa moyenne 200 jours, ventes seulement en dessous
+max_positions = 4               # nombre maximum de positions ouvertes ou en attente (une seule par actif)
+jours_avant_resultats = 5       # pas d'achat d'action dans les 5 jours de bourse avant ses résultats
+stop_a_l_entree_apres_r = 1.0   # stop ramené au prix d'entrée dès que le gain atteint 1 fois le risque
+
+# Grands indices mondiaux (symboles Yahoo Finance) : achat et vente à découvert
 [indices]
 "^GSPC" = "S&P 500"
 "^NDX" = "Nasdaq 100"
 "^GDAXI" = "DAX 40"
 "^N225" = "Nikkei 225"
 "^FTSE" = "FTSE 100"
+"^FCHI" = "CAC 40"
 
-# Actions US surveillées (les plus grosses capitalisations)
+# 50 actions US surveillées (grosses capitalisations), achat uniquement
 [actions_us]
 AAPL = "Apple"
 MSFT = "Microsoft"
@@ -31,6 +39,41 @@ XOM = "Exxon Mobil"
 UNH = "UnitedHealth"
 COST = "Costco"
 NFLX = "Netflix"
+BRK-B = "Berkshire Hathaway"
+WMT = "Walmart"
+ORCL = "Oracle"
+MA = "Mastercard"
+HD = "Home Depot"
+PG = "Procter & Gamble"
+JNJ = "Johnson & Johnson"
+ABBV = "AbbVie"
+BAC = "Bank of America"
+KO = "Coca-Cola"
+PEP = "PepsiCo"
+MRK = "Merck"
+CVX = "Chevron"
+AMD = "AMD"
+ADBE = "Adobe"
+CRM = "Salesforce"
+CSCO = "Cisco"
+MCD = "McDonald's"
+TMO = "Thermo Fisher"
+ABT = "Abbott"
+WFC = "Wells Fargo"
+DIS = "Disney"
+INTC = "Intel"
+QCOM = "Qualcomm"
+TXN = "Texas Instruments"
+IBM = "IBM"
+GE = "GE Aerospace"
+CAT = "Caterpillar"
+AMGN = "Amgen"
+INTU = "Intuit"
+NOW = "ServiceNow"
+PM = "Philip Morris"
+GS = "Goldman Sachs"
+MS = "Morgan Stanley"
+UBER = "Uber"
 
 # --- Exécution sur IG et eToro --------------------------------------------------------------
 # Sources (consultées le 03/10/2026) :
@@ -57,6 +100,11 @@ ouverture = "09:30"
 [bourses.francfort]
 nom = "Bourse de Francfort"
 tz = "Europe/Berlin"
+ouverture = "09:00"
+
+[bourses.paris]
+nom = "Bourse de Paris"
+tz = "Europe/Paris"
 ouverture = "09:00"
 
 [bourses.londres]
@@ -114,4 +162,14 @@ ig_valeur_point = 2.0
 ig_spread_points = 1.0
 etoro = "UK100"
 etoro_devise = "GBP"
+etoro_spread_pct = 0.01
+
+# CAC 40 : spreads estimés (à vérifier sur IG et eToro)
+[instruments."^FCHI"]
+bourse = "paris"
+devise = "EUR"
+ig = "France 40"
+ig_valeur_point = 1.0
+ig_spread_points = 1.0
+etoro = "FRA40"
 etoro_spread_pct = 0.01

@@ -1,13 +1,14 @@
-"""Stratégies swing (bougies journalières, positions acheteuses uniquement).
+"""Stratégies swing (bougies journalières), à l'achat et à la vente.
 
 Chaque stratégie ajoute au DataFrame les colonnes :
-- entry  : True si un signal d'achat apparaît à la clôture de la bougie (entrée à l'ouverture suivante)
+- entry  : True si un signal apparaît à la clôture de la bougie (entrée à l'ouverture suivante)
 - stop   : niveau de stop-loss associé au signal
 - target : niveau d'objectif (sert aussi à calculer le ratio gain/perte)
 - exit   : True si la règle de sortie est déclenchée à la clôture (sortie à l'ouverture suivante)
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Callable
 
 import pandas as pd
@@ -25,6 +26,19 @@ def tendance_mm(df: pd.DataFrame) -> pd.DataFrame:
     out["stop"] = df["Close"] - 2 * a
     out["target"] = df["Close"] + 3 * (df["Close"] - out["stop"])
     out["exit"] = cross_down
+    return out
+
+
+def tendance_mm_vente(df: pd.DataFrame) -> pd.DataFrame:
+    """Croisement MM20 sous MM50 dans une tendance baissière (cours < MM200), objectif 3R."""
+    out = df.copy()
+    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), sma(df["Close"], 200), atr(df)
+    cross_up = (m20 > m50) & (m20.shift(1) <= m50.shift(1))
+    cross_down = (m20 < m50) & (m20.shift(1) >= m50.shift(1))
+    out["entry"] = cross_down & (df["Close"] < m200)
+    out["stop"] = df["Close"] + 2 * a
+    out["target"] = df["Close"] - 3 * (out["stop"] - df["Close"])
+    out["exit"] = cross_up
     return out
 
 
@@ -52,11 +66,48 @@ def cassure_20j(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-# Horizon de chaque stratégie : "swing" (bougies journalières, 2 à 15 jours) ou "day" (clôture le jour même).
-TYPES = {"tendance_mm": "swing", "rsi2_repli": "swing", "cassure_20j": "swing"}
+def cassure_20j_vente(df: pd.DataFrame) -> pd.DataFrame:
+    """Cassure du plus bas 20 jours (cours < MM200), objectif 3R, sortie au-dessus du plus haut 10 jours."""
+    out = df.copy()
+    m200, a = sma(df["Close"], 200), atr(df)
+    plus_bas = df["Low"].rolling(20).min().shift(1)
+    plus_haut = df["High"].rolling(10).max().shift(1)
+    out["entry"] = (df["Close"] < plus_bas) & (df["Close"] < m200)
+    out["stop"] = df["Close"] + 2 * a
+    out["target"] = df["Close"] - 3 * (out["stop"] - df["Close"])
+    out["exit"] = df["Close"] > plus_haut
+    return out
 
-STRATEGIES: dict[str, Callable[[pd.DataFrame], pd.DataFrame]] = {
-    "tendance_mm": tendance_mm,
-    "rsi2_repli": rsi2_repli,
-    "cassure_20j": cassure_20j,
+
+@dataclass(frozen=True)
+class Strategie:
+    fonction: Callable[[pd.DataFrame], pd.DataFrame]
+    sens: int            # 1 = achat, -1 = vente à découvert
+    type: str = "swing"  # "swing" (bougies journalières, 2 à 15 jours) ou "day" (clôture le jour même)
+    indices_seulement: bool = False
+
+
+STRATEGIES: dict[str, Strategie] = {
+    "tendance_mm": Strategie(tendance_mm, 1),
+    "rsi2_repli": Strategie(rsi2_repli, 1),
+    "cassure_20j": Strategie(cassure_20j, 1),
+    # Ventes à découvert : indices uniquement (CFD sur IG et eToro).
+    "tendance_mm_vente": Strategie(tendance_mm_vente, -1, indices_seulement=True),
+    "cassure_20j_vente": Strategie(cassure_20j_vente, -1, indices_seulement=True),
 }
+TYPES = {nom: s.type for nom, s in STRATEGIES.items()}
+
+
+def regime_haussier(sp500: pd.DataFrame) -> pd.Series:
+    """True quand le S&P 500 clôture au-dessus de sa moyenne mobile 200 jours."""
+    return sp500["Close"] > sma(sp500["Close"], 200)
+
+
+def appliquer(nom: str, df: pd.DataFrame, regime: pd.Series | None = None) -> pd.DataFrame:
+    """Calcule la stratégie ; avec un régime de marché, n'achète qu'en marché haussier et ne vend qu'en marché baissier."""
+    st = STRATEGIES[nom]
+    out = st.fonction(df)
+    if regime is not None:
+        r = regime.reindex(out.index, method="ffill").fillna(False).astype(bool)
+        out["entry"] = out["entry"] & (r if st.sens > 0 else ~r)
+    return out
