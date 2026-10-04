@@ -83,3 +83,13 @@ tradeperso scan
 - Phase 4 : argent réel en petite taille, ordres validés manuellement.
 
 Limites connues : le rendement du backtest enchaîne les trades de tous les actifs par date de sortie (approximation, positions simultanées non plafonnées) ; données Yahoo gratuites, non officielles.
+
+## Plan Europe (7h, 10h05, 17h45)
+
+Workflow `plan-europe`, chaque jour de semaine, heure de Paris :
+
+- **7h** : ce qu'ont fait les futures US, l'Asie, le pétrole, l'or et l'euro pendant la nuit ; pour le DAX, le CAC, l'Euro Stoxx et le FTSE : variation de la veille, amplitude attendue (ATR), repères (haut, bas, pivot) ; heures qui bougent le plus (2 ans de données horaires) ; déroulé de la journée. Rapport `reports/matin.md`.
+- **10h05** : niveaux de la 1re heure (9h-10h). Achat au-dessus du plus haut, vente sous le plus bas, knock-out au milieu, objectif 3R, mise pour 30 € de risque. Un seul côté par indice, pas d'entrée après 12h, tout fermé à 17h15.
+- **17h45** : bilan rejoué de la journée, succès ou échec, cumul dans `reports/matin_journal.csv`.
+
+Simulation et entraînement : la règle de la 1re heure est mesurée dans le rapport du matin, à n'utiliser en réel que si elle est positive. Données Yahoo parfois en retard de 15 min, et GitHub peut lancer la tâche avec 15 à 30 min de retard.

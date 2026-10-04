@@ -240,3 +240,29 @@ def test_daytrading():
     # Cassure puis retour sous le knock-out : -1 R.
     df.iloc[-1] = [100.5, 101.5, 99.5, 100.0]
     assert round(daytrading.backtest(df, frais_bps=0)[-1], 6) == -1.0
+
+
+def test_matin_premiere_heure():
+    from tradeperso import matin
+    idx = pd.date_range("2026-10-05 09:00", periods=9, freq="h", tz="Europe/Paris")
+    base = dict(Open=100.0, High=101.0, Low=99.0, Close=100.0)
+    jour = pd.DataFrame([base] * 9, index=idx)
+    # 11h : cassure du haut (101) ; 13h : objectif atteint (risque 1 pt, objectif 104).
+    jour.iloc[2] = [100.5, 101.5, 100.2, 101.2]
+    jour.iloc[3:, jour.columns.get_loc("Low")] = 100.5
+    jour.iloc[4] = [101.5, 104.5, 101.4, 104.0]
+    j = matin.jouer(jour, "milieu", 3.0, 0)
+    assert (j.sens, j.entree, j.stop, j.objectif, j.motif) == (1, 101.0, 100.0, 104.0, "objectif") and j.r == 3.0
+    # Stop touché dans la bougie d'entrée : -1 R (hypothèse prudente).
+    jour.iloc[2] = [100.5, 101.5, 99.8, 100.0]
+    assert matin.jouer(jour, "milieu", 3.0, 0).r == -1.0
+    p = matin.profil_horaire(jour)
+    assert list(p.index) == list(range(9, 18))
+
+
+def test_phase_du_cron():
+    from tradeperso.cli import phase_du_cron
+    ete, hiver = pd.Timestamp("2026-10-05 04:00", tz="UTC"), pd.Timestamp("2026-11-02 04:00", tz="UTC")
+    assert phase_du_cron("0 5 * * 1-5", ete) == "matin" and phase_du_cron("0 6 * * 1-5", ete) is None
+    assert phase_du_cron("0 6 * * 1-5", hiver) == "matin" and phase_du_cron("0 5 * * 1-5", hiver) is None
+    assert phase_du_cron("5 8 * * 1-5", ete) == "ouverture" and phase_du_cron("45 16 * * 1-5", hiver) == "bilan"

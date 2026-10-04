@@ -8,7 +8,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import alerts, backtest, daytrading, execution, journal, portefeuille, speculation
+from . import alerts, backtest, daytrading, execution, journal, matin, portefeuille, speculation
+from .indicators import atr
 from .data import download, fraicheur, load_config, prochains_resultats, watchlist
 from .scanner import scan, to_markdown
 from .strategies import STRATEGIES, appliquer, regime_haussier
@@ -100,7 +101,7 @@ def plan_daytrading(cfg, out, data, seance, fx) -> None:
         if vendre:
             txt.append(f"🔴 Vente si < {alerts.nombre(n.vente)} · knock-out {alerts.nombre(n.vente_ko)} · objectif {alerts.nombre(n.vente_objectif)}")
             md.append(f"- Vente si le cours passe sous {n.vente:.2f} : knock-out {n.vente_ko:.2f}, objectif {n.vente_objectif:.2f}")
-        txt.append(f"Mise ≈ {alerts.nombre(par_point, 2)} € par point (prime ≈ {alerts.euros(risque_eur)})")
+        txt.append(f"Mise ≈ {alerts.nombre(par_point, 2)} € €/point (prime ≈ {alerts.euros(risque_eur)})")
         md.append(f"- Mise ≈ {par_point:.2f} € par point, soit une prime d'environ {risque_eur:.0f} €")
         lignes_tg.append("\n".join(txt))
         lignes_md.append("\n".join(md))
@@ -373,15 +374,159 @@ def pareto(data, noms, indices, regime, breakeven_r, frais, ratio_min) -> str:
     return "\n".join(lignes) + "\n"
 
 
+PHASES = {7: "matin", 10: "ouverture", 17: "bilan"}
+
+
+def phase_du_cron(cron: str, maintenant: pd.Timestamp | None = None) -> str | None:
+    """Les tâches GitHub sont en heure UTC : chaque phase a deux horaires (été / hiver).
+    On ne garde que celui qui tombe à la bonne heure de Paris aujourd'hui."""
+    minute, heure = (int(x) for x in cron.split()[:2])
+    jour = (maintenant or pd.Timestamp.now(tz="UTC")).tz_convert("UTC").normalize()
+    prevu = (jour + pd.Timedelta(hours=heure, minutes=minute)).tz_convert(matin.PARIS)
+    return PHASES.get(prevu.hour)
+
+
+def _sig(x: float, dec: int = 1) -> str:
+    return ("+" if x >= 0 else "−") + alerts.nombre(abs(x), dec)
+
+
+def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
+    mc = cfg.get("matin", {})
+    stop_mode, ratio = mc.get("stop", "milieu"), mc.get("ratio", 3.0)
+    risque_eur = cfg["capital"]["montant"] * cfg["capital"]["risque_par_trade"]
+    aujourd_hui = pd.Timestamp.now(tz=matin.PARIS)
+    out.mkdir(parents=True, exist_ok=True)
+
+    if phase == "matin":
+        nuit = matin.telecharger(matin.NUIT, "5d", "1d")
+        jours = matin.telecharger(matin.EUROPE, "3mo", "1d")
+        heures = matin.telecharger(matin.EUROPE, "730d", "1h")
+        lignes = [f"☀️ <b>Plan Europe · {alerts.date_courte(aujourd_hui)}</b>", ""]
+        nuit_txt = []
+        for s, nom in matin.NUIT.items():
+            if s in nuit and len(nuit[s]) >= 2:
+                v = matin.variation(nuit[s])
+                nuit_txt.append(f"{nom} {_sig(v)} %" if s != "^VIX" else f"{nom} {alerts.nombre(float(nuit[s]['Close'].iloc[-1]), 1)}")
+        lignes += ["🌙 <b>Nuit et veille</b>", " · ".join(nuit_txt), ""]
+        profils = [matin.profil_horaire(h) for h in heures.values() if len(h)]
+        md_heures = ""
+        if profils:
+            prof = pd.concat(profils, axis=1).mean(axis=1)
+            top = prof.sort_values(ascending=False).head(3)
+            lignes.append("⏰ <b>Heures qui bougent le plus</b> : " +
+                          ", ".join(f"{h}h-{h + 1}h ({alerts.nombre(v, 2)} %)" for h, v in top.items()))
+            lignes.append(f"Plus calme : {int(prof.idxmin())}h-{int(prof.idxmin()) + 1}h")
+            md_heures = "| Heure (Paris) | Mouvement moyen |\n| --- | --- |\n" + "".join(
+                f"| {h}h-{h + 1}h | {v:.2f} % |\n" for h, v in prof.items())
+        lignes += ["", "🗓 <b>Déroulé</b>",
+                   "9h-10h : observer, noter le plus haut et le plus bas de la 1re heure",
+                   "10h : niveaux exacts envoyés ici",
+                   "10h-12h : entrée si cassure de la 1re heure",
+                   "12h-14h30 : calme, pas de nouvelle entrée",
+                   "14h30-16h : chiffres et ouverture US, ça bouge",
+                   "17h15 : tout fermer", ""]
+        stats_md = []
+        for s, nom in matin.EUROPE.items():
+            d = jours.get(s)
+            if d is None or len(d) < 20:
+                continue
+            a = float(atr(d).iloc[-1])
+            pv = matin.pivots(d)
+            m = matin.resume(matin.backtest(heures[s], stop_mode, ratio)) if s in heures else {"trades": 0}
+            verdict = (f"{_sig(m['esperance_r'], 2)} R par trade sur {m['trades']} jours "
+                       f"{'✅' if m['esperance_r'] > 0 else '⚠️ négatif, démo seulement'}") if m["trades"] else "pas de test"
+            lignes += [f"<b>{nom}</b> : veille {_sig(matin.variation(d))} %, amplitude attendue ≈ {alerts.nombre(a, 0)} pts "
+                       f"({alerts.nombre(100 * a / float(d['Close'].iloc[-1]), 1)} %)",
+                       f"Repères : haut veille {alerts.nombre(pv['haut'], 0)} · bas veille {alerts.nombre(pv['bas'], 0)} · "
+                       f"pivot {alerts.nombre(pv['pivot'], 0)}",
+                       f"Règle 1re heure (2 ans) : {verdict}", ""]
+            for mode in ("milieu", "bord"):
+                mm = matin.resume(matin.backtest(heures[s], mode, ratio)) if s in heures else {"trades": 0}
+                if mm["trades"]:
+                    stats_md.append(f"| {nom} | {mode} | {mm['trades']} | {mm['reussite_pct']} % | {mm['esperance_r']:+} R | {mm['profit_factor']} |")
+        lignes.append("<i>Simulation, pas un conseil. Données Yahoo, parfois en retard de 15 min.</i>")
+        md = (f"# Plan Europe du {aujourd_hui:%d/%m/%Y}\n\n" + "\n".join(l.replace("<b>", "**").replace("</b>", "**")
+              .replace("<i>", "_").replace("</i>", "_") for l in lignes)
+              + "\n\n## Mouvement moyen par heure (2 ans, DAX, CAC, Euro Stoxx, FTSE)\n\n" + md_heures
+              + "\n## Règle de la 1re heure sur 2 ans\n\n| Indice | Stop | Trades | Réussite | Espérance | Profit factor |\n"
+              "| --- | --- | --- | --- | --- | --- |\n" + "\n".join(stats_md) + "\n")
+        (out / "matin.md").write_text(md, encoding="utf-8")
+        print(md)
+        alerts.send_telegram(["\n".join(lignes)])
+        return
+
+    cinq = matin.telecharger(matin.EUROPE, "1d", "5m")
+    lignes_tg, journal_lignes = [], []
+    for s, nom in matin.EUROPE.items():
+        df = cinq.get(s)
+        if df is None:
+            continue
+        df = df[df.index.date == aujourd_hui.date()]
+        if df.empty or df.index[0].hour > matin.DEBUT:
+            continue
+        h1 = df.resample("1h").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last"}).dropna()
+        h1 = matin.seance_du_jour(h1)
+        if h1.empty or h1.index[0].hour != matin.DEBUT:
+            continue
+        haut, bas = float(h1["High"].iloc[0]), float(h1["Low"].iloc[0])
+        milieu = (haut + bas) / 2
+        if phase == "ouverture":
+            ko_a, ko_v = (milieu, milieu) if stop_mode == "milieu" else (bas, haut)
+            ra, rv = haut - ko_a, ko_v - bas
+            lignes_tg += [f"<b>{nom}</b> : 1re heure {alerts.nombre(bas, 0)} – {alerts.nombre(haut, 0)}, "
+                          f"cours {alerts.nombre(float(df['Close'].iloc[-1]), 0)}",
+                          f"🟢 Achat si > {alerts.nombre(haut, 0)} · knock-out {alerts.nombre(ko_a, 0)} · objectif {alerts.nombre(haut + ratio * ra, 0)}",
+                          f"🔴 Vente si < {alerts.nombre(bas, 0)} · knock-out {alerts.nombre(ko_v, 0)} · objectif {alerts.nombre(bas - ratio * rv, 0)}",
+                          f"Mise ≈ {alerts.nombre(risque_eur / max(ra, 1e-9), 2)} €/point (prime ≈ {alerts.euros(risque_eur)})", ""]
+        else:
+            j = matin.jouer(h1, stop_mode, ratio)
+            var = 100 * (float(df["Close"].iloc[-1]) / float(df["Open"].iloc[0]) - 1)
+            if j is None or j.sens == 0:
+                lignes_tg.append(f"⚪ <b>{nom}</b> ({_sig(var)} %) : pas de cassure, pas de trade")
+                journal_lignes.append({"date": f"{aujourd_hui:%Y-%m-%d}", "indice": nom, "sens": 0, "r": 0.0, "motif": "pas de cassure"})
+            else:
+                icone = "✅" if j.r > 0.05 else ("❌" if j.r < -0.05 else "⚪")
+                lignes_tg.append(f"{icone} <b>{nom}</b> ({_sig(var)} %) : {'achat' if j.sens > 0 else 'vente'} à "
+                                 f"{alerts.nombre(j.entree, 0)}, sortie {alerts.nombre(j.sortie, 0)} ({j.motif}), {_sig(j.r)} R")
+                journal_lignes.append({"date": f"{aujourd_hui:%Y-%m-%d}", "indice": nom, "sens": j.sens, "r": round(j.r, 2), "motif": j.motif})
+    if not lignes_tg:
+        print("Pas de séance européenne aujourd'hui (jour férié ou données absentes).")
+        return
+    if phase == "ouverture":
+        entete = [f"⏱ <b>Niveaux après la 1re heure · {alerts.date_courte(aujourd_hui)}</b>",
+                  "Un seul côté par indice (le premier touché). Pas de nouvelle entrée après 12h. Tout fermer à 17h15.", ""]
+    else:
+        path = out / "matin_journal.csv"
+        matin.journal_ajouter(path, journal_lignes)
+        j = pd.read_csv(path)
+        t = j[j["sens"] != 0]
+        cumul = (f"Depuis le début : {int((t['r'] > 0.05).sum())} succès, {int((t['r'] < -0.05).sum())} échecs, "
+                 f"résultat {_sig(float(t['r'].sum()))} R") if len(t) else "Premier bilan."
+        entete = [f"🌙 <b>Bilan de la journée · {alerts.date_courte(aujourd_hui)}</b>", "Règle de la 1re heure, en simulation", ""]
+        lignes_tg += ["", cumul]
+    texte = "\n".join(entete + lignes_tg)
+    (out / f"{phase}.md").write_text(texte.replace("<b>", "**").replace("</b>", "**") + "\n", encoding="utf-8")
+    print(texte)
+    alerts.send_telegram([texte])
+
+
 def main() -> None:
     p = argparse.ArgumentParser(prog="tradeperso")
-    p.add_argument("commande", choices=["scan", "backtest"])
+    p.add_argument("commande", choices=["scan", "backtest", "matin"])
+    p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan"])
+    p.add_argument("--cron", default="", help="horaire de la tâche GitHub (pour --phase auto)")
     p.add_argument("--config", default="config.toml")
     p.add_argument("--out", default="reports")
     p.add_argument("--period", default="10y", help="historique du backtest (ex. 5y, 10y, max)")
     a = p.parse_args()
     cfg = load_config(a.config)
-    if a.commande == "scan":
+    if a.commande == "matin":
+        phase = a.phase if a.phase != "auto" else (phase_du_cron(a.cron) if a.cron else None)
+        if phase is None:
+            print("Hors horaire (heure d'été ou d'hiver) : rien à faire.")
+            return
+        cmd_matin(cfg, Path(a.out), phase)
+    elif a.commande == "scan":
         cmd_scan(cfg, Path(a.out))
     else:
         cmd_backtest(cfg, Path(a.out), a.period)
