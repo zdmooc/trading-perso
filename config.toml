@@ -31,7 +31,7 @@ ratio = 3.0              # objectif à 3 fois le risque
 
 # Plan Europe du matin (7h), niveaux après la 1re heure (10h), bilan (17h45)
 [matin]
-stop = "milieu"          # knock-out au milieu de la 1re heure ("milieu") ou à l'autre bord ("bord")
+stop = "bord"            # knock-out au milieu de la 1re heure ("milieu") ou à l'autre bord ("bord")
 ratio = 3.0
 
 # Grands indices mondiaux (symboles Yahoo Finance) : achat et vente à découvert
