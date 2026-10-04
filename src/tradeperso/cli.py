@@ -54,6 +54,7 @@ def cmd_scan(cfg: dict, out: Path) -> None:
           + (f"**⚠️ Données en retard : dernière séance du {seance:%d/%m/%Y}. Aucun nouveau signal.**\n\n" if en_retard else "")
           + (f"Cours non à jour, actifs exclus : {', '.join(sorted(noms.get(s, s) for s in perimes))}.\n\n" if perimes else "")
           + to_markdown(signaux)
+          + recents(data, noms)
           + "".join(f"\n### {s.nom} ({s.strategie})\n\n" + execution.format_plan(s, plans[id(s)]).replace("\n", "  \n") + "\n" for s in signaux))
     (out / "signaux.md").write_text(md, encoding="utf-8")
     print(md)
@@ -63,6 +64,26 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     if en_retard and alerts.send_telegram([f"⚠️ <b>Données en retard</b>\nDernière séance reçue : {alerts.date_courte(seance)}.\n"
                                            "Aucun signal envoyé ce soir."]):
         print("Alerte de retard envoyée.")
+
+
+def recents(data, noms, seuil: int = 200) -> str:
+    """Suivi des actions récemment introduites en bourse (historique trop court pour la moyenne 200 jours)."""
+    lignes = []
+    for s in sorted(noms):
+        df = data.get(s)
+        if df is None or len(df) >= seuil:
+            continue
+        c = df["Close"]
+        mm50 = c.rolling(50).mean().iloc[-1]
+        haut20 = df["High"].rolling(20).max().shift(1).iloc[-1]
+        etat = ("moyenne 50 jours pas encore disponible" if pd.isna(mm50) else
+                f"cours {c.iloc[-1]:.2f}, moyenne 50 jours {mm50:.2f} ({'au-dessus' if c.iloc[-1] > mm50 else 'en dessous'}), "
+                f"plus haut 20 jours {haut20:.2f}, plus haut depuis l'introduction {df['High'].max():.2f}")
+        lignes.append(f"- {noms[s]} ({len(df)} séances) : {etat}")
+    if not lignes:
+        return ""
+    return ("\n**Nouvelles introductions** (tendance jugée sur la moyenne 50 jours en attendant 200 séances) :\n\n"
+            + "\n".join(lignes) + "\n")
 
 
 def cmd_backtest(cfg: dict, out: Path, period: str) -> None:

@@ -17,10 +17,16 @@ import pandas as pd
 from .indicators import atr, rsi, sma
 
 
+def tendance_longue(close: pd.Series, lent: int = 200, court: int = 50) -> pd.Series:
+    """Moyenne longue (200 jours) ; pour une action récente (nouvelle introduction en bourse), la moyenne
+    50 jours la remplace tant que l'historique est trop court."""
+    return sma(close, lent).fillna(sma(close, court))
+
+
 def tendance_mm(df: pd.DataFrame, lent: int = 200, k_stop: float = 2.0) -> pd.DataFrame:
     """Croisement MM20/MM50 dans une tendance haussière (cours > MM200), objectif 3R."""
     out = df.copy()
-    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), sma(df["Close"], lent), atr(df)
+    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), tendance_longue(df["Close"], lent), atr(df)
     cross_up = (m20 > m50) & (m20.shift(1) <= m50.shift(1))
     cross_down = (m20 < m50) & (m20.shift(1) >= m50.shift(1))
     out["entry"] = cross_up & (df["Close"] > m200)
@@ -33,7 +39,7 @@ def tendance_mm(df: pd.DataFrame, lent: int = 200, k_stop: float = 2.0) -> pd.Da
 def tendance_mm_vente(df: pd.DataFrame, lent: int = 200, k_stop: float = 2.0) -> pd.DataFrame:
     """Croisement MM20 sous MM50 dans une tendance baissière (cours < MM200), objectif 3R."""
     out = df.copy()
-    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), sma(df["Close"], lent), atr(df)
+    m20, m50, m200, a = sma(df["Close"], 20), sma(df["Close"], 50), tendance_longue(df["Close"], lent), atr(df)
     cross_up = (m20 > m50) & (m20.shift(1) <= m50.shift(1))
     cross_down = (m20 < m50) & (m20.shift(1) >= m50.shift(1))
     out["entry"] = cross_down & (df["Close"] < m200)
@@ -57,7 +63,7 @@ def rsi2_repli(df: pd.DataFrame) -> pd.DataFrame:
 def cassure_20j(df: pd.DataFrame, n: int = 20, lent: int = 200, k_stop: float = 2.0) -> pd.DataFrame:
     """Cassure du plus haut 20 jours (cours > MM200), objectif 3R, sortie sous le plus bas 10 jours."""
     out = df.copy()
-    m200, a = sma(df["Close"], lent), atr(df)
+    m200, a = tendance_longue(df["Close"], lent), atr(df)
     plus_haut = df["High"].rolling(n).max().shift(1)
     plus_bas = df["Low"].rolling(10).min().shift(1)
     out["entry"] = (df["Close"] > plus_haut) & (df["Close"] > m200)
@@ -70,7 +76,7 @@ def cassure_20j(df: pd.DataFrame, n: int = 20, lent: int = 200, k_stop: float = 
 def cassure_20j_vente(df: pd.DataFrame, n: int = 20, lent: int = 200, k_stop: float = 2.0) -> pd.DataFrame:
     """Cassure du plus bas 20 jours (cours < MM200), objectif 3R, sortie au-dessus du plus haut 10 jours."""
     out = df.copy()
-    m200, a = sma(df["Close"], lent), atr(df)
+    m200, a = tendance_longue(df["Close"], lent), atr(df)
     plus_bas = df["Low"].rolling(n).min().shift(1)
     plus_haut = df["High"].rolling(10).max().shift(1)
     out["entry"] = (df["Close"] < plus_bas) & (df["Close"] < m200)
@@ -85,7 +91,7 @@ def _repli(df: pd.DataFrame, sens: int, objectif_r: float, lent: int = 200) -> p
     out = df.copy()
     c = df["Close"] * sens
     haut, bas = (df["High"], df["Low"]) if sens > 0 else (-df["Low"], -df["High"])
-    m20, m50, m200, a = sma(c, 20), sma(c, 50), sma(c, lent), atr(df)
+    m20, m50, m200, a = sma(c, 20), sma(c, 50), tendance_longue(c, lent), atr(df)
     tendance = (c > m50) & (m50 > m200) & (m50 > m50.shift(5))
     repli = (bas <= m20).rolling(5).max().astype(bool)          # le cours est revenu toucher la MM20
     reprise = (c > haut.shift(1)) & (c > m20)                    # clôture au-dessus du plus haut de la veille

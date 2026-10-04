@@ -26,6 +26,8 @@ Seuls les signaux avec un **ratio gain/perte d'au moins 3 pour 1** (`ratio_min` 
 
 Chaque signal indique son **sens** (achat ou vente), son **type** (`swing` pour l'instant ; le day trading arrive en phase 3) et son **ratio gain/perte** = |objectif − entrée| / |entrée − stop|.
 
+**Nouvelles introductions en bourse** (ex. SpaceX) : tant qu'une action a moins de 200 séances, la tendance est jugée sur la moyenne 50 jours au lieu de la moyenne 200 jours. Les signaux peuvent donc partir dès 50 séances. Cette règle n'a pas pu être testée sur 10 ans (trop peu d'introductions dans la liste) : prudence.
+
 ## Protection du capital (section `[filtres]` de `config.toml`)
 
 - **Filtre de marché** : achats seulement quand le S&P 500 est au-dessus de sa moyenne 200 jours ; ventes à découvert (indices) seulement quand il est en dessous.

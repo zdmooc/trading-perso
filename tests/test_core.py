@@ -198,3 +198,13 @@ def test_frais_trop_eleves():
     p = execution.plan(s, cfg, execution.FX_DEFAUT)
     msg = alerts.message_signal(s, p)
     assert "Frais trop élevés" in msg and "Acheter" in msg  # IG déconseillé, eToro proposé
+
+
+def test_nouvelle_introduction():
+    from tradeperso.strategies import tendance_longue
+    from tradeperso.indicators import sma
+    df = random_walk(n=120, drift=0.004)
+    t = tendance_longue(df["Close"])
+    assert t.iloc[:49].isna().all() and t.iloc[-1] == sma(df["Close"], 50).iloc[-1]
+    longue = random_walk(n=300)
+    assert tendance_longue(longue["Close"]).iloc[-1] == sma(longue["Close"], 200).iloc[-1]
