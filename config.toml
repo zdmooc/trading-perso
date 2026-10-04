@@ -13,6 +13,14 @@ max_positions = 4               # nombre maximum de positions ouvertes ou en att
 jours_avant_resultats = 5       # pas d'achat d'action dans les 5 jours de bourse avant ses résultats
 stop_a_l_entree_apres_r = 1.0   # stop ramené au prix d'entrée dès que le gain atteint 1 fois le risque
 
+# Spéculation : actions leaders du moment, en actions réelles sur eToro (voir reports/speculation.md)
+# Répartition proposée d'un capital de 10 000 € : 6 000 € ETF gardé, 3 000 € signaux swing, 1 000 € spéculation.
+[speculation]
+capital = 1000
+nombre = 5               # nombre d'actions détenues
+jours = 126              # force relative mesurée sur 6 mois de bourse
+filtre_marche = true     # tout vendre quand le S&P 500 passe sous sa moyenne 200 jours
+
 # Grands indices mondiaux (symboles Yahoo Finance) : achat et vente à découvert
 [indices]
 "^GSPC" = "S&P 500"

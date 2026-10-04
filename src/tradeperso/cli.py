@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import alerts, backtest, execution, journal, portefeuille
+from . import alerts, backtest, execution, journal, portefeuille, speculation
 from .data import download, fraicheur, load_config, prochains_resultats, watchlist
 from .scanner import scan, to_markdown
 from .strategies import STRATEGIES, appliquer, regime_haussier
@@ -61,9 +61,41 @@ def cmd_scan(cfg: dict, out: Path) -> None:
     if (signaux or clotures) and alerts.send_telegram(
             alerts.messages(signaux, clotures, journal.bilan(jrn), seance, plans, breakeven_r)):
         print("Alerte Telegram envoyée.")
+    if not en_retard and SP500 in data:
+        cmd_speculation(cfg, out, data, noms, seance, regime)
     if en_retard and alerts.send_telegram([f"⚠️ <b>Données en retard</b>\nDernière séance reçue : {alerts.date_courte(seance)}.\n"
                                            "Aucun signal envoyé ce soir."]):
         print("Alerte de retard envoyée.")
+
+
+def cmd_speculation(cfg, out, data, noms, seance, regime) -> None:
+    """Classement des actions leaders ; la sélection est revue le vendredi (ou au premier passage)."""
+    sc = cfg.get("speculation")
+    if not sc:
+        return
+    actions = {s: data[s] for s in cfg.get("actions_us", {}) if s in data}
+    t = speculation.classement(actions, noms, data[SP500], sc.get("jours", 126))
+    fichier = out / "speculation.txt"
+    avant = speculation.charger(fichier)
+    if seance.weekday() == 4 or not fichier.exists():
+        baissier = sc.get("filtre_marche") and regime is not None and not bool(regime.iloc[-1])
+        apres = [] if baissier else speculation.selection(t, avant, sc.get("nombre", 5))
+        speculation.sauver(fichier, apres)
+    else:
+        apres = avant
+    achats, ventes = [s for s in apres if s not in avant], [s for s in avant if s not in apres]
+    (out / "speculation.md").write_text(speculation.to_markdown(t, apres, ventes, sc["capital"], seance), encoding="utf-8")
+    if achats or ventes:
+        part = sc["capital"] / max(len(apres), 1)
+        lignes = [f"🚀 <b>Spéculation · actions leaders</b>", f"Revue du {alerts.date_courte(seance)}, en actions réelles sur eToro", ""]
+        lignes += [f"🟢 Acheter <b>{noms.get(s, s)}</b> pour {alerts.euros(part)}" for s in achats]
+        lignes += [f"🔴 Vendre <b>{noms.get(s, s)}</b>" for s in ventes]
+        gardes = [noms.get(s, s) for s in apres if s not in achats]
+        if gardes:
+            lignes += ["", "Garder : " + ", ".join(gardes)]
+        lignes += ["", "<i>Leaders = plus forte hausse sur 6 mois par rapport au S&P 500. Simulation, pas un conseil.</i>"]
+        if alerts.send_telegram(["\n".join(lignes)]):
+            print("Alerte spéculation envoyée.")
 
 
 def recents(data, noms, seuil: int = 200) -> str:
@@ -163,6 +195,25 @@ def section_detention(data, ref, risque) -> str:
     return "\n".join(md) + "\n"
 
 
+def section_speculation(cfg, data) -> str:
+    sc = cfg.get("speculation")
+    if not sc or SP500 not in data:
+        return ""
+    actions = {s: data[s] for s in cfg.get("actions_us", {}) if s in data}
+    md = ["### Spéculation : rotation sur les actions leaders (actions réelles, parts égales)\n",
+          "| Variante | Rendement par an | Total | Pire baisse | Plus longue période sous un sommet |",
+          "| --- | --- | --- | --- | --- |"]
+    for libelle, reg in [("Avec filtre de marché", regime_haussier(data[SP500])), ("Sans filtre de marché", None)]:
+        courbe = speculation.rotation(actions, data[SP500], sc.get("nombre", 5), sc.get("jours", 126),
+                                      cfg["capital"]["frais_bps"], reg)
+        m = portefeuille.detention(courbe, courbe.index[sc.get("jours", 126)], courbe.index[-1])
+        md.append(f"| {libelle} | {m['rendement_annuel_pct']:+} % | {m['rendement_total_pct']:+} % | "
+                  f"{m['drawdown_max_pct']} % | {m['drawdown_duree_mois']} mois |")
+    md.append("\n⚠️ Biais : la liste contient les grandes actions d'aujourd'hui, donc des gagnantes connues après coup. "
+              "Le résultat réel sera plus faible.\n")
+    return "\n".join(md) + "\n"
+
+
 def section_portefeuille(cfg, data, indices, frais, risque) -> str:
     """Résultat réaliste (limite de positions) et solidité des réglages."""
     f = cfg.get("filtres", {})
@@ -188,6 +239,7 @@ def section_portefeuille(cfg, data, indices, frais, risque) -> str:
           f"{ref['esperance_r']:+} R | {ref['profit_factor']} |\n",
           "Par stratégie : " + ", ".join(f"{s} {n} trades ({r:+} R)" for s, (n, r) in ref["par_strategie"].items()) + ".\n",
           comparaison,
+          section_speculation(cfg, data),
           "## Solidité des réglages\n",
           "Si un petit changement de réglage fait s'effondrer le résultat, la stratégie est trop ajustée au passé.\n",
           "| Variante | Trades | Espérance par trade | Rendement par an | Pire baisse |",

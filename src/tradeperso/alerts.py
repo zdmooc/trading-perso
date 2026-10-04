@@ -81,6 +81,7 @@ def message_signal(s: Signal, p: Plan | None, breakeven_r: float | None = None) 
     if breakeven_r:
         niveau = s.entree + s.sens * breakeven_r * abs(s.entree - s.stop)
         lignes.append(f"🔒 Si le cours atteint {nombre(niveau)}, remontez le stop au prix d'entrée")
+    lignes.append(f"🧱 Option barrière IG : knock-out à {nombre(s.stop)} (perte maximale = la prime)")
     if p and p.resultats:
         lignes.append(f"📅 Prochains résultats : {date_courte(p.resultats)}")
     if p:

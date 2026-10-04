@@ -113,4 +113,6 @@ def format_plan(s: Signal, p: Plan) -> str:
                       f"{o.instrument} [{o.sous_jacent}] | gain à l'objectif ≈ {o.gain_objectif_eur:.0f} € | "
                       f"perte au stop ≈ {o.perte_au_stop_eur:.0f} € | "
                       f"spread + commissions ≈ {o.frais_eur:.2f} €{nuit}")
+    lignes.append(f"IG option barrière (si disponible) : {'achat' if s.sens > 0 else 'vente'} avec un niveau de knock-out "
+                  f"au stop ({s.stop:.2f}) ; perte maximale = la prime payée, sans risque d'écart au-delà.")
     return "\n".join(lignes)

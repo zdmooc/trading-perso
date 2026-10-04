@@ -28,6 +28,13 @@ Chaque signal indique son **sens** (achat ou vente), son **type** (`swing` pour 
 
 **Nouvelles introductions en bourse** (ex. SpaceX) : tant qu'une action a moins de 200 séances, la tendance est jugée sur la moyenne 50 jours au lieu de la moyenne 200 jours. Les signaux peuvent donc partir dès 50 séances. Cette règle n'a pas pu être testée sur 10 ans (trop peu d'introductions dans la liste) : prudence.
 
+## Spéculation (section `[speculation]` de `config.toml`)
+
+Répartition proposée d'un capital de 10 000 € : **6 000 € sur un ETF gardé** (cœur), **3 000 € pour les signaux swing**, **1 000 € pour la spéculation**.
+
+- **eToro, actions réelles sans levier** : chaque vendredi, les actions de la liste sont classées par leur hausse sur 6 mois comparée au S&P 500. Les 5 premières au-dessus de leur moyenne 50 jours sont détenues à parts égales. Une action est vendue si elle sort du top 10 ou repasse sous sa moyenne 50 jours ; tout est vendu si le S&P 500 passe sous sa moyenne 200 jours. Liste dans `reports/speculation.md`, message Telegram à chaque changement.
+- **IG, options barrières** : pour chaque signal swing, le message donne le niveau de knock-out à placer (= le stop). La perte maximale est la prime payée, sans risque d'écart au-delà du stop. Disponible sur les indices et environ 90 actions chez IG.
+
 ## Protection du capital (section `[filtres]` de `config.toml`)
 
 - **Filtre de marché** : achats seulement quand le S&P 500 est au-dessus de sa moyenne 200 jours ; ventes à découvert (indices) seulement quand il est en dessous.

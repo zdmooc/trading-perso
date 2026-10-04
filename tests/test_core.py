@@ -208,3 +208,20 @@ def test_nouvelle_introduction():
     assert t.iloc[:49].isna().all() and t.iloc[-1] == sma(df["Close"], 50).iloc[-1]
     longue = random_walk(n=300)
     assert tendance_longue(longue["Close"]).iloc[-1] == sma(longue["Close"], 200).iloc[-1]
+
+
+def test_speculation():
+    from tradeperso import speculation
+    sp = random_walk(n=400, seed=0, drift=0.0003)
+    data = {f"S{i}": random_walk(n=400, seed=i + 1, drift=0.0003 * i) for i in range(8)}
+    t = speculation.classement(data, {}, sp)
+    assert list(t["rang"]) == list(range(1, 9)) and t["force_relative_pct"].is_monotonic_decreasing
+    choix = speculation.selection(t, [], 3)
+    assert len(choix) <= 3 and all(t.set_index("symbole").loc[s, "cours"] > t.set_index("symbole").loc[s, "moyenne_50j"] for s in choix)
+    # Une action détenue encore dans le top 6 et au-dessus de sa MM50 est gardée.
+    ok = t[t["cours"] > t["moyenne_50j"]]
+    if len(ok) >= 4:
+        garde = ok["symbole"].iloc[3]
+        assert garde in speculation.selection(t, [garde], 3)
+    courbe = speculation.rotation(data, sp, 3, 126)
+    assert len(courbe) == 400 and courbe.iloc[0] == 1.0 and (courbe > 0).all()
