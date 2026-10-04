@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import alerts, backtest, execution, journal, portefeuille, speculation
+from . import alerts, backtest, daytrading, execution, journal, portefeuille, speculation
 from .data import download, fraicheur, load_config, prochains_resultats, watchlist
 from .scanner import scan, to_markdown
 from .strategies import STRATEGIES, appliquer, regime_haussier
@@ -63,9 +63,57 @@ def cmd_scan(cfg: dict, out: Path) -> None:
         print("Alerte Telegram envoyée.")
     if not en_retard and SP500 in data:
         cmd_speculation(cfg, out, data, noms, seance, regime)
+    if not en_retard:
+        plan_daytrading(cfg, out, data, seance, fx)
     if en_retard and alerts.send_telegram([f"⚠️ <b>Données en retard</b>\nDernière séance reçue : {alerts.date_courte(seance)}.\n"
                                            "Aucun signal envoyé ce soir."]):
         print("Alerte de retard envoyée.")
+
+
+def plan_daytrading(cfg, out, data, seance, fx) -> None:
+    """Plan de day trading en barrières pour la séance suivante (indices qui passent le filtre)."""
+    dt = cfg.get("daytrading")
+    if not dt:
+        return
+    risque_eur = cfg["capital"]["montant"] * cfg["capital"]["risque_par_trade"]
+    lignes_md, lignes_tg = [], []
+    for s, nom in cfg.get("indices", {}).items():
+        df = data.get(s)
+        if df is None or len(df) < 30 or df.index[-1] != seance and (seance - df.index[-1]).days > 3:
+            continue
+        if not daytrading.filtre_jour(df, dt.get("filtre", "tous")).iloc[-1]:
+            continue
+        acheter, vendre = (x.iloc[-1] for x in daytrading.sens_autorise(df, dt.get("tendance", "deux_sens")))
+        a = float(daytrading.atr(df).iloc[-1])
+        n = daytrading.niveaux(float(df["High"].iloc[-1]), float(df["Low"].iloc[-1]), a, dt.get("k_stop", 0.5),
+                               ratio=dt.get("ratio", 3.0))
+        inst = cfg.get("instruments", {}).get(s, {})
+        dev = inst.get("devise", "USD")
+        par_point = risque_eur * fx.get(dev, 1.0) / (n.achat - n.achat_ko) / fx.get(dev, 1.0)
+        bourse = cfg["bourses"][inst.get("bourse", "new_york")]
+        h = execution.prochaine_ouverture(seance, bourse)
+        txt = [f"<b>{nom}</b> (IG « {inst.get('ig', nom)} »), ouverture {alerts.date_courte(h)} à {h:%Hh%M}"]
+        md = [f"### {nom}\n"]
+        if acheter:
+            txt.append(f"🟢 Achat si > {alerts.nombre(n.achat)} · knock-out {alerts.nombre(n.achat_ko)} · objectif {alerts.nombre(n.achat_objectif)}")
+            md.append(f"- Achat si le cours dépasse {n.achat:.2f} : knock-out {n.achat_ko:.2f}, objectif {n.achat_objectif:.2f}")
+        if vendre:
+            txt.append(f"🔴 Vente si < {alerts.nombre(n.vente)} · knock-out {alerts.nombre(n.vente_ko)} · objectif {alerts.nombre(n.vente_objectif)}")
+            md.append(f"- Vente si le cours passe sous {n.vente:.2f} : knock-out {n.vente_ko:.2f}, objectif {n.vente_objectif:.2f}")
+        txt.append(f"Mise ≈ {alerts.nombre(par_point, 2)} € par point (prime ≈ {alerts.euros(risque_eur)})")
+        md.append(f"- Mise ≈ {par_point:.2f} € par point, soit une prime d'environ {risque_eur:.0f} €")
+        lignes_tg.append("\n".join(txt))
+        lignes_md.append("\n".join(md))
+    entete = (f"# Day trading en barrières IG : plan pour la séance suivant le {seance:%d/%m/%Y}\n\n"
+              "Un seul côté par indice : le premier niveau touché. Knock-out = stop. Si ni le stop ni l'objectif "
+              "n'est touché, fermer avant la clôture de la séance.\n\n"
+              + ("" if dt.get("actif") else "**En test : aucun message Telegram tant que le backtest n'est pas positif.**\n\n"))
+    (out / "daytrading.md").write_text(entete + ("\n\n".join(lignes_md) or "Aucun indice ne passe le filtre ce soir.") + "\n",
+                                       encoding="utf-8")
+    if dt.get("actif") and lignes_tg:
+        msg = ["⚡ <b>Day trading · barrières IG</b>", "Un seul côté par indice, fermer avant la clôture", ""]
+        if alerts.send_telegram(["\n".join(msg) + "\n\n".join(lignes_tg)]):
+            print("Plan de day trading envoyé.")
 
 
 def cmd_speculation(cfg, out, data, noms, seance, regime) -> None:
@@ -146,6 +194,7 @@ def cmd_backtest(cfg: dict, out: Path, period: str) -> None:
           f"Stop ramené au prix d'entrée à +{breakeven_r} R : {'oui' if breakeven_r else 'non'}.\n\n"
           + table(regime, breakeven_r)
           + "\n## Sans protections (pour comparaison)\n\n" + table(None, None)
+          + "\n" + section_daytrading(cfg, data)
           + "\n" + pareto(data, noms, indices, regime, breakeven_r, frais, cfg["capital"].get("ratio_min", 0.0))
           + "\nRésultats passés : aucune garantie pour l'avenir.\n")
     out.mkdir(parents=True, exist_ok=True)
@@ -192,6 +241,37 @@ def section_detention(data, ref, risque) -> str:
     for nom, m in lignes:
         md.append(f"| {nom} | {m['rendement_annuel_pct']:+} % | {m['rendement_total_pct']:+} % | "
                   f"{m['drawdown_max_pct']} % | {m['drawdown_duree_mois']} mois |")
+    return "\n".join(md) + "\n"
+
+
+def section_daytrading(cfg, data) -> str:
+    """Backtest du day trading en barrières sur les indices, plusieurs variantes."""
+    dt = cfg.get("daytrading")
+    indices = [s for s in cfg.get("indices", {}) if s in data]
+    if not dt or not indices:
+        return ""
+    frais = cfg["capital"]["frais_bps"]
+    md = ["## Day trading en barrières IG (indices, cassure du plus haut ou du plus bas de la veille)\n",
+          "Un trade par jour au plus, clôture en fin de séance. Si le stop et l'objectif sont touchés le même jour, "
+          "le stop est compté (hypothèse prudente).\n",
+          "| Filtre de la veille | Sens | Knock-out | Trades | Réussite | Espérance par trade | Profit factor | Total |",
+          "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+    for filtre in ("tous", "nr4", "inside"):
+        for tendance in ("deux_sens", "tendance"):
+            for k in (0.5, 1.0):
+                rs = [r for s in indices for r in daytrading.backtest(data[s], filtre, tendance, k, ratio=dt.get("ratio", 3.0),
+                                                                        frais_bps=frais)]
+                m = daytrading.resume(rs)
+                if m["trades"]:
+                    actuel = " ⬅" if (filtre, tendance, k) == (dt.get("filtre"), dt.get("tendance"), dt.get("k_stop")) else ""
+                    md.append(f"| {filtre}{actuel} | {tendance} | {k} ATR | {m['trades']} | {m['reussite_pct']} % | "
+                              f"{m['esperance_r']:+} R | {m['profit_factor']} | {m['r_total']:+} R |")
+    md += ["\nPar indice (réglage actuel ⬅) :\n", "| Indice | Trades | Espérance par trade | Total |", "| --- | --- | --- | --- |"]
+    for s in indices:
+        m = daytrading.resume(daytrading.backtest(data[s], dt.get("filtre", "tous"), dt.get("tendance", "deux_sens"),
+                                                  dt.get("k_stop", 0.5), ratio=dt.get("ratio", 3.0), frais_bps=frais))
+        if m["trades"]:
+            md.append(f"| {cfg['indices'][s]} | {m['trades']} | {m['esperance_r']:+} R | {m['r_total']:+} R |")
     return "\n".join(md) + "\n"
 
 

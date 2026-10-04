@@ -225,3 +225,18 @@ def test_speculation():
         assert garde in speculation.selection(t, [garde], 3)
     courbe = speculation.rotation(data, sp, 3, 126)
     assert len(courbe) == 400 and courbe.iloc[0] == 1.0 and (courbe > 0).all()
+
+
+def test_daytrading():
+    from tradeperso import daytrading
+    n = daytrading.niveaux(110, 100, 10)
+    assert (n.achat, n.achat_ko, n.achat_objectif) == (111, 106, 126) and (n.vente, n.vente_ko, n.vente_objectif) == (99, 104, 84)
+    idx = pd.bdate_range("2020-01-01", periods=30)
+    df = pd.DataFrame({"Open": 100.0, "High": 101.0, "Low": 99.0, "Close": 100.0}, index=idx)
+    # Dernier jour : cassure du plus haut puis montée jusqu'à l'objectif (+3 R hors frais).
+    df.iloc[-1] = [100.5, 110.0, 100.4, 109.0]
+    rs = daytrading.backtest(df, frais_bps=0)
+    assert round(rs[-1], 6) == 3.0
+    # Cassure puis retour sous le knock-out : -1 R.
+    df.iloc[-1] = [100.5, 101.5, 99.5, 100.0]
+    assert round(daytrading.backtest(df, frais_bps=0)[-1], 6) == -1.0

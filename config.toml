@@ -21,6 +21,14 @@ nombre = 5               # nombre d'actions détenues
 jours = 126              # force relative mesurée sur 6 mois de bourse
 filtre_marche = true     # tout vendre quand le S&P 500 passe sous sa moyenne 200 jours
 
+# Day trading sur indices en options barrières IG (plan envoyé le soir pour la séance suivante)
+[daytrading]
+actif = false            # passe à true seulement si le backtest est positif
+filtre = "nr4"           # "tous", "nr4" (veille la plus étroite des 4 dernières) ou "inside" (veille comprise dans l'avant-veille)
+tendance = "deux_sens"   # "deux_sens" ou "tendance" (seulement dans le sens de la moyenne 20 jours)
+k_stop = 0.5             # knock-out à 0,5 ATR du point d'entrée
+ratio = 3.0              # objectif à 3 fois le risque
+
 # Grands indices mondiaux (symboles Yahoo Finance) : achat et vente à découvert
 [indices]
 "^GSPC" = "S&P 500"
