@@ -22,7 +22,7 @@ stop_a_l_entree_apres_r = 1.0   # stop ramené au prix d'entrée dès que le gai
 "^FTSE" = "FTSE 100"
 "^FCHI" = "CAC 40"
 
-# 50 actions US surveillées (grosses capitalisations), achat uniquement
+# 51 actions US surveillées (grosses capitalisations), achat uniquement
 [actions_us]
 AAPL = "Apple"
 MSFT = "Microsoft"
@@ -74,6 +74,7 @@ PM = "Philip Morris"
 GS = "Goldman Sachs"
 MS = "Morgan Stanley"
 UBER = "Uber"
+SPCX = "SpaceX"          # en bourse depuis le 12/06/2026 : pas de signal avant ~200 séances d'historique
 
 # --- Exécution sur IG et eToro --------------------------------------------------------------
 # Sources (consultées le 03/10/2026) :

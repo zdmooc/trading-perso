@@ -1,6 +1,6 @@
 # Trading perso : scanner de signaux swing
 
-Scanner personnel qui cherche chaque soir des opportunités swing sur **6 grands indices** (S&P 500, Nasdaq 100, DAX 40, Nikkei 225, FTSE 100, CAC 40), à l'achat comme à la vente, et sur **50 grandes actions US** (achat seulement), avec entrée, stop, objectif et taille de position. Phase 1 (MVP) : **simulation uniquement, aucun ordre n'est passé**.
+Scanner personnel qui cherche chaque soir des opportunités swing sur **6 grands indices** (S&P 500, Nasdaq 100, DAX 40, Nikkei 225, FTSE 100, CAC 40), à l'achat comme à la vente, et sur **51 grandes actions US** (achat seulement, dont SpaceX depuis son entrée en bourse), avec entrée, stop, objectif et taille de position. Phase 1 (MVP) : **simulation uniquement, aucun ordre n'est passé**.
 
 > **Avertissement.** Un signal n'est qu'une probabilité, jamais une garantie de gain. Les résultats passés ne préjugent pas des résultats futurs. Outil personnel, pas un conseil en investissement.
 
