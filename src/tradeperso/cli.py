@@ -512,9 +512,36 @@ def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
     alerts.send_telegram([texte])
 
 
+RECHERCHES_IG = ["Germany 40", "France 40", "US 500", "US Tech 100", "FTSE 100", "Japan 225",
+                 "Caterpillar", "Texas Instruments", "Cisco"]
+
+
+def cmd_ig_test(out: Path) -> None:
+    from .ig import IG
+    ig = IG()
+    session = ig.connexion()
+    lignes = ["# Test de connexion IG démo", ""]
+    for c in ig.comptes():
+        s = c.get("balance") or {}
+        lignes.append(f"- Compte {c.get('accountType')} ({c.get('currency')}) : solde {s.get('balance')}, "
+                      f"disponible {s.get('available')}{' (par défaut)' if c.get('preferred') else ''}")
+    lignes += ["", f"Compte actif : type {session.get('accountType', '?')}", "",
+               "| Recherche | EPIC | Nom | Type | Échéance | Statut |", "| --- | --- | --- | --- | --- | --- |"]
+    for terme in RECHERCHES_IG:
+        for m in ig.chercher(terme)[:4]:
+            lignes.append(f"| {terme} | `{m.get('epic')}` | {m.get('instrumentName')} | {m.get('instrumentType')} | "
+                          f"{m.get('expiry')} | {m.get('marketStatus')} |")
+    texte = "\n".join(lignes) + "\n"
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "ig_test.md").write_text(texte, encoding="utf-8")
+    print(texte)
+    n = len(ig.positions())
+    alerts.send_telegram([f"🔌 <b>IG démo connecté</b>\nComptes trouvés : {len(ig.comptes())}\nPositions ouvertes : {n}"])
+
+
 def main() -> None:
     p = argparse.ArgumentParser(prog="tradeperso")
-    p.add_argument("commande", choices=["scan", "backtest", "matin"])
+    p.add_argument("commande", choices=["scan", "backtest", "matin", "ig-test"])
     p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan"])
     p.add_argument("--cron", default="", help="horaire de la tâche GitHub (pour --phase auto)")
     p.add_argument("--config", default="config.toml")
@@ -522,6 +549,9 @@ def main() -> None:
     p.add_argument("--period", default="10y", help="historique du backtest (ex. 5y, 10y, max)")
     a = p.parse_args()
     cfg = load_config(a.config)
+    if a.commande == "ig-test":
+        cmd_ig_test(Path(a.out))
+        return
     if a.commande == "matin":
         phase = a.phase if a.phase != "auto" else (phase_du_cron(a.cron) if a.cron else None)
         if phase is None:
