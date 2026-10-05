@@ -13,14 +13,14 @@ from . import alerts, matin
 PANIER = {
     "Indices": ["Germany 40", "France 40", "EU Stocks 50", "FTSE 100", "US 500", "US Tech 100", "Wall Street",
                 "Japan 225"],
-    "Matières premières": ["Spot Gold", "Silver", "Brent Crude", "US Crude", "Natural Gas", "Copper"],
-    "Cryptos": ["Bitcoin", "Ether", "Solana", "Ripple"],
+    "Matières premières": ["Spot Gold", "Silver", "Brent", "US Crude", "Natural Gas", "Copper"],
+    "Cryptos": ["Bitcoin", "Ethereum", "Solana", "XRP"],
 }
 COLONNES = ["horodatage", "categorie", "nom", "epic", "vente", "achat", "spread", "var_pct", "plus_haut", "plus_bas",
             "statut"]
 
 
-TYPES = {"Indices": {"INDICES"}, "Matières premières": {"COMMODITIES"}, "Cryptos": {"CURRENCIES", "CRYPTOCURRENCIES"}}
+TYPES = {"Indices": {"INDICES"}, "Matières premières": {"COMMODITIES", "CURRENCIES"}, "Cryptos": {"CURRENCIES", "CRYPTOCURRENCIES"}}
 PAUSE = 2.5  # secondes entre deux appels : l'API démo limite le nombre de requêtes par minute
 
 
