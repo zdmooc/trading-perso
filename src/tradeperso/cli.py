@@ -400,6 +400,8 @@ def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
     if phase == "matin":
         nuit = matin.telecharger(matin.NUIT, "5d", "1d")
         jours = matin.telecharger(matin.EUROPE, "3mo", "1d")
+        # lancé après 9h, Yahoo ajoute la séance du jour en cours : on ne garde que la veille
+        jours = {s: d[d.index.date < aujourd_hui.date()] for s, d in jours.items()}
         heures = matin.telecharger(matin.EUROPE, "730d", "1h")
         lignes = [f"☀️ <b>Plan Europe · {alerts.date_courte(aujourd_hui)}</b>", ""]
         nuit_txt = []
