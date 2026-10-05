@@ -436,7 +436,7 @@ def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
             pv = matin.pivots(d)
             m = matin.resume(matin.backtest(heures[s], stop_mode, ratio)) if s in heures else {"trades": 0}
             verdict = (f"{_sig(m['esperance_r'], 2)} R par trade sur {m['trades']} jours "
-                       f"{'✅' if m['esperance_r'] > 0 else '⚠️ négatif, démo seulement'}") if m["trades"] else "pas de test"
+                       f"{'✅' if m['esperance_r'] >= 0.05 else ('⚠️ nul, démo seulement' if m['esperance_r'] > -0.05 else '⚠️ négatif, démo seulement')}") if m["trades"] else "pas de test"
             lignes += [f"<b>{nom}</b> : veille {_sig(matin.variation(d))} %, amplitude attendue ≈ {alerts.nombre(a, 0)} pts "
                        f"({alerts.nombre(100 * a / float(d['Close'].iloc[-1]), 1)} %)",
                        f"Repères : haut veille {alerts.nombre(pv['haut'], 0)} · bas veille {alerts.nombre(pv['bas'], 0)} · "
