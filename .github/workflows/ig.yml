@@ -1,7 +1,12 @@
 name: ig-demo
-# Connexion au compte IG démo (test, sans ordre).
+# Compte IG démo en lecture seule : aucun ordre n'est jamais passé.
 on:
   workflow_dispatch:
+    inputs:
+      commande:
+        type: choice
+        options: [ig-marches, ig-test]
+        default: ig-marches
 permissions:
   contents: write
 concurrency:
@@ -16,7 +21,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e .
-      - name: Test IG démo
+      - name: Lecture IG démo
         env:
           IG_API_KEY: ${{ secrets.IG_API_KEY }}
           IG_USERNAME: ${{ secrets.IG_USERNAME }}
@@ -25,13 +30,13 @@ jobs:
           IG_ACCOUNT_ID: Z4UJIM
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: tradeperso ig-test
+        run: tradeperso ${{ inputs.commande || 'ig-marches' }}
       - name: Publier
         run: |
           git config user.name "scan-bot"
           git config user.email "scan-bot@users.noreply.github.com"
           git add reports
           git diff --cached --quiet && exit 0
-          git commit -m "Test IG démo du $(date -u +%F)"
+          git commit -m "IG démo du $(date -u +%F)"
           git pull -q --rebase origin main
           git push

@@ -539,9 +539,60 @@ def cmd_ig_test(out: Path) -> None:
     alerts.send_telegram([f"🔌 <b>IG démo connecté</b>\nComptes trouvés : {len(ig.comptes())}\nPositions ouvertes : {n}"])
 
 
+INDICES_IG = ["Germany 40", "France 40", "EU Stocks 50", "FTSE 100", "US 500", "US Tech 100", "Wall Street", "Japan 225"]
+
+
+def _epic_mini(ig, terme: str) -> dict | None:
+    """Contrat au comptant le plus petit (1 € de préférence) pour un indice."""
+    comptant = [m for m in ig.chercher(terme) if m.get("instrumentType") == "INDICES" and m.get("expiry") == "-"]
+    for m in comptant:
+        if "(1€)" in (m.get("instrumentName") or ""):
+            return m
+    return comptant[-1] if comptant else None
+
+
+def cmd_ig_marches(out: Path) -> None:
+    """Lecture seule : cours et fiches produits IG des grands indices. Aucun ordre."""
+    from .ig import IG
+    ig = IG()
+    ig.connexion()
+    lignes = ["# Grands indices sur IG (démo, lecture seule)", "",
+              f"Relevé du {pd.Timestamp.now(tz=matin.PARIS):%d/%m/%Y à %Hh%M} (Paris).", "",
+              "| Indice | Produit | Achat | Vente | Spread | Var. jour | Plus haut | Plus bas | Statut |",
+              "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+    fiches, alerte = [], []
+    for terme in INDICES_IG:
+        m = _epic_mini(ig, terme)
+        if not m:
+            lignes.append(f"| {terme} | introuvable | | | | | | | |")
+            continue
+        d = ig.marche(m["epic"])
+        sn, ins, rg = d.get("snapshot", {}), d.get("instrument", {}), d.get("dealingRules", {})
+        achat, vente = sn.get("offer"), sn.get("bid")
+        spread = round(achat - vente, 2) if achat and vente else None
+        var = sn.get("percentageChange")
+        lignes.append(f"| {terme} | {ins.get('name')} | {achat} | {vente} | {spread} | {var} % | "
+                      f"{sn.get('high')} | {sn.get('low')} | {sn.get('marketStatus')} |")
+        taille = (rg.get("minDealSize") or {}).get("value")
+        stop = (rg.get("minNormalStopOrLimitDistance") or {}).get("value")
+        marge = ins.get("marginFactor")
+        heures = ", ".join(f"{h.get('openTime')}-{h.get('closeTime')}"
+                           for h in ((ins.get("openingHours") or {}).get("marketTimes") or []))
+        fiches.append(f"- **{terme}** `{m['epic']}` : 1 point = {ins.get('valueOfOnePip')} {ins.get('currencies', [{}])[0].get('code', '')}, "
+                      f"taille min {taille}, stop min {stop} pts, marge {marge} %, heures {heures or '?'}")
+        if var is not None:
+            alerte.append(f"{terme} {'🟢' if var >= 0 else '🔴'} {var:+.1f} % (spread {spread})")
+    lignes += ["", "## Fiches produits", "", *fiches]
+    texte = "\n".join(lignes) + "\n"
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "ig_marches.md").write_text(texte, encoding="utf-8")
+    print(texte)
+    alerts.send_telegram(["📡 <b>Indices IG</b>\n\n" + "\n".join(alerte)])
+
+
 def main() -> None:
     p = argparse.ArgumentParser(prog="tradeperso")
-    p.add_argument("commande", choices=["scan", "backtest", "matin", "ig-test"])
+    p.add_argument("commande", choices=["scan", "backtest", "matin", "ig-test", "ig-marches"])
     p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan"])
     p.add_argument("--cron", default="", help="horaire de la tâche GitHub (pour --phase auto)")
     p.add_argument("--config", default="config.toml")
@@ -549,6 +600,9 @@ def main() -> None:
     p.add_argument("--period", default="10y", help="historique du backtest (ex. 5y, 10y, max)")
     a = p.parse_args()
     cfg = load_config(a.config)
+    if a.commande == "ig-marches":
+        cmd_ig_marches(Path(a.out))
+        return
     if a.commande == "ig-test":
         cmd_ig_test(Path(a.out))
         return
