@@ -13,17 +13,21 @@ from . import alerts, matin
 PANIER = {
     "Indices": ["Germany 40", "France 40", "EU Stocks 50", "FTSE 100", "US 500", "US Tech 100", "Wall Street",
                 "Japan 225"],
-    "Matières premières": ["Spot Gold", "Spot Silver", "Oil - Brent Crude", "Oil - US Crude", "Natural Gas",
-                           "High Grade Copper"],
+    "Matières premières": ["Spot Gold", "Silver", "Brent Crude", "US Crude", "Natural Gas", "Copper"],
     "Cryptos": ["Bitcoin", "Ether", "Solana", "Ripple"],
 }
 COLONNES = ["horodatage", "categorie", "nom", "epic", "vente", "achat", "spread", "var_pct", "plus_haut", "plus_bas",
             "statut"]
 
 
-def _choisir(marches: list[dict]) -> dict | None:
-    """Produit au comptant (sans échéance), le plus petit contrat (1 €) de préférence."""
-    comptant = [m for m in marches if m.get("expiry") in ("-", None, "DFB")]
+TYPES = {"Indices": {"INDICES"}, "Matières premières": {"COMMODITIES"}, "Cryptos": {"CURRENCIES", "CRYPTOCURRENCIES"}}
+PAUSE = 2.5  # secondes entre deux appels : l'API démo limite le nombre de requêtes par minute
+
+
+def _choisir(marches: list[dict], categorie: str) -> dict | None:
+    """Produit au comptant (sans échéance) du bon type, le plus petit contrat (1 €) de préférence."""
+    comptant = [m for m in marches if m.get("expiry") in ("-", None, "DFB")
+                and m.get("instrumentType") in TYPES[categorie]]
     if not comptant:
         return None
     for m in comptant:
@@ -32,16 +36,23 @@ def _choisir(marches: list[dict]) -> dict | None:
     return comptant[0]
 
 
+NON_TROUVES: list[str] = []
+
+
 def _epics(ig, cache: Path) -> dict[str, str]:
     """Codes IG mémorisés dans le dépôt : on ne recherche que ceux qui manquent."""
     connus = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
-    for termes in PANIER.values():
+    for categorie, termes in PANIER.items():
         for terme in termes:
             if terme not in connus:
-                m = _choisir(ig.chercher(terme))
-                time.sleep(1)
+                resultats = ig.chercher(terme)
+                m = _choisir(resultats, categorie)
+                time.sleep(PAUSE)
                 if m:
                     connus[terme] = m["epic"]
+                else:
+                    NON_TROUVES.append(f"- {terme} : " + ", ".join(
+                        f"`{r.get('epic')}` {r.get('instrumentType')} {r.get('expiry')}" for r in resultats[:5]))
     cache.parent.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps(connus, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return connus
@@ -68,9 +79,9 @@ def releve(out: Path, telegram: bool = True) -> None:
             try:
                 d = ig.marche(epic)
             except RuntimeError as e:
-                lignes.append(f"| {terme} | erreur {str(e)[:60]} | | | | | | | |")
+                lignes.append(f"| {terme} | erreur {str(e)[-90:]} | | | | | | | |")
                 continue
-            time.sleep(1)
+            time.sleep(PAUSE)
             sn, ins, rg = d.get("snapshot", {}), d.get("instrument", {}), d.get("dealingRules", {})
             vente, achat, var = sn.get("bid"), sn.get("offer"), sn.get("percentageChange")
             spread = round(achat - vente, 4) if achat and vente else None
@@ -87,6 +98,8 @@ def releve(out: Path, telegram: bool = True) -> None:
                 resume.append(f"{'🟢' if var >= 0 else '🔴'} {terme} {var:+.1f} %")
         lignes.append("")
     lignes += ["## Fiches produits", "", *fiches]
+    if NON_TROUVES:
+        lignes += ["", "## Recherches sans produit retenu", "", *NON_TROUVES]
     texte = "\n".join(lignes) + "\n"
     (out / "ig_marches.md").write_text(texte, encoding="utf-8")
     # Historique : un fichier CSV par mois, une ligne par marché et par relevé.

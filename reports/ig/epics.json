@@ -1,17 +1,12 @@
 {
  "Germany 40": "IX.D.DAX.IFMM.IP",
  "France 40": "IX.D.CAC.IMF.IP",
- "EU Stocks 50": "IX.D.STXE.IFD.IP",
+ "EU Stocks 50": "IX.D.STXE.IFM.IP",
  "FTSE 100": "IX.D.FTSE.IFE.IP",
  "US 500": "IX.D.SPTRD.IFE.IP",
  "US Tech 100": "IX.D.NASDAQ.IFE.IP",
  "Wall Street": "IX.D.DOW.IFE.IP",
- "Japan 225": "IX.D.NIKKEI.IFD.IP",
+ "Japan 225": "IX.D.NIKKEI.IFM.IP",
  "Spot Gold": "CS.D.CFEGOLD.CEF.IP",
- "Oil - Brent Crude": "KA.D.3BSRLN.CASH.IP",
- "Oil - US Crude": "CC.D.CL.UME.IP",
- "Natural Gas": "KA.D.NGAFLN.CASH.IP",
- "Bitcoin": "CS.D.BITCOIN.CEFM.IP",
- "Ether": "KC.D.ENETLN.CASH.IP",
- "Solana": "UB.D.HSDTUS.CASH.IP"
+ "Bitcoin": "CS.D.BITCOIN.CEFM.IP"
 }
