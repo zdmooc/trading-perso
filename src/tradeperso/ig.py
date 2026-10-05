@@ -28,13 +28,25 @@ class IG:
         return r.json() if r.content else {}
 
     def connexion(self) -> dict:
-        r = self.client.post(self.base + "/session", headers={**self.entetes, "Version": "2"},
-                             json={"identifier": self._login[0], "password": self._login[1]})
+        corps = {"identifier": self._login[0], "password": self._login[1]}
+        r = self.client.post(self.base + "/session", headers={**self.entetes, "Version": "2"}, json=corps)
+        if r.status_code == 403 and "stockbroking" in r.text:
+            # Session v2 refusée si le compte par défaut est un compte actions : on tente la v3 (OAuth).
+            r = self.client.post(self.base + "/session", headers={**self.entetes, "Version": "3"}, json=corps)
+            if r.status_code < 400:
+                d = r.json()
+                self.entetes["Authorization"] = "Bearer " + d["oauthToken"]["access_token"]
+                self.entetes["IG-ACCOUNT-ID"] = os.environ.get("IG_ACCOUNT_ID") or d["accountId"]
+                return d
         if r.status_code >= 400:
             raise RuntimeError(f"Connexion IG refusée : {r.status_code} {r.text[:200]}")
         self.entetes["CST"] = r.headers["CST"]
         self.entetes["X-SECURITY-TOKEN"] = r.headers["X-SECURITY-TOKEN"]
-        return r.json()
+        compte = os.environ.get("IG_ACCOUNT_ID")
+        d = r.json()
+        if compte and compte != d.get("currentAccountId"):
+            self._req("PUT", "/session", json={"accountId": compte, "defaultAccount": False})
+        return d
 
     def comptes(self) -> list[dict]:
         return self._req("GET", "/accounts")["accounts"]
