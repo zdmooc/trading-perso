@@ -96,10 +96,10 @@ def plan_daytrading(cfg, out, data, seance, fx) -> None:
         txt = [f"<b>{nom}</b> (IG « {inst.get('ig', nom)} »), ouverture {alerts.date_courte(h)} à {h:%Hh%M}"]
         md = [f"### {nom}\n"]
         if acheter:
-            txt.append(f"🟢 Achat si > {alerts.nombre(n.achat)} · knock-out {alerts.nombre(n.achat_ko)} · objectif {alerts.nombre(n.achat_objectif)}")
+            txt.append(f"🟢 Achat au-dessus de {alerts.nombre(n.achat)} · knock-out {alerts.nombre(n.achat_ko)} · objectif {alerts.nombre(n.achat_objectif)}")
             md.append(f"- Achat si le cours dépasse {n.achat:.2f} : knock-out {n.achat_ko:.2f}, objectif {n.achat_objectif:.2f}")
         if vendre:
-            txt.append(f"🔴 Vente si < {alerts.nombre(n.vente)} · knock-out {alerts.nombre(n.vente_ko)} · objectif {alerts.nombre(n.vente_objectif)}")
+            txt.append(f"🔴 Vente sous {alerts.nombre(n.vente)} · knock-out {alerts.nombre(n.vente_ko)} · objectif {alerts.nombre(n.vente_objectif)}")
             md.append(f"- Vente si le cours passe sous {n.vente:.2f} : knock-out {n.vente_ko:.2f}, objectif {n.vente_objectif:.2f}")
         txt.append(f"Mise ≈ {alerts.nombre(par_point, 2)} € €/point (prime ≈ {alerts.euros(risque_eur)})")
         md.append(f"- Mise ≈ {par_point:.2f} € par point, soit une prime d'environ {risque_eur:.0f} €")
@@ -477,8 +477,8 @@ def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
             ra, rv = haut - ko_a, ko_v - bas
             lignes_tg += [f"<b>{nom}</b> : 1re heure {alerts.nombre(bas, 0)} – {alerts.nombre(haut, 0)}, "
                           f"cours {alerts.nombre(float(df['Close'].iloc[-1]), 0)}",
-                          f"🟢 Achat si > {alerts.nombre(haut, 0)} · knock-out {alerts.nombre(ko_a, 0)} · objectif {alerts.nombre(haut + ratio * ra, 0)}",
-                          f"🔴 Vente si < {alerts.nombre(bas, 0)} · knock-out {alerts.nombre(ko_v, 0)} · objectif {alerts.nombre(bas - ratio * rv, 0)}",
+                          f"🟢 Achat au-dessus de {alerts.nombre(haut, 0)} · knock-out {alerts.nombre(ko_a, 0)} · objectif {alerts.nombre(haut + ratio * ra, 0)}",
+                          f"🔴 Vente sous {alerts.nombre(bas, 0)} · knock-out {alerts.nombre(ko_v, 0)} · objectif {alerts.nombre(bas - ratio * rv, 0)}",
                           f"Mise ≈ {alerts.nombre(risque_eur / max(ra, 1e-9), 2)} €/point (prime ≈ {alerts.euros(risque_eur)})", ""]
         else:
             j = matin.jouer(h1, stop_mode, ratio)
