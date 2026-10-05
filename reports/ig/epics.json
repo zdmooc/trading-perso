@@ -8,5 +8,7 @@
  "Wall Street": "IX.D.DOW.IFE.IP",
  "Japan 225": "IX.D.NIKKEI.IFM.IP",
  "Spot Gold": "CS.D.CFEGOLD.CEF.IP",
- "Bitcoin": "CS.D.BITCOIN.CEFM.IP"
+ "Bitcoin": "CS.D.BITCOIN.CEFM.IP",
+ "US Crude": "CC.D.CL.UME.IP",
+ "Natural Gas": "CC.D.NG.UNC.IP"
 }
