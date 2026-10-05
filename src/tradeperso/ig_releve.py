@@ -13,8 +13,8 @@ from . import alerts, matin
 PANIER = {
     "Indices": ["Germany 40", "France 40", "EU Stocks 50", "FTSE 100", "US 500", "US Tech 100", "Wall Street",
                 "Japan 225"],
-    "Matières premières": ["Spot Gold", "Silver", "Brent", "US Crude", "Natural Gas", "Copper"],
-    "Cryptos": ["Bitcoin", "Ethereum", "Solana", "XRP"],
+    "Matières premières": ["Spot Gold", "Silver", "US Crude", "Natural Gas", "Copper"],
+    "Cryptos": ["Bitcoin"],  # Ethereum, Solana, XRP : seulement en barrières sur ce compte
 }
 COLONNES = ["horodatage", "categorie", "nom", "epic", "vente", "achat", "spread", "var_pct", "plus_haut", "plus_bas",
             "statut"]

@@ -12,6 +12,5 @@
  "US Crude": "CC.D.CL.UME.IP",
  "Natural Gas": "CC.D.NG.UNC.IP",
  "Silver": "CS.D.CFDSILVER.CFM.IP",
- "Copper": "CS.D.COPPER.MINI.IP",
- "Brent": "CC.D.LCO.UME.IP"
+ "Copper": "CS.D.COPPER.MINI.IP"
 }
