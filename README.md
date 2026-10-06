@@ -93,3 +93,8 @@ Workflow `plan-europe`, chaque jour de semaine, heure de Paris :
 - **17h45** : bilan rejoué de la journée, succès ou échec, cumul dans `reports/matin_journal.csv`.
 
 Simulation et entraînement : la règle de la 1re heure est mesurée dans le rapport du matin, à n'utiliser en réel que si elle est positive. Données Yahoo parfois en retard de 15 min, et GitHub peut lancer la tâche avec 15 à 30 min de retard.
+
+## Nasdaq 100 : analyse, zones d'achat et suivi du soir
+
+Voir [docs/analyse_nasdaq.md](docs/analyse_nasdaq.md). Chaque soir, le graphe est régénéré, archivé dans
+`reports/graphes/` et les zones d'achat (`config.toml`, section `zones`) sont vérifiées (`reports/zones_NDX.csv`).

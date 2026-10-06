@@ -195,3 +195,14 @@ ig_valeur_point = 1.0
 ig_spread_points = 1.0
 etoro = "FRA40"
 etoro_spread_pct = 0.01
+
+# Zones d'achat sur repli (analyse du 06/10/2026, voir docs/analyse_nasdaq.md).
+# Vérifiées chaque soir par scripts/graphe.py : touchée, confirmée (bougie haussière dans la zone) ou cassée.
+[zones."^NDX"]
+invalidation = 28100
+liste = [
+  { nom = "Zone 1", achat = 30700, stop = 30200, objectif = 32200 },
+  { nom = "Zone 2 (meilleure)", achat = 29950, stop = 29400, objectif = 31600 },
+  { nom = "Zone 3", achat = 29500, stop = 28950, objectif = 31150 },
+  { nom = "Zone 4", achat = 28750, stop = 28100, objectif = 30700 },
+]

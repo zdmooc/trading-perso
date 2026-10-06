@@ -5,6 +5,11 @@ on:
     - cron: "30 22 * * 1-5"
     - cron: "0 8 * * 0"
   workflow_dispatch:
+    inputs:
+      backtest:
+        description: "lancer aussi le backtest"
+        type: boolean
+        default: false
 permissions:
   contents: write
 jobs:
@@ -15,19 +20,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -e .
+      - run: pip install -e . matplotlib
       - name: Scan des signaux
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: tradeperso scan
       - name: Backtest hebdomadaire
-        if: github.event.schedule == '0 8 * * 0' || github.event_name == 'workflow_dispatch'
+        if: github.event.schedule == '0 8 * * 0' || format('{0}', inputs.backtest) == 'true'
         run: tradeperso backtest --period 10y
+      - name: Graphe et vérification des zones du soir
+        if: github.event.schedule != '0 8 * * 0'
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/graphe.py ^NDX
       - name: Publier les rapports
         run: |
           git config user.name "scan-bot"
           git config user.email "scan-bot@users.noreply.github.com"
           git add reports
-          git diff --cached --quiet || git commit -m "Rapports du $(date -u +%F)"
-          git push
+          git diff --cached --quiet && exit 0
+          git commit -m "Rapports du $(date -u +%F)"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push && break; sleep 5; done
