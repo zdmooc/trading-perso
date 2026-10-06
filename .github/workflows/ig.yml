@@ -19,7 +19,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: rapports
+  group: releve-ig
   cancel-in-progress: false
 jobs:
   ig:
@@ -47,5 +47,4 @@ jobs:
           git add reports
           git diff --cached --quiet && exit 0
           git commit -m "Relevé IG du $(date -u '+%F %H:%M') UTC"
-          git pull -q --rebase origin main
-          git push
+          for i in 1 2 3; do git pull -q --rebase origin main && git push && break; sleep 5; done
