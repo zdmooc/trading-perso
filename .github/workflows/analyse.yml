@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       outil:
-        description: "analyse_europe ou divergence"
+        description: "analyse_europe, divergence ou fin_annee"
         default: analyse_europe
       symbole:
         description: "pour divergence (ex. ^NDX, ^GSPC, ^GDAXI)"
@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e . tabulate
-      - run: python scripts/${{ inputs.outil || 'analyse_europe' }}.py ${{ inputs.outil == 'divergence' && inputs.symbole || '' }}
+      - run: python scripts/${{ inputs.outil || 'analyse_europe' }}.py ${{ inputs.outil != 'analyse_europe' && inputs.symbole || '' }}
       - name: Publier
         run: |
           git config user.name "scan-bot"
