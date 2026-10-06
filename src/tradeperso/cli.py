@@ -390,6 +390,15 @@ def _sig(x: float, dec: int = 1) -> str:
     return ("+" if x >= 0 else "−") + alerts.nombre(abs(x), dec)
 
 
+def _pct_pts(pct: float, ecart: float) -> str:
+    """Variation en % suivie de son équivalent en points (ex. « +0,2 % = +62 pts »)."""
+    return f"{_sig(pct)} % = {_sig(ecart, 0)} pts"
+
+
+def _ecart(df: pd.DataFrame) -> float:
+    return float(df["Close"].iloc[-1] - df["Close"].iloc[-2]) if len(df) >= 2 else float("nan")
+
+
 def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
     mc = cfg.get("matin", {})
     stop_mode, ratio = mc.get("stop", "milieu"), mc.get("ratio", 3.0)
@@ -408,7 +417,9 @@ def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
         for s, nom in matin.NUIT.items():
             if s in nuit and len(nuit[s]) >= 2:
                 v = matin.variation(nuit[s])
-                nuit_txt.append(f"{nom} {_sig(v)} %" if s != "^VIX" else f"{nom} {alerts.nombre(float(nuit[s]['Close'].iloc[-1]), 1)}")
+                cours = float(nuit[s]["Close"].iloc[-1])
+                nuit_txt.append((f"{nom} {_pct_pts(v, _ecart(nuit[s]))}" if cours > 50 else f"{nom} {_sig(v)} %")
+                                if s != "^VIX" else f"{nom} {alerts.nombre(float(nuit[s]['Close'].iloc[-1]), 1)}")
         lignes += ["🌙 <b>Nuit et veille</b>", " · ".join(nuit_txt), ""]
         profils = [matin.profil_horaire(h) for h in heures.values() if len(h)]
         md_heures = ""
@@ -437,7 +448,7 @@ def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
             m = matin.resume(matin.backtest(heures[s], stop_mode, ratio)) if s in heures else {"trades": 0}
             verdict = (f"{_sig(m['esperance_r'], 2)} R par trade sur {m['trades']} jours "
                        f"{'✅' if m['esperance_r'] >= 0.05 else ('⚠️ nul, démo seulement' if m['esperance_r'] > -0.05 else '⚠️ négatif, démo seulement')}") if m["trades"] else "pas de test"
-            lignes += [f"<b>{nom}</b> : veille {_sig(matin.variation(d))} %, amplitude attendue ≈ {alerts.nombre(a, 0)} pts "
+            lignes += [f"<b>{nom}</b> : veille {_pct_pts(matin.variation(d), _ecart(d))}, amplitude attendue ≈ {alerts.nombre(a, 0)} pts "
                        f"({alerts.nombre(100 * a / float(d['Close'].iloc[-1]), 1)} %)",
                        f"Repères : haut veille {alerts.nombre(pv['haut'], 0)} · bas veille {alerts.nombre(pv['bas'], 0)} · "
                        f"pivot {alerts.nombre(pv['pivot'], 0)}",
@@ -483,12 +494,13 @@ def cmd_matin(cfg: dict, out: Path, phase: str) -> None:
         else:
             j = matin.jouer(h1, stop_mode, ratio)
             var = 100 * (float(df["Close"].iloc[-1]) / float(df["Open"].iloc[0]) - 1)
+            var_pts = float(df["Close"].iloc[-1]) - float(df["Open"].iloc[0])
             if j is None or j.sens == 0:
-                lignes_tg.append(f"⚪ <b>{nom}</b> ({_sig(var)} %) : pas de cassure, pas de trade")
+                lignes_tg.append(f"⚪ <b>{nom}</b> ({_pct_pts(var, var_pts)}) : pas de cassure, pas de trade")
                 journal_lignes.append({"date": f"{aujourd_hui:%Y-%m-%d}", "indice": nom, "sens": 0, "r": 0.0, "motif": "pas de cassure"})
             else:
                 icone = "✅" if j.r > 0.05 else ("❌" if j.r < -0.05 else "⚪")
-                lignes_tg.append(f"{icone} <b>{nom}</b> ({_sig(var)} %) : {'achat' if j.sens > 0 else 'vente'} à "
+                lignes_tg.append(f"{icone} <b>{nom}</b> ({_pct_pts(var, var_pts)}) : {'achat' if j.sens > 0 else 'vente'} à "
                                  f"{alerts.nombre(j.entree, 0)}, sortie {alerts.nombre(j.sortie, 0)} ({j.motif}), {_sig(j.r)} R")
                 journal_lignes.append({"date": f"{aujourd_hui:%Y-%m-%d}", "indice": nom, "sens": j.sens, "r": round(j.r, 2), "motif": j.motif})
     if not lignes_tg:

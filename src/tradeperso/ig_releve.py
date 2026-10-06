@@ -85,7 +85,7 @@ def releve(out: Path, telegram: bool = True) -> None:
             sn, ins, rg = d.get("snapshot", {}), d.get("instrument", {}), d.get("dealingRules", {})
             vente, achat, var = sn.get("bid"), sn.get("offer"), sn.get("percentageChange")
             spread = round(achat - vente, 4) if achat and vente else None
-            lignes.append(f"| {terme} | {ins.get('name')} | {vente} | {achat} | {spread} | {var} % | "
+            lignes.append(f"| {terme} | {ins.get('name')} | {vente} | {achat} | {spread} | {var} % ({sn.get('netChange')} pts) | "
                           f"{sn.get('high')} | {sn.get('low')} | {sn.get('marketStatus')} |")
             rangs.append([f"{maintenant:%Y-%m-%d %H:%M}", categorie, terme, epic, vente, achat, spread, var,
                           sn.get("high"), sn.get("low"), sn.get("marketStatus")])
@@ -95,7 +95,8 @@ def releve(out: Path, telegram: bool = True) -> None:
                           f"stop min {(rg.get('minNormalStopOrLimitDistance') or {}).get('value')}, "
                           f"marge {ins.get('marginFactor')} %")
             if var is not None:
-                resume.append(f"{'🟢' if var >= 0 else '🔴'} {terme} {var:+.1f} %")
+                pts = sn.get("netChange")
+                resume.append(f"{'🟢' if var >= 0 else '🔴'} {terme} {var:+.1f} %" + (f" = {pts:+.0f} pts" if pts is not None else ""))
         lignes.append("")
     lignes += ["## Fiches produits", "", *fiches]
     if NON_TROUVES:
