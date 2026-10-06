@@ -375,14 +375,17 @@ def pareto(data, noms, indices, regime, breakeven_r, frais, ratio_min) -> str:
 
 
 PHASES = {7: "matin", 10: "ouverture", 17: "bilan"}
+RETARD_MAX = 45  # minutes
 
 
 def phase_du_cron(cron: str, maintenant: pd.Timestamp | None = None) -> str | None:
     """Les tâches GitHub sont en heure UTC : chaque phase a deux horaires (été / hiver).
     On ne garde que celui qui tombe à la bonne heure de Paris aujourd'hui."""
     minute, heure = (int(x) for x in cron.split()[:2])
-    jour = (maintenant or pd.Timestamp.now(tz="UTC")).tz_convert("UTC").normalize()
-    prevu = (jour + pd.Timedelta(hours=heure, minutes=minute)).tz_convert(matin.PARIS)
+    maintenant = (maintenant or pd.Timestamp.now(tz="UTC")).tz_convert("UTC")
+    prevu = (maintenant.normalize() + pd.Timedelta(hours=heure, minutes=minute)).tz_convert(matin.PARIS)
+    if maintenant - prevu > pd.Timedelta(minutes=RETARD_MAX):
+        return None  # GitHub lance parfois les tâches planifiées avec des heures de retard : message périmé
     return PHASES.get(prevu.hour)
 
 
@@ -572,7 +575,7 @@ def main() -> None:
     if a.commande == "matin":
         phase = a.phase if a.phase != "auto" else (phase_du_cron(a.cron) if a.cron else None)
         if phase is None:
-            print("Hors horaire (heure d'été ou d'hiver) : rien à faire.")
+            print("Hors horaire (heure d'été ou d'hiver) ou trop en retard : rien à faire.")
             return
         cmd_matin(cfg, Path(a.out), phase)
     elif a.commande == "scan":

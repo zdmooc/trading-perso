@@ -266,3 +266,5 @@ def test_phase_du_cron():
     assert phase_du_cron("0 5 * * 1-5", ete) == "matin" and phase_du_cron("0 6 * * 1-5", ete) is None
     assert phase_du_cron("0 6 * * 1-5", hiver) == "matin" and phase_du_cron("0 5 * * 1-5", hiver) is None
     assert phase_du_cron("5 8 * * 1-5", ete) == "ouverture" and phase_du_cron("45 16 * * 1-5", hiver) == "bilan"
+    assert phase_du_cron("5 8 * * 1-5", pd.Timestamp("2026-10-06 08:30", tz="UTC")) == "ouverture"
+    assert phase_du_cron("5 8 * * 1-5", pd.Timestamp("2026-10-06 13:00", tz="UTC")) is None  # parti trop tard
