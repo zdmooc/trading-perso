@@ -1,0 +1,376 @@
+# Déclencheurs à l'heure exacte (heure de Paris) depuis CRC : chaque CronJob demande à GitHub
+# de lancer un workflow du dépôt zdmooc/trading-perso. Aucun ordre de bourse, aucun accès IG ici.
+# Le jeton GitHub vit dans le secret « github-dispatch » (créé à la main, jamais dans ce fichier).
+apiVersion: v1
+kind: List
+items:
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: plan-7h
+    namespace: trading-perso
+  spec:
+    schedule: "0 7 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/matin.yml/dispatches
+                -d '{"ref":"main","inputs":{"phase":"matin"}}'
+                && echo "matin.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: plan-10h05
+    namespace: trading-perso
+  spec:
+    schedule: "5 10 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/matin.yml/dispatches
+                -d '{"ref":"main","inputs":{"phase":"ouverture"}}'
+                && echo "matin.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: plan-17h45
+    namespace: trading-perso
+  spec:
+    schedule: "45 17 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/matin.yml/dispatches
+                -d '{"ref":"main","inputs":{"phase":"bilan"}}'
+                && echo "matin.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: ig-7h10
+    namespace: trading-perso
+  spec:
+    schedule: "10 7 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/ig.yml/dispatches
+                -d '{"ref":"main","inputs":{"commande":"ig-marches","silencieux":"true"}}'
+                && echo "ig.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: ig-9h20
+    namespace: trading-perso
+  spec:
+    schedule: "20 9 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/ig.yml/dispatches
+                -d '{"ref":"main","inputs":{"commande":"ig-marches","silencieux":"true"}}'
+                && echo "ig.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: ig-12h
+    namespace: trading-perso
+  spec:
+    schedule: "0 12 * * *"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/ig.yml/dispatches
+                -d '{"ref":"main","inputs":{"commande":"ig-marches","silencieux":"true"}}'
+                && echo "ig.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: ig-15h50
+    namespace: trading-perso
+  spec:
+    schedule: "50 15 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/ig.yml/dispatches
+                -d '{"ref":"main","inputs":{"commande":"ig-marches","silencieux":"true"}}'
+                && echo "ig.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: ig-17h55
+    namespace: trading-perso
+  spec:
+    schedule: "55 17 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/ig.yml/dispatches
+                -d '{"ref":"main","inputs":{"commande":"ig-marches","silencieux":"true"}}'
+                && echo "ig.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: ig-22h20
+    namespace: trading-perso
+  spec:
+    schedule: "20 22 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/ig.yml/dispatches
+                -d '{"ref":"main","inputs":{"commande":"ig-marches","silencieux":"true"}}'
+                && echo "ig.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: scan-23h
+    namespace: trading-perso
+  spec:
+    schedule: "0 23 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 600
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+        activeDeadlineSeconds: 120
+        template:
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: declencheur
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              env:
+              - name: GH_TOKEN
+                valueFrom: {secretKeyRef: {name: github-dispatch, key: token}}
+              command: ["sh", "-c"]
+              args:
+              - >-
+                curl -fsS -X POST
+                -H "Authorization: Bearer $GH_TOKEN"
+                -H "Accept: application/vnd.github+json"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/scan.yml/dispatches
+                -d '{"ref":"main","inputs":{}}'
+                && echo "scan.yml lancé"
+              resources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {cpu: 100m, memory: 64Mi}
