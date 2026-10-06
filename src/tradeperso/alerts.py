@@ -124,3 +124,15 @@ def send_telegram(textes: list[str]) -> bool:
                        data={"chat_id": chat, "text": texte[:4000], "parse_mode": "HTML"}, timeout=15)
         r.raise_for_status()
     return True
+
+
+def send_photo(chemin: str, legende: str = "") -> bool:
+    token, chat = os.getenv("TELEGRAM_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
+    if not token or not chat:
+        return False
+    with open(chemin, "rb") as f:
+        r = httpx.post(f"https://api.telegram.org/bot{token}/sendPhoto",
+                       data={"chat_id": chat, "caption": legende[:1000], "parse_mode": "HTML"},
+                       files={"photo": f}, timeout=30)
+    r.raise_for_status()
+    return True
