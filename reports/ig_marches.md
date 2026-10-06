@@ -1,35 +1,35 @@
 # Marchés sur IG (démo, lecture seule)
 
-Relevé du 06/10/2026 à 21h07 (Paris).
+Relevé du 06/10/2026 à 22h36 (Paris).
 
 ## Indices
 
 | Marché | Produit | Vente | Achat | Spread | Var. jour | Plus haut | Plus bas | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Germany 40 | Allemagne 40 au comptant (1€) | 25372.0 | 25375.5 | 3.5 | -0.34 % (-86.1 pts) | 25467.6 | 25367.5 | TRADEABLE |
-| France 40 | France 40 au comptant (1€) | 7831.6 | 7834.1 | 2.5 | -0.47 % (-36.6 pts) | 7872.6 | 7830.4 | TRADEABLE |
-| EU Stocks 50 | EU Stocks 50 au comptant (2€) | 6248.03 | 6249.53 | 1.5 | -0.37 % (-23 pts) | 6276.53 | 6244.03 | TRADEABLE |
-| FTSE 100 | FTSE 100 au comptant (1€) | 10546.9 | 10549.9 | 3.0 | 0.06 % (6 pts) | 10557.8 | 10531.0 | TRADEABLE |
-| US 500 | US 500 au comptant (1€) | 7827.52 | 7828.42 | 0.9 | 0.65 % (50.37 pts) | 7845.2 | 7774.14 | TRADEABLE |
-| US Tech 100 | US Tech 100 au comptant (1€) | 31273.8 | 31275.3 | 1.5 | 0.61 % (189.2 pts) | 31366.9 | 31059.2 | TRADEABLE |
-| Wall Street | Wall Street au comptant (1€) | 51553.1 | 51556.8 | 3.7 | 0.55 % (283.9 pts) | 51674.1 | 51258.7 | TRADEABLE |
-| Japan 225 | Japon 225 au comptant (1$) | 70791.4 | 70798.4 | 7.0 | -0.03 % (-22.9 pts) | 71364.5 | 70607.8 | TRADEABLE |
+| Germany 40 | Allemagne 40 au comptant (1€) | 25353.3 | 25361.4 | 8.1 | -0.4 % (-102.5 pts) | 25467.6 | 25342.0 | TRADEABLE |
+| France 40 | France 40 au comptant (1€) | 7823.2 | 7827.2 | 4.0 | -0.56 % (-44.2 pts) | 7872.6 | 7818.4 | TRADEABLE |
+| EU Stocks 50 | EU Stocks 50 au comptant (2€) | 6242.38 | 6245.38 | 3.0 | -0.44 % (-27.9 pts) | 6276.53 | 6239.03 | TRADEABLE |
+| FTSE 100 | FTSE 100 au comptant (1€) | 10532.2 | 10537.2 | 5.0 | -0.07 % (-7.7 pts) | 10557.8 | 10528.0 | TRADEABLE |
+| US 500 | US 500 au comptant (1€) | 7820.64 | 7822.24 | 1.6 | 0.02 % (1.65 pts) | 7825.84 | 7817.4 | TRADEABLE |
+| US Tech 100 | US Tech 100 au comptant (1€) | 31239.4 | 31241.9 | 2.5 | 0.02 % (6.5 pts) | 31258.5 | 31227.6 | TRADEABLE |
+| Wall Street | Wall Street au comptant (1€) | 51528.6 | 51534.6 | 6.0 | 0.02 % (7.8 pts) | 51546.5 | 51515.4 | TRADEABLE |
+| Japan 225 | Japon 225 au comptant (1$) | 70760.1 | 70767.1 | 7.0 | -0.08 % (-54.2 pts) | 71364.5 | 70607.8 | TRADEABLE |
 
 ## Matières premières
 
 | Marché | Produit | Vente | Achat | Spread | Var. jour | Plus haut | Plus bas | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Spot Gold | Spot Gold ($1) | 4177.08 | 4178.08 | 1.0 | 0.89 % (37.02 pts) | 4184.99 | 4103.22 | TRADEABLE |
-| Silver | Argent au comptant mini (500oz) | 61.696 | 61.736 | 0.04 | 1.09 % (0.665 pts) | 61.894 | 60.261 | TRADEABLE |
-| US Crude | Pétrole - US Brut Léger (1€) | 8904.7 | 8909.5 | 4.8 | 0.21 % (18.9 pts) | 8919.0 | 8885.8 | TRADEABLE |
-| Natural Gas | Gaz naturel (10$) | 3221 | 3224 | 3 | 0.31 % (10 pts) | 3227 | 3207 | TRADEABLE |
+| Spot Gold | Spot Gold ($1) | 4162.77 | 4163.77 | 1.0 | 0.55 % (22.72 pts) | 4184.99 | 4103.22 | TRADEABLE |
+| Silver | Argent au comptant mini (500oz) | 61.3 | 61.34 | 0.04 | 0.44 % (0.269 pts) | 61.894 | 60.261 | TRADEABLE |
+| US Crude | Pétrole - US Brut Léger (1€) | 8931.4 | 8935.4 | 4.0 | 0.51 % (45.2 pts) | 8941.6 | 8885.8 | TRADEABLE |
+| Natural Gas | Gaz naturel (10$) | 3215 | 3218 | 3 | 0.12 % (4 pts) | 3227 | 3207 | TRADEABLE |
 | Copper | Copper ($5 Mini Contract) | 14400.5 | 14427.5 | 27.0 | -0.08 % (-11.5 pts) | 14436.6 | 14397.5 | EDITS_ONLY |
 
 ## Cryptos
 
 | Marché | Produit | Vente | Achat | Spread | Var. jour | Plus haut | Plus bas | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Bitcoin | Bitcoin ($0.1) | 85421 | 85571 | 150 | -0.34 % (-293 pts) | 86745 | 85040 | TRADEABLE |
+| Bitcoin | Bitcoin ($0.1) | 85582 | 85732 | 150 | -0.15 % (-131 pts) | 86745 | 85040 | TRADEABLE |
 
 ## Fiches produits
 
