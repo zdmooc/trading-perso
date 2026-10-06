@@ -39,10 +39,10 @@ def analyser(df: pd.DataFrame, k: int, fenetre: int) -> dict:
     if len(hauts) >= 2:
         a, b = hauts[-2], hauts[-1]
         res["h"] = (c.index[a], c.iloc[a], r.iloc[a], c.index[b], c.iloc[b], r.iloc[b])
-        res["baissiere"] = c.iloc[b] > c.iloc[a] and r.iloc[b] < r.iloc[a]
+        res["baissiere"] = bool(c.iloc[b] > c.iloc[a] and r.iloc[b] < r.iloc[a])
     if len(bas) >= 2:
         a, b = bas[-2], bas[-1]
-        res["haussiere"] = c.iloc[b] < c.iloc[a] and r.iloc[b] > r.iloc[a]
+        res["haussiere"] = bool(c.iloc[b] < c.iloc[a] and r.iloc[b] > r.iloc[a])
     return res
 
 
@@ -58,7 +58,7 @@ def main(symbole: str = "^NDX") -> None:
         x = analyser(df, k, fen)
         if "h" in x:
             da, pa, ra, db, pb, rb = x["h"]
-            prec = f"{da:%d/%m/%Y} : {pa:,.0f} (RSI {ra:.0f})".replace(",", " ")
+            prec = f"{da:%d/%m/%Y} : {pa:,.0f} (RSI {ra:.1f})".replace(",", " ")
             dern = f"{db:%d/%m/%Y} : {pb:,.0f} (RSI {rb:.0f}), {pb - pa:+,.0f} pts".replace(",", " ")
         else:
             prec = dern = "-"
