@@ -1,5 +1,5 @@
 date_signal,symbole,nom,type,strategie,entree_prevue,stop,objectif,ratio,sens,statut,date_entree,prix_entree,date_sortie,prix_sortie,motif,r
-2026-10-02,^NDX,Nasdaq 100,swing,cassure_20j,30807.9297,30035.3943,33125.5358,3.0,,en attente,,,,,,
-2026-10-02,CAT,Caterpillar,swing,cassure_20j,845.42,798.8095,985.2516,3.0,1.0,en attente,,,,,,
-2026-10-02,TXN,Texas Instruments,swing,cassure_20j,293.8,277.5123,342.6631,3.0,1.0,en attente,,,,,,
-2026-10-02,CSCO,Cisco,swing,cassure_20j,112.2,106.9191,128.0428,3.0,1.0,en attente,,,,,,
+2026-10-02,^NDX,Nasdaq 100,swing,cassure_20j,30807.9297,30035.3943,33125.5358,3.0,,ouvert,2026-10-05,30828.1681,,,,
+2026-10-02,CAT,Caterpillar,swing,cassure_20j,845.42,798.8095,985.2516,3.0,1.0,ouvert,2026-10-05,843.5916,,,,
+2026-10-02,TXN,Texas Instruments,swing,cassure_20j,293.8,277.5123,342.6631,3.0,1.0,ouvert,2026-10-05,291.6157,,,,
+2026-10-02,CSCO,Cisco,swing,cassure_20j,112.2,106.9191,128.0428,3.0,1.0,ouvert,2026-10-05,112.036,,,,
