@@ -61,11 +61,12 @@ def main(symbole: str = "^NDX") -> None:
     # historique des vérifications
     histo = Path("reports", f"zones_{nom}.csv")
     neuf = not histo.exists()
+    deja = not neuf and f"\n{date:%Y-%m-%d}," in histo.read_text(encoding="utf-8")
     with histo.open("a", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         if neuf:
             w.writerow(["date", "cloture", "plus_bas", "zone", "achat", "stop", "etat"])
-        for z, e in etats:
+        for z, e in ([] if deja else etats):  # une seule vérification par séance
             w.writerow([f"{date:%Y-%m-%d}", round(float(jour["Close"])), round(float(jour["Low"])), z["nom"], z["achat"], z["stop"], e])
     ecart = float(jour["Close"] - c.iloc[-2])
     lignes = [f"📈 <b>{symbole} {jour['Close']:,.0f}</b> ({ecart:+,.0f} pts)".replace(",", " ")]
