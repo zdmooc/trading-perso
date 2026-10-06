@@ -13,7 +13,7 @@ import yfinance as yf
 
 from tradeperso import alerts
 
-ZONES = {"^NDX": [(30700, 30200, "Zone 1"), (29950, 29400, "Zone 2 ⭐"), (29500, 28950, "Zone 3"),
+ZONES = {"^NDX": [(30700, 30200, "Zone 1"), (29950, 29400, "Zone 2 (meilleure)"), (29500, 28950, "Zone 3"),
                   (28750, 28100, "Zone 4")]}
 
 
@@ -35,7 +35,7 @@ def main(symbole: str = "^NDX") -> None:
                 va="bottom", fontsize=8, color="#166534")
     ax.set_title(f"{symbole} : zones d'achat sur repli ({pd.Timestamp.now():%d/%m/%Y})")
     ax.grid(alpha=0.25)
-    ax.legend(loc="upper left", fontsize=8)
+    ax.legend(loc="lower right", fontsize=8)
     fig.tight_layout()
     chemin = Path("reports", "graphe_" + symbole.replace("^", "") + ".png")
     fig.savefig(chemin)
