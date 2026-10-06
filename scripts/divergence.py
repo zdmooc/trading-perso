@@ -59,7 +59,7 @@ def main(symbole: str = "^NDX") -> None:
         if "h" in x:
             da, pa, ra, db, pb, rb = x["h"]
             prec = f"{da:%d/%m/%Y} : {pa:,.0f} (RSI {ra:.1f})".replace(",", " ")
-            dern = f"{db:%d/%m/%Y} : {pb:,.0f} (RSI {rb:.0f}), {pb - pa:+,.0f} pts".replace(",", " ")
+            dern = f"{db:%d/%m/%Y} : {pb:,.0f} (RSI {rb:.1f}), {pb - pa:+,.0f} pts".replace(",", " ")
         else:
             prec = dern = "-"
         verdict = "🔴 OUI" if x["baissiere"] else ("non" if x["baissiere"] is False else "?")
