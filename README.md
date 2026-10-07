@@ -98,3 +98,9 @@ Simulation et entraînement : la règle de la 1re heure est mesurée dans le rap
 
 Voir [docs/analyse_nasdaq.md](docs/analyse_nasdaq.md). Chaque soir, le graphe est régénéré, archivé dans
 `reports/graphes/` et les zones d'achat (`config.toml`, section `zones`) sont vérifiées (`reports/zones_NDX.csv`).
+
+## Plan du jour (DAX, Nasdaq 100, S&P 500)
+
+`plan.yml` envoie sur Telegram, en cours IG : le plan à 8h45 (2 entrées au plus par indice, constant toute la journée),
+un point à 14h15 et le bilan à 17h45. Chaque règle est testée sur 2 ans (`reports/plan_du_jour.md`) et chaque trade
+du plan est suivi dans `reports/plan/journal.csv`. Aucun ordre n'est passé : tu décides seul.

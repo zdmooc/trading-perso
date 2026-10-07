@@ -57,5 +57,10 @@ class IG:
     def marche(self, epic: str) -> dict:
         return self._req("GET", f"/markets/{epic}", version=3)
 
+    def historique(self, epic: str, debut: str, fin: str, resolution: str = "HOUR") -> list[dict]:
+        """Bougies passées (lecture seule). Dates au format 2026-10-07T00:00:00. Consomme le quota hebdomadaire."""
+        return self._req("GET", f"/prices/{epic}", version=3,
+                         params={"resolution": resolution, "from": debut, "to": fin, "pageSize": 0}).get("prices", [])
+
     def positions(self) -> list[dict]:
         return self._req("GET", "/positions", version=2).get("positions", [])

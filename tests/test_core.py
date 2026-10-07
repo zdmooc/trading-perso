@@ -268,3 +268,62 @@ def test_phase_du_cron():
     assert phase_du_cron("5 8 * * 1-5", ete) == "ouverture" and phase_du_cron("45 16 * * 1-5", hiver) == "bilan"
     assert phase_du_cron("5 8 * * 1-5", pd.Timestamp("2026-10-06 08:30", tz="UTC")) == "ouverture"
     assert phase_du_cron("5 8 * * 1-5", pd.Timestamp("2026-10-06 13:00", tz="UTC")) is None  # parti trop tard
+
+
+def _barres(prix, debut="2026-10-07 09:00"):
+    idx = pd.date_range(debut, periods=len(prix), freq="h", tz="Europe/Paris")
+    return pd.DataFrame([dict(Open=o, High=h, Low=l, Close=c) for o, h, l, c in prix], index=idx)
+
+
+def test_plan_rejouer():
+    from tradeperso.plan import Ordre, rejouer
+    vente = [Ordre(-1, 110, "haut", 10)]
+    # monte à 110 (vente), puis baisse jusqu'à l'objectif 80
+    t = rejouer(_barres([(100, 105, 99, 104), (104, 111, 103, 108), (108, 109, 95, 96), (96, 97, 79, 81)]), vente, 15, 1)
+    assert t.motif == "objectif" and t.entree == 110 and t.pts == 29
+    # stop au-dessus de 120
+    t = rejouer(_barres([(100, 105, 99, 104), (104, 111, 103, 108), (108, 121, 107, 119)]), vente, 15, 1)
+    assert t.motif == "stop" and t.pts == -11
+    # jamais touché
+    assert rejouer(_barres([(100, 105, 99, 104)]), vente, 15, 1) is None
+    # séance pas finie : en cours
+    t = rejouer(_barres([(104, 111, 103, 108), (108, 109, 104, 105)]), vente, 15, 1, fini=False)
+    assert t.motif == "en cours" and t.pts == 4
+
+
+def test_plan_backtest_et_message():
+    import numpy as np
+    from tradeperso import plan
+    rng = np.random.default_rng(1)
+    idx = pd.date_range("2024-10-01", "2026-10-06 23:00", freq="h", tz="Europe/Paris")
+    idx = idx[(idx.dayofweek < 5)]
+    c = 20000 + np.cumsum(rng.normal(0, 20, len(idx)))
+    h = pd.DataFrame({"Open": c, "High": c + 15, "Low": c - 15, "Close": c + rng.normal(0, 5, len(idx))}, index=idx)
+    d = h.resample("D").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last"}).dropna()
+    d.index = d.index.tz_localize(None)
+    info = plan.INDICES["^GDAXI"]
+    res = plan.backtest(h, d, info)
+    assert set(res) == {r.cle for r in plan.REGLES} and len(res[plan.REGLES[0].cle]) > 100
+    s = plan.stats(res[plan.REGLES[0].cle], 0.5)
+    assert s["gagnes_pct"] + s["perdus_pct"] == 100
+    st = {"indices": {"^GDAXI": {"choisie": plan.meilleure(res, 0.5),
+                                 "regles": {k: plan.stats(v, 0.5) for k, v in res.items()}}}}
+    p = plan.preparer(pd.Timestamp("2026-10-07 08:45", tz="Europe/Paris"), st, {"^GDAXI": d}, {"^GDAXI": h}, {})
+    assert p["indices"]["^GDAXI"]["veille"] == "2026-10-06" and p["indices"]["^GDAXI"]["source"] == "Yahoo"
+    txt = plan.message_plan(p, st, pd.DataFrame(columns=plan.COLONNES), [])
+    assert "DAX 40" in txt and "pts" in txt and "€" in txt
+
+
+def test_plan_barres_ig():
+    from tradeperso.plan import barres_ig
+    px = lambda b, a: {"bid": b, "ask": a}
+    df = barres_ig([{"snapshotTimeUTC": "2026-10-07T07:00:00", "openPrice": px(1, 3), "highPrice": px(5, 7),
+                     "lowPrice": px(0, 2), "closePrice": px(3, 5)}])
+    assert df.index[0].hour == 9 and df["High"].iloc[0] == 6
+
+
+def test_phase_plan():
+    from tradeperso.cli import PHASES_PLAN, phase_du_cron
+    ete = pd.Timestamp("2026-10-07 06:50", tz="UTC")
+    assert phase_du_cron("45 6 * * 1-5", ete, PHASES_PLAN) == "plan" and phase_du_cron("45 7 * * 1-5", ete, PHASES_PLAN) is None
+    assert phase_du_cron("15 12 * * 1-5", pd.Timestamp("2026-10-07 12:20", tz="UTC"), PHASES_PLAN) == "point"

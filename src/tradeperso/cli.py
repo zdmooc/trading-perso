@@ -375,10 +375,11 @@ def pareto(data, noms, indices, regime, breakeven_r, frais, ratio_min) -> str:
 
 
 PHASES = {7: "matin", 10: "ouverture", 17: "bilan"}
+PHASES_PLAN = {8: "plan", 14: "point", 17: "bilan"}
 RETARD_MAX = 45  # minutes
 
 
-def phase_du_cron(cron: str, maintenant: pd.Timestamp | None = None) -> str | None:
+def phase_du_cron(cron: str, maintenant: pd.Timestamp | None = None, phases: dict | None = None) -> str | None:
     """Les tâches GitHub sont en heure UTC : chaque phase a deux horaires (été / hiver).
     On ne garde que celui qui tombe à la bonne heure de Paris aujourd'hui."""
     minute, heure = (int(x) for x in cron.split()[:2])
@@ -386,7 +387,7 @@ def phase_du_cron(cron: str, maintenant: pd.Timestamp | None = None) -> str | No
     prevu = (maintenant.normalize() + pd.Timedelta(hours=heure, minutes=minute)).tz_convert(matin.PARIS)
     if maintenant - prevu > pd.Timedelta(minutes=RETARD_MAX):
         return None  # GitHub lance parfois les tâches planifiées avec des heures de retard : message périmé
-    return PHASES.get(prevu.hour)
+    return (phases or PHASES).get(prevu.hour)
 
 
 def _sig(x: float, dec: int = 1) -> str:
@@ -556,8 +557,8 @@ def cmd_ig_test(out: Path) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(prog="tradeperso")
-    p.add_argument("commande", choices=["scan", "backtest", "matin", "ig-test", "ig-marches"])
-    p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan"])
+    p.add_argument("commande", choices=["scan", "backtest", "matin", "plan", "ig-test", "ig-marches"])
+    p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan", "plan", "point"])
     p.add_argument("--cron", default="", help="horaire de la tâche GitHub (pour --phase auto)")
     p.add_argument("--silencieux", action="store_true", help="pas de message Telegram")
     p.add_argument("--config", default="config.toml")
@@ -571,6 +572,14 @@ def main() -> None:
         return
     if a.commande == "ig-test":
         cmd_ig_test(Path(a.out))
+        return
+    if a.commande == "plan":
+        phase = a.phase if a.phase != "auto" else (phase_du_cron(a.cron, phases=PHASES_PLAN) if a.cron else None)
+        if phase not in ("plan", "point", "bilan"):
+            print("Hors horaire (heure d'été ou d'hiver) ou trop en retard : rien à faire.")
+            return
+        from . import plan
+        plan.executer(Path(a.out), phase, telegram=not a.silencieux)
         return
     if a.commande == "matin":
         phase = a.phase if a.phase != "auto" else (phase_du_cron(a.cron) if a.cron else None)
