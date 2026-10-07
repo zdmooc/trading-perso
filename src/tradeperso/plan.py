@@ -171,6 +171,11 @@ def eur(x: float) -> str:
     return ("+" if x >= 0 else "−") + alerts.nombre(abs(x), 0) + " €"
 
 
+def depuis(st: dict) -> str:
+    d = pd.Timestamp(st.get("debut", st.get("date")))
+    return f"📊 Test depuis {alerts.MOIS_COURTS[d.month - 1]} {d.year}"
+
+
 def ligne_stats(s: dict, prefixe: str = "📊 2 ans") -> str:
     if not s.get("trades"):
         return f"{prefixe} : aucun trade"
@@ -251,9 +256,10 @@ def charger_stats(out: Path, d: dict, h: dict) -> dict:
     aujourd_hui = str(pd.Timestamp.now(tz=matin.PARIS).date())
     if chemin.exists():
         cache = json.loads(chemin.read_text(encoding="utf-8"))
-        if cache.get("date") == aujourd_hui:
+        if cache.get("date") == aujourd_hui and "debut" in cache:
             return cache
-    cache = {"date": aujourd_hui, "indices": {}}
+    debuts = [h[s].index[0] for s in INDICES if s in h and len(h[s])]
+    cache = {"date": aujourd_hui, "debut": str(min(debuts).date()) if debuts else aujourd_hui, "indices": {}}
     for s, info in INDICES.items():
         if s not in h or s not in d:
             continue
@@ -351,9 +357,9 @@ def message_plan(plan: dict, st: dict, j: pd.DataFrame, hier: list[str]) -> str:
                   + ("" if p["source"] == "IG" else " · ⚠️ cours Yahoo, IG indisponible")]
         l += [ligne_ordre(Ordre(**o), info["taille"]) for o in p["ordres"]] or ["Aucune entrée aujourd'hui."]
         s2 = st["indices"][s]["regles"][p["regle"]]
-        l.append(ligne_stats(s2))
+        l.append(ligne_stats(s2, depuis(st)))
         if s2.get("total_pts", 0) <= 0:
-            l.append("⚠️ Règle perdante sur 2 ans : pour info seulement, ne pas trader.")
+            l.append("⚠️ Règle perdante sur le test : pour info seulement, ne pas trader.")
         r = stats_reelles(j, info["nom"], info["taille"])
         if r.get("trades"):
             l.append(ligne_stats(r, "📒 Plan réel"))
@@ -375,7 +381,7 @@ def message_suivi(titre: str, plan: dict, res: dict, ig: dict) -> str:
 
 def rapport(out: Path, plan: dict, st: dict, j: pd.DataFrame, texte: str) -> None:
     import re
-    l = ["# Plan du jour", "", re.sub(r"</?b>", "**", texte).replace("\n", "  \n"), "", "## Statistiques sur 2 ans (bougies horaires)",
+    l = ["# Plan du jour", "", re.sub(r"</?b>", "**", texte).replace("\n", "  \n"), "", f"## Statistiques depuis le {st.get('debut', '?')} (bougies horaires)",
          "", "Points nets du spread IG. Objectif à 3 fois le risque. La règle retenue a le meilleur total.", ""]
     for s, info in INDICES.items():
         if s not in st["indices"]:
