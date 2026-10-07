@@ -172,7 +172,9 @@ def eur(x: float) -> str:
 
 
 def depuis(st: dict) -> str:
-    d = pd.Timestamp(st.get("debut", st.get("date")))
+    if not st.get("debut"):
+        return "📊 Test"
+    d = pd.Timestamp(st["debut"])
     return f"📊 Test depuis {alerts.MOIS_COURTS[d.month - 1]} {d.year}"
 
 
