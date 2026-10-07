@@ -347,32 +347,70 @@ def stats_reelles(j: pd.DataFrame, nom: str, taille: float) -> dict:
     return stats(f["pts"].astype(float).tolist(), taille)
 
 
-def message_plan(plan: dict, st: dict, j: pd.DataFrame, hier: list[str]) -> str:
+def message_plan(plan: dict, st: dict, j: pd.DataFrame, hier: list[str], long_terme: list[str] | None = None) -> str:
+    """Une ligne vide entre chaque bloc : plus lisible sur téléphone."""
     jour = pd.Timestamp(plan["date"])
-    l = [f"📋 <b>Plan du jour · {alerts.date_courte(jour)}</b> (cours IG)", "Hors plan = pas de trade."]
+    l = [f"📋 <b>Plan du jour · {alerts.date_courte(jour)}</b> (cours IG)", "", "Hors plan = pas de trade."]
     if hier:
-        l += ["", "<b>Hier</b>", *hier]
+        l += ["", "", "<b>Hier</b>"]
+        for x in hier:
+            l += ["", x]
     for s, p in plan["indices"].items():
         info = INDICES[s]
         var = f" ({pts(p['variation'])})" if p.get("variation") is not None else ""
-        l += ["", f"{info['drapeau']} <b>{info['nom']}</b> · veille {alerts.nombre(p['cloture'], 0)}{var}"
+        l += ["", "", f"{info['drapeau']} <b>{info['nom']}</b> · veille {alerts.nombre(p['cloture'], 0)}{var}"
                   + ("" if p["source"] == "IG" else " · ⚠️ cours Yahoo, IG indisponible")]
-        l += [ligne_ordre(Ordre(**o), info["taille"]) for o in p["ordres"]] or ["Aucune entrée aujourd'hui."]
+        for o in p["ordres"]:
+            l += ["", ligne_ordre(Ordre(**o), info["taille"])]
+        if not p["ordres"]:
+            l += ["", "Aucune entrée aujourd'hui."]
         s2 = st["indices"][s]["regles"][p["regle"]]
-        l.append(ligne_stats(s2, depuis(st)))
+        l += ["", ligne_stats(s2, depuis(st))]
         if s2.get("total_pts", 0) <= 0:
-            l.append("⚠️ Règle perdante sur le test : pour info seulement, ne pas trader.")
+            l += ["⚠️ Règle perdante sur le test : pour info seulement, ne pas trader."]
         r = stats_reelles(j, info["nom"], info["taille"])
         if r.get("trades"):
-            l.append(ligne_stats(r, "📒 Plan réel"))
+            l += ["", ligne_stats(r, "📒 Plan réel")]
         t = f"{info['taille']:g}".replace(".", ",")
-        l.append(f"⏰ {info['fenetre']} · {t} contrat = {t} €/pt")
+        l += ["", f"⏰ {info['fenetre']} · {t} contrat = {t} €/pt"]
+    if long_terme:
+        l += ["", "", "📈 <b>Long terme</b>"]
+        for x in long_terme:
+            l += ["", x]
     return "\n".join(l)
+
+
+def long_terme(out: Path, zones: dict) -> list[str]:
+    """Positions swing ouvertes (journal des signaux) et zones d'achat sur repli du Nasdaq."""
+    lignes = []
+    jr = out / "journal.csv"
+    j = pd.read_csv(jr) if jr.exists() else pd.DataFrame()
+    ouverts = j[j["statut"] == "ouvert"] if len(j) else j
+    symboles = list(ouverts["symbole"]) if len(ouverts) else []
+    symboles += [s for s in zones if s not in symboles]
+    cours = {s: float(df["Close"].iloc[-1]) for s, df in matin.telecharger(symboles, "5d", "1d").items()}
+    for r in ouverts.itertuples() if len(ouverts) else []:
+        c = cours.get(r.symbole)
+        if c is None:
+            continue
+        e = float(r.prix_entree)
+        lignes.append(f"{r.nom} : acheté {alerts.nombre(e, 0 if e >= 1000 else 2)}, cours {alerts.nombre(c, 0 if c >= 1000 else 2)} "
+                      f"({pts(c - e) if e >= 1000 else ('+' if c >= e else '−') + alerts.nombre(abs(c - e), 2) + ' $'})\n"
+                      f"   stop {alerts.nombre(float(r.stop), 0 if e >= 1000 else 2)} · objectif {alerts.nombre(float(r.objectif), 0 if e >= 1000 else 2)}")
+    for s, z in zones.items():
+        c = cours.get(s)
+        if c is None:
+            continue
+        for x in z.get("liste", []):
+            lignes.append(f"🛒 {x['nom']} Nasdaq : achat {alerts.nombre(x['achat'], 0)} (à {pts(x['achat'] - c)})\n"
+                          f"   stop {alerts.nombre(x['stop'], 0)} · objectif {alerts.nombre(x['objectif'], 0)}")
+    return lignes
 
 
 def message_suivi(titre: str, plan: dict, res: dict, ig: dict) -> str:
     l = [titre]
     for s, p in plan["indices"].items():
+        l.append("")
         info = INDICES[s]
         cours = f" {alerts.nombre(float(ig[s]['Close'].iloc[-1]), 0)}" if len(ig.get(s, [])) else ""
         t, fini = res.get(s, (None, False))
@@ -429,7 +467,14 @@ def executer(out: Path, phase: str, telegram: bool = True) -> None:
             hier = [f"{INDICES[s]['nom']} : {ligne_trade(t, INDICES[s]['taille'], f)}" for s, (t, f) in res.items()]
         plan = preparer(maintenant, st, d, h, ig)
         (rep / f"plan_{plan['date']}.json").write_text(json.dumps(plan, indent=1) + "\n", encoding="utf-8")
-        texte = message_plan(plan, st, j, hier)
+        try:
+            import tomllib
+            zones = tomllib.loads(Path("config.toml").read_text(encoding="utf-8")).get("zones", {})
+            lt = long_terme(out, zones)
+        except Exception as e:  # le long terme ne bloque jamais le plan
+            print(f"Long terme : {e}")
+            lt = []
+        texte = message_plan(plan, st, j, hier, lt)
     else:
         chemin = rep / f"plan_{maintenant.date()}.json"
         if not chemin.exists():
