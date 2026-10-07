@@ -1,71 +1,14 @@
 # Plan du jour
 
-📋 **Plan du jour · mer. 7 oct.** (cours IG)  
+🕑 **Point de 14h15** (cours IG)  
   
-Hors plan = pas de trade.  
+🇩🇪 **DAX 40** 25 136 : pas déclenché  
   
+🇺🇸 **Nasdaq 100** 31 112 : vente à 31 013 (15h), stoppé : −95 pts = −47 €  
   
-🇩🇪 **DAX 40** · veille 25 449 (+190 pts)  
+🇺🇸 **S&P 500** 7 801 : vente à 7 789 (15h), en cours : −13 pts = −13 €  
   
-🟢 Achat si 25 552 touché  
-   stop 25 480 (−72 pts = −36 €) · objectif 25 769 (+216 pts = +108 €)  
-  
-📊 Test depuis nov. 2023 : 329 trades · 44 % gagnés (+111 pts en moy.) · 56 % perdus (−64 pts en moy.) · total +4 269 pts = +2 135 €  
-  
-⏰ entrée 9h-16h, tout fermé à 17h30 · 0,5 contrat = 0,5 €/pt  
-  
-  
-🇺🇸 **Nasdaq 100** · veille 31 234 (+144 pts)  
-  
-🟢 Achat si 31 404 touché  
-   stop 31 310 (−94 pts = −47 €) · objectif 31 685 (+281 pts = +140 €)  
-  
-🔴 Vente si 31 172 touché  
-   stop 31 265 (−94 pts = −47 €) · objectif 30 891 (+281 pts = +140 €)  
-  
-📊 Test depuis nov. 2023 : 602 trades · 43 % gagnés (+134 pts en moy.) · 57 % perdus (−80 pts en moy.) · total +7 555 pts = +3 778 €  
-  
-⏰ entrée 15h30-21h, tout fermé à 22h · 0,5 contrat = 0,5 €/pt  
-  
-  
-🇺🇸 **S&P 500** · veille 7 820 (+40 pts)  
-  
-🟢 Achat si 7 851 touché  
-   stop 7 834 (−17 pts = −17 €) · objectif 7 902 (+51 pts = +51 €)  
-  
-🔴 Vente si 7 799 touché  
-   stop 7 816 (−17 pts = −17 €) · objectif 7 748 (+51 pts = +51 €)  
-  
-📊 Test depuis nov. 2023 : 588 trades · 42 % gagnés (+27 pts en moy.) · 58 % perdus (−16 pts en moy.) · total +1 420 pts = +1 420 €  
-  
-⏰ entrée 15h30-21h, tout fermé à 22h · 1 contrat = 1 €/pt  
-  
-  
-📈 **Long terme**  
-  
-Nasdaq 100 : acheté 30 828, cours 31 224 (+396 pts)  
-   stop 30 035 · objectif 33 126  
-  
-Caterpillar : acheté 843,59, cours 863,44 (+19,85 $)  
-   stop 798,81 · objectif 985,25  
-  
-Texas Instruments : acheté 291,62, cours 297,23 (+5,61 $)  
-   stop 277,51 · objectif 342,66  
-  
-Cisco : acheté 112,04, cours 117,94 (+5,90 $)  
-   stop 106,92 · objectif 128,04  
-  
-🛒 Zone 1 Nasdaq : achat 30 700 (à −524 pts)  
-   stop 30 200 · objectif 32 200  
-  
-🛒 Zone 2 (meilleure) Nasdaq : achat 29 950 (à −1 274 pts)  
-   stop 29 400 · objectif 31 600  
-  
-🛒 Zone 3 Nasdaq : achat 29 500 (à −1 724 pts)  
-   stop 28 950 · objectif 31 150  
-  
-🛒 Zone 4 Nasdaq : achat 28 750 (à −2 474 pts)  
-   stop 28 100 · objectif 30 700
+Le plan ne change pas.
 
 ## Statistiques depuis le 2023-11-07 (bougies horaires)
 
@@ -124,4 +67,8 @@ Points nets du spread IG. Objectif à 3 fois le risque. La règle retenue a le m
 
 ## Journal réel du plan
 
-Aucun trade pour l'instant.
+| date | indice | regle | source | sens | entree | heure | stop | objectif | sortie | motif | pts | euros | statut |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-10-07 | DAX 40 | cassure-0.25-tendance | IG |  |  |  |  |  |  |  |  |  | non déclenché |
+| 2026-10-07 | Nasdaq 100 | cassure-0.25-aucun | IG | vente | 31012.5 | 15h | 31106.2 | 30731.6 | 31106.2 | stop | -94.6 | -47.3 | perdu |
+| 2026-10-07 | S&P 500 | cassure-0.25-aucun | IG | vente | 7789.0 | 15h | 7806.0 | 7737.9 | 7801.3 | en cours | -12.7 | -12.7 | en cours |

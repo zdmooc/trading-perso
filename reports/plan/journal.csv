@@ -1,0 +1,4 @@
+date,indice,regle,source,sens,entree,heure,stop,objectif,sortie,motif,pts,euros,statut
+2026-10-07,DAX 40,cassure-0.25-tendance,IG,,,,,,,,,,non déclenché
+2026-10-07,Nasdaq 100,cassure-0.25-aucun,IG,vente,31012.5,15h,31106.2,30731.6,31106.2,stop,-94.6,-47.3,perdu
+2026-10-07,S&P 500,cassure-0.25-aucun,IG,vente,7789.0,15h,7806.0,7737.9,7801.3,en cours,-12.7,-12.7,en cours
