@@ -1,4 +1,4 @@
-# Spéculation : actions leaders (séance du 07/10/2026)
+# Spéculation : actions leaders (séance du 08/10/2026)
 
 Capital spéculation : 1000 €, en parts égales, en **actions réelles sur eToro** (sans levier).
 
@@ -8,28 +8,28 @@ Règle : les actions qui montent le plus par rapport au S&P 500 sur 6 mois, au-d
 
 | Action | Rang | Force relative 6 mois | Cours | Moyenne 50 jours | Montant |
 | --- | --- | --- | --- | --- | --- |
-| AMD | 1 | +175.0 % | 649.42 | 518.82 | 200 € |
-| Intel | 2 | +94.5 % | 112.5 | 101.77 | 200 € |
-| Texas Instruments | 3 | +32.2 % | 297.23 | 271.12 | 200 € |
-| Qualcomm | 5 | +29.1 % | 181.03 | 171.47 | 200 € |
-| Cisco | 4 | +29.1 % | 117.94 | 111.73 | 200 € |
+| AMD | 1 | +163.6 % | 645.86 | 522.64 | 200 € |
+| Intel | 2 | +76.9 % | 113.12 | 102.31 | 200 € |
+| Texas Instruments | 7 | +24.7 % | 288.98 | 271.38 | 200 € |
+| Qualcomm | 6 | +25.2 % | 177.12 | 171.77 | 200 € |
+| Cisco | 5 | +26.3 % | 117.39 | 111.78 | 200 € |
 
 ## Classement complet (15 premiers)
 
 | Rang | Action | Force relative 6 mois | Au-dessus de la MM50 |
 | --- | --- | --- | --- |
-| 1 | AMD | +175.0 % | oui |
-| 2 | Intel | +94.5 % | oui |
-| 3 | Texas Instruments | +32.2 % | oui |
-| 4 | Cisco | +29.1 % | oui |
-| 5 | Qualcomm | +29.1 % | oui |
-| 6 | Microsoft | +24.6 % | oui |
-| 7 | ServiceNow | +19.0 % | oui |
-| 8 | Nvidia | +16.5 % | oui |
-| 9 | Thermo Fisher | +16.2 % | oui |
-| 10 | Apple | +13.7 % | oui |
-| 11 | AbbVie | +13.1 % | oui |
-| 12 | Meta | +10.5 % | oui |
-| 13 | Eli Lilly | +6.5 % | non |
-| 14 | UnitedHealth | +5.6 % | non |
-| 15 | Salesforce | +5.6 % | oui |
+| 1 | AMD | +163.6 % | oui |
+| 2 | Intel | +76.9 % | oui |
+| 3 | Microsoft | +27.1 % | oui |
+| 4 | ServiceNow | +26.4 % | oui |
+| 5 | Cisco | +26.3 % | oui |
+| 6 | Qualcomm | +25.2 % | oui |
+| 7 | Texas Instruments | +24.7 % | oui |
+| 8 | Thermo Fisher | +16.7 % | oui |
+| 9 | Nvidia | +15.7 % | oui |
+| 10 | AbbVie | +15.2 % | oui |
+| 11 | Apple | +15.2 % | oui |
+| 12 | Salesforce | +13.2 % | oui |
+| 13 | Eli Lilly | +10.1 % | oui |
+| 14 | UnitedHealth | +9.3 % | non |
+| 15 | Philip Morris | +6.7 % | oui |
