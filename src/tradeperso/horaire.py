@@ -72,6 +72,9 @@ def resume(s: str, jour_df: pd.DataFrame, d: pd.DataFrame | None, pl: dict | Non
         r["prix"] = float(jour_df["Close"].iloc[-1])
         r["heure"] = f"{jour_df.index[-1]:%Hh%M}"
         r["haut"], r["bas"] = float(jour_df["High"].max()), float(jour_df["Low"].min())
+        avant = jour_df[jour_df.index <= jour_df.index[-1] - pd.Timedelta(hours=1)]
+        if len(avant):
+            r["var_1h"] = r["prix"] - float(avant["Close"].iloc[-1])
     if pl and "prix" in r:
         r["var"] = r["prix"] - pl["cloture"]
         r["var_pct"] = 100 * r["var"] / pl["cloture"]
@@ -208,12 +211,18 @@ h1{font-size:20px;margin:8px 0 2px}h2{font-size:18px;margin:0 0 8px}h3{font-size
 .prix{font-size:26px;font-weight:600;margin:0}.prix small{font-size:13px;color:var(--muted);font-weight:400}
 p{margin:6px 0}.muted{color:var(--muted);font-size:13px}.pos{color:#22a06b}.neg{color:#e5484d}
 .etat{padding:8px 10px;border-radius:8px;background:var(--bg)}.ordre{margin:10px 0}
-.graphe{width:100%}.note{font-size:12px;color:var(--muted);margin-top:24px}
+.graphe{width:100%}.ia{border-left:4px solid #4c8dff}.note{font-size:12px;color:var(--muted);margin-top:24px}
 """
 
 
-def page(maintenant: pd.Timestamp, source: str, resumes: dict[str, dict], figures: dict[str, dict]) -> str:
+def page(maintenant: pd.Timestamp, source: str, resumes: dict[str, dict], figures: dict[str, dict],
+         commentaire: str | None = None) -> str:
     cartes = "".join(carte(s, r) for s, r in resumes.items())
+    if commentaire:
+        cartes = ('<section class="carte ia"><h2>🧠 Commentaire de l\'heure</h2>'
+                  + "".join(f"<p>{html.escape(l)}</p>" for l in commentaire.splitlines() if l.strip())
+                  + '<p class="muted">Écrit par ton modèle local à partir des chiffres ci-dessous, vérifiés un par un.</p>'
+                  + "</section>" + cartes)
     js = json.dumps(figures, separators=(",", ":"), default=float)
     return f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -239,12 +248,31 @@ for(const [id,f] of Object.entries(F)){{
 """
 
 
+DEPOT_BRUT = "https://raw.githubusercontent.com/zdmooc/trading-perso/main/reports/plan"
+
+
+def plan_du_jour(out: Path, maintenant: pd.Timestamp) -> dict:
+    """Plan de 8h45 : fichier local (GitHub Actions), sinon copie publiée dans le dépôt (CRC)."""
+    nom = f"plan_{maintenant.date()}.json"
+    chemin = plan.dossier(out) / nom
+    if not chemin.exists():
+        try:
+            import httpx
+            r = httpx.get(f"{DEPOT_BRUT}/{nom}", timeout=20)
+            if r.status_code != 200:
+                return {}
+            chemin.write_text(r.text, encoding="utf-8")
+        except Exception as e:
+            print(f"Plan du jour introuvable : {e}")
+            return {}
+    return json.loads(chemin.read_text(encoding="utf-8"))["indices"]
+
+
 def executer(out: Path, telegram: bool = True) -> Path:
     maintenant = pd.Timestamp.now(tz=matin.PARIS)
     jour, source = charger_jour(maintenant)
     d = matin.telecharger(plan.INDICES, "1y", "1d")
-    chemin_plan = plan.dossier(out) / f"plan_{maintenant.date()}.json"
-    pl = json.loads(chemin_plan.read_text(encoding="utf-8"))["indices"] if chemin_plan.exists() else {}
+    pl = plan_du_jour(out, maintenant)
     resumes, figures = {}, {}
     for s in plan.INDICES:
         df = jour.get(s, pd.DataFrame(columns=["Open", "High", "Low", "Close"]))
@@ -256,9 +284,12 @@ def executer(out: Path, telegram: bool = True) -> Path:
     rep = out / "html"
     rep.mkdir(parents=True, exist_ok=True)
     chemin = rep / "marche.html"
-    chemin.write_text(page(maintenant, source, resumes, figures), encoding="utf-8")
+    from . import ia
+    commentaire = ia.commenter(resumes)
+    chemin.write_text(page(maintenant, source, resumes, figures, commentaire), encoding="utf-8")
     print(f"Rapport écrit : {chemin}")
     if telegram:
         legende = " · ".join(f"{r['nom']} {alerts.nombre(r['prix'], 0)}" for r in resumes.values() if "prix" in r)
-        alerts.send_document(str(chemin), f"📈 Marché à {maintenant:%Hh%M}\n{legende}", silencieux=True)
+        legende = f"📈 Marché à {maintenant:%Hh%M}\n{legende}" + (f"\n\n{commentaire}" if commentaire else "")
+        alerts.send_document(str(chemin), legende, silencieux=True)
     return chemin

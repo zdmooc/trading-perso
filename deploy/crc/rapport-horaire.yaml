@@ -1,0 +1,108 @@
+# Rapport horaire avec commentaire IA local, sur CRC (heure de Paris, 9h05 à 22h05, du lundi au vendredi).
+# Lecture seule : cours IG démo, Yahoo, plan du jour publié dans le dépôt. Aucun ordre de bourse.
+# Les clés vivent dans le secret « rapport-horaire » (créé à la main, jamais dans ce fichier).
+apiVersion: v1
+kind: List
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: rapport-horaire
+    namespace: trading-perso
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    name: rapport-horaire
+    namespace: trading-perso
+  spec:
+    source:
+      git:
+        uri: https://github.com/zdmooc/trading-perso.git
+        ref: main
+    strategy:
+      dockerStrategy:
+        dockerfilePath: Containerfile
+    output:
+      to:
+        kind: ImageStreamTag
+        name: rapport-horaire:latest
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    name: rapport-horaire
+    namespace: trading-perso
+  spec:
+    schedule: "5 9-22 * * 1-5"
+    timeZone: Europe/Paris
+    concurrencyPolicy: Forbid
+    startingDeadlineSeconds: 900
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 1
+        activeDeadlineSeconds: 600
+        template:
+          metadata:
+            labels:
+              app: rapport-horaire
+          spec:
+            restartPolicy: Never
+            containers:
+            - name: rapport
+              image: image-registry.openshift-image-registry.svc:5000/trading-perso/rapport-horaire:latest
+              imagePullPolicy: Always
+              envFrom:
+              - secretRef:
+                  name: rapport-horaire
+              env:
+              - name: IG_ACC_TYPE
+                value: DEMO
+              - name: IG_ACCOUNT_ID
+                value: Z4UJIM
+              - name: IA_URL
+                value: http://192.168.56.1:11434
+              - name: IA_MODELE
+                value: qwen2.5:3b
+              resources:
+                requests: {cpu: 100m, memory: 256Mi}
+                limits: {cpu: "1", memory: 768Mi}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities: {drop: [ALL]}
+                runAsNonRoot: true
+                seccompProfile: {type: RuntimeDefault}
+# Sorties autorisées pour ces pods seulement : DNS, HTTPS vers Internet (IG, Yahoo, Telegram, GitHub)
+# et Ollama sur l'hôte Windows (192.168.56.1, port 11434). Rien d'autre, ni vers le réseau local.
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: rapport-horaire-sorties
+    namespace: trading-perso
+  spec:
+    podSelector:
+      matchLabels:
+        app: rapport-horaire
+    policyTypes: [Ingress, Egress]
+    ingress: []
+    egress:
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: openshift-dns
+      ports:
+      - {protocol: UDP, port: 5353}
+      - {protocol: TCP, port: 5353}
+      - {protocol: UDP, port: 53}
+      - {protocol: TCP, port: 53}
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
+      ports:
+      - {protocol: TCP, port: 443}
+    - to:
+      - ipBlock:
+          cidr: 192.168.56.1/32
+      ports:
+      - {protocol: TCP, port: 11434}

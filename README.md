@@ -111,3 +111,7 @@ du plan est suivi dans `reports/plan/journal.csv`. Aucun ordre n'est passé : tu
 sans sonnerie. Pour le DAX, le Nasdaq 100 et le S&P 500 : cours IG du jour, écart avec la veille en points, état du plan
 du jour, graphique du jour avec les niveaux du plan (entrées, stops, objectifs) et les pivots de la semaine, graphique
 6 mois avec les moyennes 20 et 50 jours. Lecture seule. Environ 40 bougies IG par passage pour ménager le quota.
+
+Commentaire IA (étape 2) : `src/tradeperso/ia.py`. Si `IA_URL` est défini (Ollama ou LiteLLM, API compatible OpenAI),
+le modèle local décrit les chiffres en 3 à 5 lignes. Chaque nombre cité est vérifié ; au moindre nombre inventé, le
+commentaire est retiré. Déploiement sur CRC : `deploy/crc/README.md`.

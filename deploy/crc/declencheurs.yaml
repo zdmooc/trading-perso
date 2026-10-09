@@ -7,10 +7,10 @@ items:
 - apiVersion: batch/v1
   kind: CronJob
   metadata:
-    name: plan-7h
+    name: plan-8h45
     namespace: trading-perso
   spec:
-    schedule: "0 7 * * 1-5"
+    schedule: "45 8 * * 1-5"
     timeZone: Europe/Paris
     concurrencyPolicy: Forbid
     startingDeadlineSeconds: 600
@@ -35,19 +35,19 @@ items:
                 curl -fsS -X POST
                 -H "Authorization: Bearer $GH_TOKEN"
                 -H "Accept: application/vnd.github+json"
-                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/matin.yml/dispatches
-                -d '{"ref":"main","inputs":{"phase":"matin"}}'
-                && echo "matin.yml lancé"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/plan.yml/dispatches
+                -d '{"ref":"main","inputs":{"phase":"plan"}}'
+                && echo "plan.yml lancé"
               resources:
                 requests: {cpu: 10m, memory: 16Mi}
                 limits: {cpu: 100m, memory: 64Mi}
 - apiVersion: batch/v1
   kind: CronJob
   metadata:
-    name: plan-10h05
+    name: point-14h15
     namespace: trading-perso
   spec:
-    schedule: "5 10 * * 1-5"
+    schedule: "15 14 * * 1-5"
     timeZone: Europe/Paris
     concurrencyPolicy: Forbid
     startingDeadlineSeconds: 600
@@ -72,16 +72,16 @@ items:
                 curl -fsS -X POST
                 -H "Authorization: Bearer $GH_TOKEN"
                 -H "Accept: application/vnd.github+json"
-                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/matin.yml/dispatches
-                -d '{"ref":"main","inputs":{"phase":"ouverture"}}'
-                && echo "matin.yml lancé"
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/plan.yml/dispatches
+                -d '{"ref":"main","inputs":{"phase":"point"}}'
+                && echo "plan.yml lancé"
               resources:
                 requests: {cpu: 10m, memory: 16Mi}
                 limits: {cpu: 100m, memory: 64Mi}
 - apiVersion: batch/v1
   kind: CronJob
   metadata:
-    name: plan-17h45
+    name: bilan-17h45
     namespace: trading-perso
   spec:
     schedule: "45 17 * * 1-5"
@@ -109,9 +109,9 @@ items:
                 curl -fsS -X POST
                 -H "Authorization: Bearer $GH_TOKEN"
                 -H "Accept: application/vnd.github+json"
-                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/matin.yml/dispatches
+                https://api.github.com/repos/zdmooc/trading-perso/actions/workflows/plan.yml/dispatches
                 -d '{"ref":"main","inputs":{"phase":"bilan"}}'
-                && echo "matin.yml lancé"
+                && echo "plan.yml lancé"
               resources:
                 requests: {cpu: 10m, memory: 16Mi}
                 limits: {cpu: 100m, memory: 64Mi}

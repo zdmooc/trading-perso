@@ -366,3 +366,30 @@ def test_rapport_horaire():
     figs = {"j-GDAXI": horaire.figure_jour(jour, r), "m-GDAXI": horaire.figure_mois(d, r)}
     texte = horaire.page(maintenant, "IG", {"^GDAXI": r}, figs)
     assert "Marché à 13h30" in texte and 'id="j-GDAXI"' in texte and "plotly" in texte
+
+
+def test_ia_verification(monkeypatch):
+    from tradeperso import ia
+    assert ia.nombres("DAX à 25 140, −37 pts, RSI 44,5") == [25140, 37, 44.5]
+    d = {"DAX 40": {"cours": 25140, "ecart_1h_pts": 38, "heure": "14h00", "niveaux_du_plan": [{"niveau": 24757}]}}
+    assert ia.verifier("Le DAX est à 25 140 à 14h00, +38 pts en 1 heure. Vente à 24 757.", d) == []
+    assert ia.verifier("Le DAX vise 25 300.", d) == [25300]
+    monkeypatch.delenv("IA_URL", raising=False)
+    assert ia.commenter({"x": {"nom": "DAX 40", "prix": 1.0}}) is None
+
+    class Rep:
+        def raise_for_status(self):
+            pass
+
+        def __init__(self, texte):
+            self.texte = texte
+
+        def json(self):
+            return {"choices": [{"message": {"content": self.texte}}]}
+
+    r = {"^GDAXI": {"nom": "DAX 40", "prix": 25140.2, "heure": "14h00", "haut": 25148, "bas": 24952, "var_1h": 38}}
+    monkeypatch.setenv("IA_URL", "http://ollama:11434")
+    monkeypatch.setattr(ia.httpx, "post", lambda *a, **k: Rep("Le DAX monte de 38 pts en 1 heure, à 25 140."))
+    assert ia.commenter(r).startswith("Le DAX")
+    monkeypatch.setattr(ia.httpx, "post", lambda *a, **k: Rep("Le DAX ira à 26 000."))
+    assert ia.commenter(r) is None
