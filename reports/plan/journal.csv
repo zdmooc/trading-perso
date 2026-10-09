@@ -2,3 +2,6 @@ date,indice,regle,source,sens,entree,heure,stop,objectif,sortie,motif,pts,euros,
 2026-10-07,DAX 40,cassure-0.25-tendance,IG,,,,,,,,,,non déclenché
 2026-10-07,Nasdaq 100,cassure-0.25-aucun,IG,vente,31012.5,15h,31106.2,30731.6,31106.2,stop,-94.6,-47.3,perdu
 2026-10-07,S&P 500,cassure-0.25-aucun,IG,vente,7789.0,15h,7806.0,7737.9,7806.0,stop,-17.4,-17.4,perdu
+2026-10-08,DAX 40,cassure-0.25-tendance,IG,vente,24918.4,09h,24992.7,24695.6,24992.7,stop,-75.5,-37.7,perdu
+2026-10-08,Nasdaq 100,cassure-0.25-aucun,IG,vente,30861.1,18h,30953.8,30583.1,30583.1,objectif,277.0,138.5,gagné
+2026-10-08,S&P 500,cassure-0.25-aucun,IG,vente,7757.4,18h,7774.2,7707.0,7765.9,clôture,-8.9,-8.9,perdu

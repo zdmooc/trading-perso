@@ -1,36 +1,36 @@
 {
- "date": "2026-10-08",
- "debut": "2023-11-08",
+ "date": "2026-10-09",
+ "debut": "2023-11-09",
  "indices": {
   "^GDAXI": {
    "choisie": "cassure-0.25-tendance",
    "regles": {
     "cassure-0.25-aucun": {
-     "trades": 568,
+     "trades": 569,
      "gagnes_pct": 40,
-     "gain_moy": 109,
+     "gain_moy": 110,
      "perdus_pct": 60,
      "perte_moy": -65,
-     "total_pts": 2337,
-     "total_eur": 1169
+     "total_pts": 2478,
+     "total_eur": 1239
     },
     "cassure-0.25-tendance": {
      "trades": 329,
      "gagnes_pct": 44,
-     "gain_moy": 110,
+     "gain_moy": 111,
      "perdus_pct": 56,
      "perte_moy": -65,
-     "total_pts": 4294,
-     "total_eur": 2147
+     "total_pts": 4253,
+     "total_eur": 2127
     },
     "cassure-0.4-aucun": {
-     "trades": 568,
-     "gagnes_pct": 46,
+     "trades": 569,
+     "gagnes_pct": 47,
      "gain_moy": 107,
-     "perdus_pct": 54,
+     "perdus_pct": 53,
      "perte_moy": -89,
-     "total_pts": 1248,
-     "total_eur": 624
+     "total_pts": 1484,
+     "total_eur": 742
     },
     "cassure-0.4-tendance": {
      "trades": 329,
@@ -38,17 +38,17 @@
      "gain_moy": 113,
      "perdus_pct": 50,
      "perte_moy": -91,
-     "total_pts": 3245,
-     "total_eur": 1623
+     "total_pts": 3254,
+     "total_eur": 1627
     },
     "cassure-0.6-aucun": {
-     "trades": 568,
+     "trades": 569,
      "gagnes_pct": 51,
-     "gain_moy": 107,
+     "gain_moy": 108,
      "perdus_pct": 49,
      "perte_moy": -101,
-     "total_pts": 2403,
-     "total_eur": 1202
+     "total_pts": 2586,
+     "total_eur": 1293
     },
     "cassure-0.6-tendance": {
      "trades": 329,
@@ -56,62 +56,62 @@
      "gain_moy": 112,
      "perdus_pct": 46,
      "perte_moy": -106,
-     "total_pts": 3951,
-     "total_eur": 1976
+     "total_pts": 3962,
+     "total_eur": 1981
     },
     "rejet-0.25-aucun": {
-     "trades": 619,
+     "trades": 620,
      "gagnes_pct": 33,
      "gain_moy": 117,
      "perdus_pct": 67,
      "perte_moy": -62,
-     "total_pts": -1905,
-     "total_eur": -953
+     "total_pts": -2077,
+     "total_eur": -1039
     },
     "rejet-0.25-tendance": {
-     "trades": 297,
+     "trades": 298,
      "gagnes_pct": 36,
      "gain_moy": 107,
      "perdus_pct": 64,
      "perte_moy": -65,
-     "total_pts": -911,
-     "total_eur": -455
+     "total_pts": -999,
+     "total_eur": -500
     },
     "rejet-0.4-aucun": {
-     "trades": 619,
+     "trades": 620,
      "gagnes_pct": 41,
-     "gain_moy": 113,
+     "gain_moy": 112,
      "perdus_pct": 59,
      "perte_moy": -85,
-     "total_pts": -2813,
-     "total_eur": -1406
+     "total_pts": -2937,
+     "total_eur": -1468
     },
     "rejet-0.4-tendance": {
-     "trades": 297,
+     "trades": 298,
      "gagnes_pct": 44,
      "gain_moy": 106,
      "perdus_pct": 56,
-     "perte_moy": -86,
-     "total_pts": -501,
-     "total_eur": -250
+     "perte_moy": -85,
+     "total_pts": -540,
+     "total_eur": -270
     },
     "rejet-0.6-aucun": {
-     "trades": 619,
+     "trades": 620,
      "gagnes_pct": 45,
      "gain_moy": 111,
      "perdus_pct": 55,
      "perte_moy": -102,
-     "total_pts": -3715,
-     "total_eur": -1858
+     "total_pts": -3985,
+     "total_eur": -1993
     },
     "rejet-0.6-tendance": {
-     "trades": 297,
+     "trades": 298,
      "gagnes_pct": 47,
      "gain_moy": 103,
      "perdus_pct": 53,
      "perte_moy": -96,
-     "total_pts": -576,
-     "total_eur": -288
+     "total_pts": -755,
+     "total_eur": -377
     }
    }
   },
@@ -119,112 +119,112 @@
    "choisie": "cassure-0.25-aucun",
    "regles": {
     "cassure-0.25-aucun": {
-     "trades": 603,
+     "trades": 600,
      "gagnes_pct": 43,
      "gain_moy": 134,
      "perdus_pct": 57,
      "perte_moy": -80,
-     "total_pts": 7461,
-     "total_eur": 3730
+     "total_pts": 7582,
+     "total_eur": 3791
     },
     "cassure-0.25-tendance": {
-     "trades": 366,
-     "gagnes_pct": 41,
+     "trades": 363,
+     "gagnes_pct": 42,
      "gain_moy": 132,
-     "perdus_pct": 59,
+     "perdus_pct": 58,
      "perte_moy": -78,
-     "total_pts": 3229,
-     "total_eur": 1614
+     "total_pts": 3459,
+     "total_eur": 1729
     },
     "cassure-0.4-aucun": {
-     "trades": 603,
+     "trades": 600,
      "gagnes_pct": 48,
      "gain_moy": 134,
      "perdus_pct": 52,
-     "perte_moy": -108,
-     "total_pts": 4236,
-     "total_eur": 2118
+     "perte_moy": -109,
+     "total_pts": 4483,
+     "total_eur": 2242
     },
     "cassure-0.4-tendance": {
-     "trades": 366,
+     "trades": 363,
      "gagnes_pct": 47,
      "gain_moy": 132,
      "perdus_pct": 53,
      "perte_moy": -107,
-     "total_pts": 1835,
-     "total_eur": 917
+     "total_pts": 2139,
+     "total_eur": 1069
     },
     "cassure-0.6-aucun": {
-     "trades": 603,
-     "gagnes_pct": 50,
+     "trades": 600,
+     "gagnes_pct": 51,
      "gain_moy": 130,
-     "perdus_pct": 50,
+     "perdus_pct": 49,
      "perte_moy": -129,
-     "total_pts": 720,
-     "total_eur": 360
+     "total_pts": 1134,
+     "total_eur": 567
     },
     "cassure-0.6-tendance": {
-     "trades": 366,
-     "gagnes_pct": 49,
+     "trades": 363,
+     "gagnes_pct": 50,
      "gain_moy": 129,
-     "perdus_pct": 51,
+     "perdus_pct": 50,
      "perte_moy": -129,
-     "total_pts": -673,
-     "total_eur": -336
+     "total_pts": -324,
+     "total_eur": -162
     },
     "rejet-0.25-aucun": {
-     "trades": 654,
+     "trades": 651,
      "gagnes_pct": 39,
      "gain_moy": 133,
      "perdus_pct": 61,
      "perte_moy": -81,
-     "total_pts": 1610,
-     "total_eur": 805
+     "total_pts": 1593,
+     "total_eur": 797
     },
     "rejet-0.25-tendance": {
-     "trades": 307,
+     "trades": 305,
      "gagnes_pct": 41,
-     "gain_moy": 145,
+     "gain_moy": 143,
      "perdus_pct": 59,
-     "perte_moy": -81,
-     "total_pts": 3383,
-     "total_eur": 1691
+     "perte_moy": -82,
+     "total_pts": 2895,
+     "total_eur": 1448
     },
     "rejet-0.4-aucun": {
-     "trades": 654,
+     "trades": 651,
      "gagnes_pct": 43,
      "gain_moy": 136,
      "perdus_pct": 57,
      "perte_moy": -109,
-     "total_pts": -2260,
-     "total_eur": -1130
+     "total_pts": -2252,
+     "total_eur": -1126
     },
     "rejet-0.4-tendance": {
-     "trades": 307,
+     "trades": 305,
      "gagnes_pct": 44,
      "gain_moy": 145,
      "perdus_pct": 56,
-     "perte_moy": -111,
-     "total_pts": 347,
-     "total_eur": 174
+     "perte_moy": -112,
+     "total_pts": -6,
+     "total_eur": -3
     },
     "rejet-0.6-aucun": {
-     "trades": 654,
+     "trades": 651,
      "gagnes_pct": 45,
      "gain_moy": 140,
      "perdus_pct": 55,
-     "perte_moy": -123,
-     "total_pts": -3122,
-     "total_eur": -1561
+     "perte_moy": -124,
+     "total_pts": -3223,
+     "total_eur": -1611
     },
     "rejet-0.6-tendance": {
-     "trades": 307,
+     "trades": 305,
      "gagnes_pct": 45,
-     "gain_moy": 155,
+     "gain_moy": 154,
      "perdus_pct": 55,
-     "perte_moy": -130,
-     "total_pts": -277,
-     "total_eur": -138
+     "perte_moy": -132,
+     "total_pts": -863,
+     "total_eur": -432
     }
    }
   },
@@ -237,35 +237,35 @@
      "gain_moy": 27,
      "perdus_pct": 58,
      "perte_moy": -16,
-     "total_pts": 1412,
-     "total_eur": 1412
+     "total_pts": 1353,
+     "total_eur": 1353
     },
     "cassure-0.25-tendance": {
      "trades": 365,
      "gagnes_pct": 42,
-     "gain_moy": 26,
+     "gain_moy": 25,
      "perdus_pct": 58,
      "perte_moy": -15,
-     "total_pts": 619,
-     "total_eur": 619
+     "total_pts": 640,
+     "total_eur": 640
     },
     "cassure-0.4-aucun": {
      "trades": 589,
      "gagnes_pct": 47,
-     "gain_moy": 27,
+     "gain_moy": 26,
      "perdus_pct": 53,
      "perte_moy": -21,
-     "total_pts": 783,
-     "total_eur": 783
+     "total_pts": 694,
+     "total_eur": 694
     },
     "cassure-0.4-tendance": {
      "trades": 365,
      "gagnes_pct": 47,
-     "gain_moy": 24,
+     "gain_moy": 23,
      "perdus_pct": 53,
      "perte_moy": -21,
-     "total_pts": -144,
-     "total_eur": -144
+     "total_pts": -120,
+     "total_eur": -120
     },
     "cassure-0.6-aucun": {
      "trades": 589,
@@ -273,17 +273,17 @@
      "gain_moy": 26,
      "perdus_pct": 50,
      "perte_moy": -25,
-     "total_pts": 195,
-     "total_eur": 195
+     "total_pts": 138,
+     "total_eur": 138
     },
     "cassure-0.6-tendance": {
      "trades": 365,
-     "gagnes_pct": 50,
-     "gain_moy": 24,
-     "perdus_pct": 50,
-     "perte_moy": -25,
-     "total_pts": -315,
-     "total_eur": -315
+     "gagnes_pct": 51,
+     "gain_moy": 23,
+     "perdus_pct": 49,
+     "perte_moy": -26,
+     "total_pts": -291,
+     "total_eur": -291
     },
     "rejet-0.25-aucun": {
      "trades": 653,
@@ -291,8 +291,8 @@
      "gain_moy": 28,
      "perdus_pct": 64,
      "perte_moy": -16,
-     "total_pts": -37,
-     "total_eur": -37
+     "total_pts": -114,
+     "total_eur": -114
     },
     "rejet-0.25-tendance": {
      "trades": 306,
@@ -300,17 +300,17 @@
      "gain_moy": 28,
      "perdus_pct": 65,
      "perte_moy": -16,
-     "total_pts": -123,
-     "total_eur": -123
+     "total_pts": -118,
+     "total_eur": -118
     },
     "rejet-0.4-aucun": {
      "trades": 653,
-     "gagnes_pct": 42,
+     "gagnes_pct": 41,
      "gain_moy": 29,
-     "perdus_pct": 58,
+     "perdus_pct": 59,
      "perte_moy": -22,
-     "total_pts": -447,
-     "total_eur": -447
+     "total_pts": -549,
+     "total_eur": -549
     },
     "rejet-0.4-tendance": {
      "trades": 306,
@@ -318,8 +318,8 @@
      "gain_moy": 29,
      "perdus_pct": 60,
      "perte_moy": -22,
-     "total_pts": -611,
-     "total_eur": -611
+     "total_pts": -617,
+     "total_eur": -617
     },
     "rejet-0.6-aucun": {
      "trades": 653,
@@ -327,17 +327,17 @@
      "gain_moy": 29,
      "perdus_pct": 56,
      "perte_moy": -25,
-     "total_pts": -781,
-     "total_eur": -781
+     "total_pts": -881,
+     "total_eur": -881
     },
     "rejet-0.6-tendance": {
      "trades": 306,
-     "gagnes_pct": 43,
+     "gagnes_pct": 44,
      "gain_moy": 29,
-     "perdus_pct": 57,
+     "perdus_pct": 56,
      "perte_moy": -26,
-     "total_pts": -628,
-     "total_eur": -628
+     "total_pts": -611,
+     "total_eur": -611
     }
    }
   }

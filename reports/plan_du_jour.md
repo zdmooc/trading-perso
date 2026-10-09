@@ -1,86 +1,85 @@
 # Plan du jour
 
-📋 **Plan du jour · jeu. 8 oct.** (cours IG)  
+📋 **Plan du jour · ven. 9 oct.** (cours IG)  
   
 Hors plan = pas de trade.  
   
   
 **Hier**  
   
-DAX 40 : pas déclenché  
+DAX 40 : vente à 24 918 (09h), stoppé : −75 pts = −38 €  
   
-Nasdaq 100 : vente à 31 013 (15h), stoppé : −95 pts = −47 €  
+Nasdaq 100 : vente à 30 861 (18h), objectif atteint ✅ : +277 pts = +139 €  
   
-S&P 500 : vente à 7 789 (15h), stoppé : −17 pts = −17 €  
+S&P 500 : vente à 7 757 (18h), fermé en fin de séance : −9 pts = −9 €  
   
   
-🇩🇪 **DAX 40** · veille 25 115 (−334 pts)  
+🇩🇪 **DAX 40** · veille 24 816 (−299 pts)  
   
-🔴 Vente si 25 009 touché  
-   stop 25 083 (−74 pts = −37 €) · objectif 24 786 (+223 pts = +111 €)  
+🔴 Vente si 24 757 touché  
+   stop 24 831 (−75 pts = −37 €) · objectif 24 533 (+224 pts = +112 €)  
   
-📊 Test depuis nov. 2023 : 329 trades · 44 % gagnés (+110 pts en moy.) · 56 % perdus (−65 pts en moy.) · total +4 294 pts = +2 147 €  
+📊 Test depuis nov. 2023 : 329 trades · 44 % gagnés (+111 pts en moy.) · 56 % perdus (−65 pts en moy.) · total +4 253 pts = +2 127 €  
+  
+📒 Plan réel : 1 trades · 0 % gagnés (+0 pts en moy.) · 100 % perdus (−76 pts en moy.) · total −76 pts = −38 €  
   
 ⏰ entrée 9h-16h, tout fermé à 17h30 · 0,5 contrat = 0,5 €/pt  
   
   
-🇺🇸 **Nasdaq 100** · veille 31 149 (−85 pts)  
+🇺🇸 **Nasdaq 100** · veille 30 733 (−415 pts)  
   
-🟢 Achat si 31 204 touché  
-   stop 31 111 (−93 pts = −46 €) · objectif 31 482 (+278 pts = +139 €)  
+🟢 Achat si 31 172 touché  
+   stop 31 075 (−97 pts = −48 €) · objectif 31 463 (+290 pts = +145 €)  
   
-🔴 Vente si 30 861 touché  
-   stop 30 954 (−93 pts = −46 €) · objectif 30 583 (+278 pts = +139 €)  
+🔴 Vente si 30 511 touché  
+   stop 30 607 (−97 pts = −48 €) · objectif 30 220 (+290 pts = +145 €)  
   
-📊 Test depuis nov. 2023 : 603 trades · 43 % gagnés (+134 pts en moy.) · 57 % perdus (−80 pts en moy.) · total +7 461 pts = +3 730 €  
+📊 Test depuis nov. 2023 : 600 trades · 43 % gagnés (+134 pts en moy.) · 57 % perdus (−80 pts en moy.) · total +7 582 pts = +3 791 €  
   
-📒 Plan réel : 1 trades · 0 % gagnés (+0 pts en moy.) · 100 % perdus (−95 pts en moy.) · total −95 pts = −47 €  
+📒 Plan réel : 2 trades · 50 % gagnés (+277 pts en moy.) · 50 % perdus (−95 pts en moy.) · total +182 pts = +91 €  
   
 ⏰ entrée 15h30-21h, tout fermé à 22h · 0,5 contrat = 0,5 €/pt  
   
   
-🇺🇸 **S&P 500** · veille 7 799 (−21 pts)  
+🇺🇸 **S&P 500** · veille 7 766 (−33 pts)  
   
-🟢 Achat si 7 814 touché  
-   stop 7 797 (−17 pts = −17 €) · objectif 7 864 (+50 pts = +50 €)  
+🟢 Achat si 7 805 touché  
+   stop 7 788 (−17 pts = −17 €) · objectif 7 856 (+51 pts = +51 €)  
   
-🔴 Vente si 7 757 touché  
-   stop 7 774 (−17 pts = −17 €) · objectif 7 707 (+50 pts = +50 €)  
+🔴 Vente si 7 724 touché  
+   stop 7 741 (−17 pts = −17 €) · objectif 7 674 (+51 pts = +51 €)  
   
-📊 Test depuis nov. 2023 : 589 trades · 42 % gagnés (+27 pts en moy.) · 58 % perdus (−16 pts en moy.) · total +1 412 pts = +1 412 €  
+📊 Test depuis nov. 2023 : 589 trades · 42 % gagnés (+27 pts en moy.) · 58 % perdus (−16 pts en moy.) · total +1 353 pts = +1 353 €  
   
-📒 Plan réel : 1 trades · 0 % gagnés (+0 pts en moy.) · 100 % perdus (−17 pts en moy.) · total −17 pts = −17 €  
+📒 Plan réel : 2 trades · 0 % gagnés (+0 pts en moy.) · 100 % perdus (−13 pts en moy.) · total −26 pts = −26 €  
   
 ⏰ entrée 15h30-21h, tout fermé à 22h · 1 contrat = 1 €/pt  
   
   
 📈 **Long terme**  
   
-Nasdaq 100 : acheté 30 828, cours 31 160 (+332 pts)  
+Nasdaq 100 : acheté 30 828, cours 30 726 (−102 pts)  
    stop 30 035 · objectif 33 126  
   
-Caterpillar : acheté 843,59, cours 813,83 (−29,76 $)  
-   stop 798,81 · objectif 985,25  
-  
-Texas Instruments : acheté 291,62, cours 288,98 (−2,64 $)  
+Texas Instruments : acheté 291,62, cours 288,20 (−3,42 $)  
    stop 277,51 · objectif 342,66  
   
-Cisco : acheté 112,04, cours 117,39 (+5,35 $)  
+Cisco : acheté 112,04, cours 114,89 (+2,85 $)  
    stop 106,92 · objectif 128,04  
   
-🛒 Zone 1 Nasdaq : achat 30 700 (à −460 pts)  
+🛒 Zone 1 Nasdaq : achat 30 700 (à −26 pts)  
    stop 30 200 · objectif 32 200  
   
-🛒 Zone 2 (meilleure) Nasdaq : achat 29 950 (à −1 210 pts)  
+🛒 Zone 2 (meilleure) Nasdaq : achat 29 950 (à −776 pts)  
    stop 29 400 · objectif 31 600  
   
-🛒 Zone 3 Nasdaq : achat 29 500 (à −1 660 pts)  
+🛒 Zone 3 Nasdaq : achat 29 500 (à −1 226 pts)  
    stop 28 950 · objectif 31 150  
   
-🛒 Zone 4 Nasdaq : achat 28 750 (à −2 410 pts)  
+🛒 Zone 4 Nasdaq : achat 28 750 (à −1 976 pts)  
    stop 28 100 · objectif 30 700
 
-## Statistiques depuis le 2023-11-08 (bougies horaires)
+## Statistiques depuis le 2023-11-09 (bougies horaires)
 
 Points nets du spread IG. Objectif à 3 fois le risque. La règle retenue a le meilleur total.
 
@@ -88,52 +87,52 @@ Points nets du spread IG. Objectif à 3 fois le risque. La règle retenue a le m
 
 | Règle | Trades | Gagnés | Gain moyen | Perdus | Perte moyenne | Total |
 | --- | --- | --- | --- | --- | --- | --- |
-| Cassure du plus haut / plus bas de la veille, stop 0.25 ATR | 568 | 40 % | +109 pts | 60 % | −65 pts | +2 337 pts = +1 169 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR ✅ | 329 | 44 % | +110 pts | 56 % | −65 pts | +4 294 pts = +2 147 € |
-| Cassure du plus haut / plus bas de la veille, stop 0.4 ATR | 568 | 46 % | +107 pts | 54 % | −89 pts | +1 248 pts = +624 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 329 | 50 % | +113 pts | 50 % | −91 pts | +3 245 pts = +1 623 € |
-| Cassure du plus haut / plus bas de la veille, stop 0.6 ATR | 568 | 51 % | +107 pts | 49 % | −101 pts | +2 403 pts = +1 202 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 329 | 54 % | +112 pts | 46 % | −106 pts | +3 951 pts = +1 976 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.25 ATR | 619 | 33 % | +117 pts | 67 % | −62 pts | −1 905 pts = −953 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 297 | 36 % | +107 pts | 64 % | −65 pts | −911 pts = −455 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.4 ATR | 619 | 41 % | +113 pts | 59 % | −85 pts | −2 813 pts = −1 406 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 297 | 44 % | +106 pts | 56 % | −86 pts | −501 pts = −250 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.6 ATR | 619 | 45 % | +111 pts | 55 % | −102 pts | −3 715 pts = −1 858 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 297 | 47 % | +103 pts | 53 % | −96 pts | −576 pts = −288 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.25 ATR | 569 | 40 % | +110 pts | 60 % | −65 pts | +2 478 pts = +1 239 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR ✅ | 329 | 44 % | +111 pts | 56 % | −65 pts | +4 253 pts = +2 127 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.4 ATR | 569 | 47 % | +107 pts | 53 % | −89 pts | +1 484 pts = +742 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 329 | 50 % | +113 pts | 50 % | −91 pts | +3 254 pts = +1 627 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.6 ATR | 569 | 51 % | +108 pts | 49 % | −101 pts | +2 586 pts = +1 293 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 329 | 54 % | +112 pts | 46 % | −106 pts | +3 962 pts = +1 981 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.25 ATR | 620 | 33 % | +117 pts | 67 % | −62 pts | −2 077 pts = −1 039 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 298 | 36 % | +107 pts | 64 % | −65 pts | −999 pts = −500 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.4 ATR | 620 | 41 % | +112 pts | 59 % | −85 pts | −2 937 pts = −1 468 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 298 | 44 % | +106 pts | 56 % | −85 pts | −540 pts = −270 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.6 ATR | 620 | 45 % | +111 pts | 55 % | −102 pts | −3 985 pts = −1 993 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 298 | 47 % | +103 pts | 53 % | −96 pts | −755 pts = −377 € |
 
 ### Nasdaq 100 (0,5 contrat)
 
 | Règle | Trades | Gagnés | Gain moyen | Perdus | Perte moyenne | Total |
 | --- | --- | --- | --- | --- | --- | --- |
-| Cassure du plus haut / plus bas de la veille, stop 0.25 ATR ✅ | 603 | 43 % | +134 pts | 57 % | −80 pts | +7 461 pts = +3 730 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 366 | 41 % | +132 pts | 59 % | −78 pts | +3 229 pts = +1 614 € |
-| Cassure du plus haut / plus bas de la veille, stop 0.4 ATR | 603 | 48 % | +134 pts | 52 % | −108 pts | +4 236 pts = +2 118 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 366 | 47 % | +132 pts | 53 % | −107 pts | +1 835 pts = +917 € |
-| Cassure du plus haut / plus bas de la veille, stop 0.6 ATR | 603 | 50 % | +130 pts | 50 % | −129 pts | +720 pts = +360 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 366 | 49 % | +129 pts | 51 % | −129 pts | −673 pts = −336 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.25 ATR | 654 | 39 % | +133 pts | 61 % | −81 pts | +1 610 pts = +805 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 307 | 41 % | +145 pts | 59 % | −81 pts | +3 383 pts = +1 691 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.4 ATR | 654 | 43 % | +136 pts | 57 % | −109 pts | −2 260 pts = −1 130 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 307 | 44 % | +145 pts | 56 % | −111 pts | +347 pts = +174 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.6 ATR | 654 | 45 % | +140 pts | 55 % | −123 pts | −3 122 pts = −1 561 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 307 | 45 % | +155 pts | 55 % | −130 pts | −277 pts = −138 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.25 ATR ✅ | 600 | 43 % | +134 pts | 57 % | −80 pts | +7 582 pts = +3 791 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 363 | 42 % | +132 pts | 58 % | −78 pts | +3 459 pts = +1 729 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.4 ATR | 600 | 48 % | +134 pts | 52 % | −109 pts | +4 483 pts = +2 242 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 363 | 47 % | +132 pts | 53 % | −107 pts | +2 139 pts = +1 069 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.6 ATR | 600 | 51 % | +130 pts | 49 % | −129 pts | +1 134 pts = +567 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 363 | 50 % | +129 pts | 50 % | −129 pts | −324 pts = −162 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.25 ATR | 651 | 39 % | +133 pts | 61 % | −81 pts | +1 593 pts = +797 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 305 | 41 % | +143 pts | 59 % | −82 pts | +2 895 pts = +1 448 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.4 ATR | 651 | 43 % | +136 pts | 57 % | −109 pts | −2 252 pts = −1 126 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 305 | 44 % | +145 pts | 56 % | −112 pts | −6 pts = −3 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.6 ATR | 651 | 45 % | +140 pts | 55 % | −124 pts | −3 223 pts = −1 611 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 305 | 45 % | +154 pts | 55 % | −132 pts | −863 pts = −432 € |
 
 ### S&P 500 (1 contrat)
 
 | Règle | Trades | Gagnés | Gain moyen | Perdus | Perte moyenne | Total |
 | --- | --- | --- | --- | --- | --- | --- |
-| Cassure du plus haut / plus bas de la veille, stop 0.25 ATR ✅ | 589 | 42 % | +27 pts | 58 % | −16 pts | +1 412 pts = +1 412 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 365 | 42 % | +26 pts | 58 % | −15 pts | +619 pts = +619 € |
-| Cassure du plus haut / plus bas de la veille, stop 0.4 ATR | 589 | 47 % | +27 pts | 53 % | −21 pts | +783 pts = +783 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 365 | 47 % | +24 pts | 53 % | −21 pts | −144 pts = −144 € |
-| Cassure du plus haut / plus bas de la veille, stop 0.6 ATR | 589 | 50 % | +26 pts | 50 % | −25 pts | +195 pts = +195 € |
-| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 365 | 50 % | +24 pts | 50 % | −25 pts | −315 pts = −315 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.25 ATR | 653 | 36 % | +28 pts | 64 % | −16 pts | −37 pts = −37 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 306 | 35 % | +28 pts | 65 % | −16 pts | −123 pts = −123 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.4 ATR | 653 | 42 % | +29 pts | 58 % | −22 pts | −447 pts = −447 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 306 | 40 % | +29 pts | 60 % | −22 pts | −611 pts = −611 € |
-| Rejet sur le plus haut / plus bas de la veille, stop 0.6 ATR | 653 | 44 % | +29 pts | 56 % | −25 pts | −781 pts = −781 € |
-| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 306 | 43 % | +29 pts | 57 % | −26 pts | −628 pts = −628 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.25 ATR ✅ | 589 | 42 % | +27 pts | 58 % | −16 pts | +1 353 pts = +1 353 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 365 | 42 % | +25 pts | 58 % | −15 pts | +640 pts = +640 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.4 ATR | 589 | 47 % | +26 pts | 53 % | −21 pts | +694 pts = +694 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 365 | 47 % | +23 pts | 53 % | −21 pts | −120 pts = −120 € |
+| Cassure du plus haut / plus bas de la veille, stop 0.6 ATR | 589 | 50 % | +26 pts | 50 % | −25 pts | +138 pts = +138 € |
+| Cassure du plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 365 | 51 % | +23 pts | 49 % | −26 pts | −291 pts = −291 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.25 ATR | 653 | 36 % | +28 pts | 64 % | −16 pts | −114 pts = −114 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.25 ATR | 306 | 35 % | +28 pts | 65 % | −16 pts | −118 pts = −118 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.4 ATR | 653 | 41 % | +29 pts | 59 % | −22 pts | −549 pts = −549 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.4 ATR | 306 | 40 % | +29 pts | 60 % | −22 pts | −617 pts = −617 € |
+| Rejet sur le plus haut / plus bas de la veille, stop 0.6 ATR | 653 | 44 % | +29 pts | 56 % | −25 pts | −881 pts = −881 € |
+| Rejet sur le plus haut / plus bas de la veille, dans le sens de la tendance, stop 0.6 ATR | 306 | 44 % | +29 pts | 56 % | −26 pts | −611 pts = −611 € |
 
 ## Journal réel du plan
 
@@ -142,3 +141,6 @@ Points nets du spread IG. Objectif à 3 fois le risque. La règle retenue a le m
 | 2026-10-07 | DAX 40 | cassure-0.25-tendance | IG |  |  |  |  |  |  |  |  |  | non déclenché |
 | 2026-10-07 | Nasdaq 100 | cassure-0.25-aucun | IG | vente | 31012.5 | 15h | 31106.2 | 30731.6 | 31106.2 | stop | -94.6 | -47.3 | perdu |
 | 2026-10-07 | S&P 500 | cassure-0.25-aucun | IG | vente | 7789.0 | 15h | 7806.0 | 7737.9 | 7806.0 | stop | -17.4 | -17.4 | perdu |
+| 2026-10-08 | DAX 40 | cassure-0.25-tendance | IG | vente | 24918.4 | 09h | 24992.7 | 24695.6 | 24992.7 | stop | -75.5 | -37.7 | perdu |
+| 2026-10-08 | Nasdaq 100 | cassure-0.25-aucun | IG | vente | 30861.1 | 18h | 30953.8 | 30583.1 | 30583.1 | objectif | 277.0 | 138.5 | gagné |
+| 2026-10-08 | S&P 500 | cassure-0.25-aucun | IG | vente | 7757.4 | 18h | 7774.2 | 7707.0 | 7765.9 | clôture | -8.9 | -8.9 | perdu |
