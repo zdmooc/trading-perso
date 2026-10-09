@@ -345,3 +345,24 @@ def test_seances_us_1530():
     idx = pd.date_range("2026-10-08 15:00", periods=4, freq="30min", tz="Europe/Paris")
     df = pd.DataFrame({"Open": 1.0, "High": 1.0, "Low": 1.0, "Close": 1.0}, index=idx)
     assert seances(df, (15, 21), 30)[idx[0].date()].index[0].minute == 30
+
+
+def test_rapport_horaire():
+    import pandas as pd
+    import numpy as np
+    from tradeperso import horaire, matin
+    jours = pd.bdate_range("2026-03-01", "2026-10-09")
+    c = 24000 + np.cumsum(np.random.default_rng(1).normal(0, 80, len(jours)))
+    d = pd.DataFrame({"Open": c, "High": c + 60, "Low": c - 60, "Close": c}, index=jours)
+    t = pd.date_range("2026-10-09 09:00", "2026-10-09 13:00", freq="h", tz=matin.PARIS)
+    jour = pd.DataFrame({"Open": [24000, 24010, 24060, 24120, 24100], "High": [24020, 24070, 24130, 24150, 24110],
+                         "Low": [23990, 24000, 24050, 24090, 24080], "Close": [24010, 24060, 24120, 24100, 24090]}, index=t)
+    pl = {"cloture": 23980, "ordres": [{"sens": 1, "niveau": 24050, "cote": "haut", "risque": 40},
+                                       {"sens": -1, "niveau": 23900, "cote": "bas", "risque": 40}]}
+    maintenant = pd.Timestamp("2026-10-09 13:30", tz=matin.PARIS)
+    r = horaire.resume("^GDAXI", jour, d, pl, maintenant)
+    assert r["var"] == 110 and r["trade"].sens == 1 and "achat à 24 050" in r["etat"].replace(" ", " ")
+    assert set(r["pivots"]) == {"R2", "R1", "P", "S1", "S2"}
+    figs = {"j-GDAXI": horaire.figure_jour(jour, r), "m-GDAXI": horaire.figure_mois(d, r)}
+    texte = horaire.page(maintenant, "IG", {"^GDAXI": r}, figs)
+    assert "Marché à 13h30" in texte and 'id="j-GDAXI"' in texte and "plotly" in texte

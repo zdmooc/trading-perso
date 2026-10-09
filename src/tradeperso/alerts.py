@@ -136,3 +136,16 @@ def send_photo(chemin: str, legende: str = "") -> bool:
                        files={"photo": f}, timeout=30)
     r.raise_for_status()
     return True
+
+
+def send_document(chemin: str, legende: str = "", silencieux: bool = False) -> bool:
+    """Envoie un fichier (ex. rapport HTML), sans sonnerie si silencieux."""
+    token, chat = os.getenv("TELEGRAM_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
+    if not token or not chat:
+        return False
+    with open(chemin, "rb") as f:
+        r = httpx.post(f"https://api.telegram.org/bot{token}/sendDocument",
+                       data={"chat_id": chat, "caption": legende[:1000], "disable_notification": str(silencieux).lower()},
+                       files={"document": f}, timeout=30)
+    r.raise_for_status()
+    return True

@@ -1,0 +1,54 @@
+name: rapport-horaire
+# Rapport HTML du marché (DAX, Nasdaq 100, S&P 500) chaque heure, 9h-22h heure de Paris.
+# Envoyé sur Telegram sans sonnerie. Lecture seule : aucun ordre.
+on:
+  schedule:
+    - cron: "5 7-20 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      publier:
+        description: "enregistrer aussi le rapport dans le dépôt"
+        type: boolean
+        default: false
+      silencieux:
+        description: "pas d'envoi Telegram"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: rapport-horaire
+  cancel-in-progress: true
+jobs:
+  horaire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Rapport
+        env:
+          IG_API_KEY: ${{ secrets.IG_API_KEY }}
+          IG_USERNAME: ${{ secrets.IG_USERNAME }}
+          IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
+          IG_ACC_TYPE: ${{ secrets.IG_ACC_TYPE }}
+          IG_ACCOUNT_ID: Z4UJIM
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: tradeperso horaire ${{ inputs.silencieux && '--silencieux' || '' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rapport-marche
+          path: reports/html/marche.html
+          retention-days: 3
+      - name: Publier
+        if: ${{ inputs.publier }}
+        run: |
+          git config user.name "scan-bot"
+          git config user.email "scan-bot@users.noreply.github.com"
+          git add -f reports/html/marche.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Rapport horaire $(date -u '+%F %H:%M') UTC"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push && break; sleep 5; done

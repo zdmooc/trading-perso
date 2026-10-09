@@ -557,7 +557,7 @@ def cmd_ig_test(out: Path) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(prog="tradeperso")
-    p.add_argument("commande", choices=["scan", "backtest", "matin", "plan", "ig-test", "ig-marches"])
+    p.add_argument("commande", choices=["scan", "backtest", "matin", "plan", "ig-test", "ig-marches", "horaire"])
     p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan", "plan", "point"])
     p.add_argument("--cron", default="", help="horaire de la tâche GitHub (pour --phase auto)")
     p.add_argument("--silencieux", action="store_true", help="pas de message Telegram")
@@ -569,6 +569,10 @@ def main() -> None:
     if a.commande == "ig-marches":
         from .ig_releve import releve
         releve(Path(a.out), telegram=not a.silencieux)
+        return
+    if a.commande == "horaire":
+        from . import horaire
+        horaire.executer(Path(a.out), telegram=not a.silencieux)
         return
     if a.commande == "ig-test":
         cmd_ig_test(Path(a.out))

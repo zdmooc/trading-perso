@@ -105,7 +105,7 @@ def rejouer(barres: pd.DataFrame, liste: list[Ordre], fin_entree: int, spread: f
                 continue
             risque = o.risque
             pos = Trade(o.sens, entree, entree - o.sens * o.risque, entree + o.sens * RATIO * o.risque,
-                        heure=f"{b.Index:%Hh}")
+                        heure=f"{b.Index:%Hh}" + (f"{b.Index:%M}" if getattr(b.Index, "minute", 0) else ""))
             if (b.Close <= pos.stop) if o.sens > 0 else (b.Close >= pos.stop):
                 pos.sortie, pos.motif = pos.stop, "stop"
                 break

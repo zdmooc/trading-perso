@@ -104,3 +104,10 @@ Voir [docs/analyse_nasdaq.md](docs/analyse_nasdaq.md). Chaque soir, le graphe es
 `plan.yml` envoie sur Telegram, en cours IG : le plan à 8h45 (2 entrées au plus par indice, constant toute la journée),
 un point à 14h15 et le bilan à 17h45. Chaque règle est testée sur 2 ans (`reports/plan_du_jour.md`) et chaque trade
 du plan est suivi dans `reports/plan/journal.csv`. Aucun ordre n'est passé : tu décides seul.
+
+## Rapport horaire (HTML avec graphiques)
+
+`horaire.yml` (`tradeperso horaire`) écrit chaque heure de 9h à 22h `reports/html/marche.html` et l'envoie sur Telegram
+sans sonnerie. Pour le DAX, le Nasdaq 100 et le S&P 500 : cours IG du jour, écart avec la veille en points, état du plan
+du jour, graphique du jour avec les niveaux du plan (entrées, stops, objectifs) et les pivots de la semaine, graphique
+6 mois avec les moyennes 20 et 50 jours. Lecture seule. Environ 40 bougies IG par passage pour ménager le quota.
