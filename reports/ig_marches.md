@@ -1,39 +1,39 @@
 # Marchés sur IG (démo, lecture seule)
 
-Relevé du 09/10/2026 à 02h26 (Paris).
+Relevé du 09/10/2026 à 08h38 (Paris).
 
 ## Indices
 
 | Marché | Produit | Vente | Achat | Spread | Var. jour | Plus haut | Plus bas | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Germany 40 | Allemagne 40 au comptant (1€) | 25010.6 | 25016.4 | 5.8 | 0.77 % (191.5 pts) | 25036.1 | 24784.9 | TRADEABLE |
-| France 40 | France 40 au comptant (1€) | 7782.2 | 7785.2 | 3.0 | 0.71 % (55.1 pts) | 7792.5 | 7714.6 | TRADEABLE |
-| EU Stocks 50 | EU Stocks 50 au comptant (2€) | 6158.1 | 6160.1 | 2.0 | 0.53 % (32.67 pts) | 6167.3 | 6117.68 | TRADEABLE |
-| FTSE 100 | FTSE 100 au comptant (1€) | 10524.7 | 10528.7 | 4.0 | 0.82 % (85.6 pts) | 10541.8 | 10429.2 | TRADEABLE |
-| US 500 | US 500 au comptant (1€) | 7774.49 | 7776.09 | 1.6 | 0.13 % (9.92 pts) | 7782.39 | 7764.56 | TRADEABLE |
-| US Tech 100 | US Tech 100 au comptant (1€) | 30738.9 | 30741.4 | 2.5 | 0.02 % (6.4 pts) | 30845.6 | 30722.1 | TRADEABLE |
-| Wall Street | Wall Street au comptant (1€) | 51293.8 | 51299.8 | 6.0 | 0.14 % (70.2 pts) | 51324.9 | 51203.1 | TRADEABLE |
-| Japan 225 | Japon 225 au comptant (1$) | 68326.0 | 68333.0 | 7.0 | -1.35 % (-935.5 pts) | 69297.1 | 67853.5 | TRADEABLE |
+| Germany 40 | Allemagne 40 au comptant (1€) | 24998.8 | 25002.3 | 3.5 | 0.72 % (178.5 pts) | 25047.3 | 24784.9 | TRADEABLE |
+| France 40 | France 40 au comptant (1€) | 7784.8 | 7787.3 | 2.5 | 0.75 % (57.6 pts) | 7805.8 | 7714.6 | TRADEABLE |
+| EU Stocks 50 | EU Stocks 50 au comptant (2€) | 6170.35 | 6171.85 | 1.5 | 0.73 % (44.67 pts) | 6181.6 | 6117.68 | TRADEABLE |
+| FTSE 100 | FTSE 100 au comptant (1€) | 10531.1 | 10534.1 | 3.0 | 0.88 % (91.5 pts) | 10547.9 | 10429.2 | TRADEABLE |
+| US 500 | US 500 au comptant (1€) | 7790.11 | 7791.71 | 1.6 | 0.33 % (25.55 pts) | 7795.31 | 7764.56 | TRADEABLE |
+| US Tech 100 | US Tech 100 au comptant (1€) | 30951.6 | 30954.1 | 2.5 | 0.71 % (219.1 pts) | 30959.5 | 30722.1 | TRADEABLE |
+| Wall Street | Wall Street au comptant (1€) | 51276.2 | 51281.2 | 5.0 | 0.1 % (52.1 pts) | 51361.5 | 51203.1 | TRADEABLE |
+| Japan 225 | Japon 225 au comptant (1$) | 69202.3 | 69209.3 | 7.0 | 0.25 % (170 pts) | 69219.3 | 69018.7 | TRADEABLE |
 
 ## Matières premières
 
 | Marché | Produit | Vente | Achat | Spread | Var. jour | Plus haut | Plus bas | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Spot Gold | Spot Gold ($1) | 4141.84 | 4142.84 | 1.0 | 0.2 % (8.35 pts) | 4151.13 | 4130.24 | TRADEABLE |
-| Silver | Argent au comptant mini (500oz) | 59.52 | 59.56 | 0.04 | 0.6 % (0.358 pts) | 59.777 | 58.87 | TRADEABLE |
-| US Crude | Pétrole - US Brut Léger (1€) | 9056.0 | 9060.8 | 4.8 | -0.46 % (-41.9 pts) | 9128.0 | 9005.9 | TRADEABLE |
-| Natural Gas | Gaz naturel (10$) | 3276 | 3279 | 3 | -0.7 % (-23 pts) | 3308 | 3258 | TRADEABLE |
-| Copper | Copper ($5 Mini Contract) | 14283.8 | 14303.8 | 20.0 | -0.01 % (-1.5 pts) | 14333.9 | 14280.0 | TRADEABLE |
+| Spot Gold | Spot Gold ($1) | 4190.67 | 4191.67 | 1.0 | 1.38 % (57.19 pts) | 4208.11 | 4130.24 | TRADEABLE |
+| Silver | Argent au comptant mini (500oz) | 60.215 | 60.255 | 0.04 | 1.78 % (1.053 pts) | 60.633 | 58.87 | TRADEABLE |
+| US Crude | Pétrole - US Brut Léger (1€) | 9030.3 | 9034.3 | 4.0 | -0.75 % (-68 pts) | 9128.0 | 8962.2 | TRADEABLE |
+| Natural Gas | Gaz naturel (10$) | 3279 | 3282 | 3 | -0.61 % (-20 pts) | 3308 | 3258 | TRADEABLE |
+| Copper | Copper ($5 Mini Contract) | 14470.3 | 14490.3 | 20.0 | 1.29 % (185 pts) | 14498.8 | 14280.0 | TRADEABLE |
 
 ## Cryptos
 
 | Marché | Produit | Vente | Achat | Spread | Var. jour | Plus haut | Plus bas | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Bitcoin | Bitcoin ($0.1) | 81640 | 81790 | 150 | -0.12 % (-97 pts) | 81997 | 81496 | TRADEABLE |
+| Bitcoin | Bitcoin ($0.1) | 82467 | 82617 | 150 | 0.89 % (729 pts) | 82661 | 81493 | TRADEABLE |
 
 ## Fiches produits
 
-- **Germany 40** `IX.D.DAX.IFMM.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 8.0, marge 5 %
+- **Germany 40** `IX.D.DAX.IFMM.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 5.0, marge 5 %
 - **France 40** `IX.D.CAC.IMF.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 12.0, marge 5 %
 - **EU Stocks 50** `IX.D.STXE.IFM.IP` : 1 point = 2.00 EUR, taille min 0.5, stop min 6.0, marge 5 %
 - **FTSE 100** `IX.D.FTSE.IFE.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 8.0, marge 5 %
