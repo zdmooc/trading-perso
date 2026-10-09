@@ -24,10 +24,10 @@ from .indicators import atr, sma
 INDICES = {
     "^GDAXI": dict(nom="DAX 40", ig="Germany 40", drapeau="🇩🇪", heures=(9, 17), fin_entree=15, taille=0.5,
                    spread=1.2, fenetre="entrée 9h-16h, tout fermé à 17h30"),
-    "^NDX": dict(nom="Nasdaq 100", ig="US Tech 100", drapeau="🇺🇸", heures=(15, 21), fin_entree=20, taille=0.5,
-                 spread=1.0, fenetre="entrée 15h30-21h, tout fermé à 22h"),
-    "^GSPC": dict(nom="S&P 500", ig="US 500", drapeau="🇺🇸", heures=(15, 21), fin_entree=20, taille=1.0,
-                  spread=0.4, fenetre="entrée 15h30-21h, tout fermé à 22h"),
+    "^NDX": dict(nom="Nasdaq 100", ig="US Tech 100", drapeau="🇺🇸", heures=(15, 21), debut_min=30, fin_entree=20, taille=0.5,
+                 spread=1.0, resolution="MINUTE_30", fenetre="entrée 15h30-21h, tout fermé à 22h"),
+    "^GSPC": dict(nom="S&P 500", ig="US 500", drapeau="🇺🇸", heures=(15, 21), debut_min=30, fin_entree=20, taille=1.0,
+                  spread=0.4, resolution="MINUTE_30", fenetre="entrée 15h30-21h, tout fermé à 22h"),
 }
 RATIO = 3.0
 MIN_TRADES = 30
@@ -85,9 +85,12 @@ def ordres(regle: Regle, haut: float, bas: float, a: float, tendance: int) -> li
     return liste
 
 
-def rejouer(barres: pd.DataFrame, liste: list[Ordre], fin_entree: int, spread: float, fini: bool = True) -> Trade | None:
-    """Rejoue une séance (bougies horaires, heure de Paris). Un seul trade : le premier niveau touché."""
-    pos = None
+def rejouer(barres: pd.DataFrame, liste: list[Ordre], fin_entree: int, spread: float, fini: bool = True,
+            gap_max: float | None = None, stop_entree: bool = False) -> Trade | None:
+    """Rejoue une séance (bougies horaires, heure de Paris). Un seul trade : le premier niveau touché.
+    gap_max : pas d'entrée si la bougie ouvre déjà au-delà du niveau de plus de gap_max fois le risque.
+    stop_entree : stop remonté au prix d'entrée dès que le gain atteint 1 fois le risque."""
+    pos, risque = None, 0.0
     for b in barres.itertuples():
         if pos is None:
             if b.Index.hour > fin_entree:
@@ -97,6 +100,10 @@ def rejouer(barres: pd.DataFrame, liste: list[Ordre], fin_entree: int, spread: f
                 continue
             o = min(touches, key=lambda o: abs(b.Open - o.niveau))
             entree = max(b.Open, o.niveau) if o.cote == "haut" else min(b.Open, o.niveau)
+            if gap_max is not None and abs(entree - o.niveau) > gap_max * o.risque:
+                liste = [x for x in liste if x is not o]  # niveau dépassé dès l'ouverture : on ne court pas après
+                continue
+            risque = o.risque
             pos = Trade(o.sens, entree, entree - o.sens * o.risque, entree + o.sens * RATIO * o.risque,
                         heure=f"{b.Index:%Hh}")
             if (b.Close <= pos.stop) if o.sens > 0 else (b.Close >= pos.stop):
@@ -109,6 +116,8 @@ def rejouer(barres: pd.DataFrame, liste: list[Ordre], fin_entree: int, spread: f
         if (b.High >= pos.objectif) if pos.sens > 0 else (b.Low <= pos.objectif):
             pos.sortie, pos.motif = pos.objectif, "objectif"
             break
+        if stop_entree and ((b.High >= pos.entree + risque) if pos.sens > 0 else (b.Low <= pos.entree - risque)):
+            pos.stop = pos.entree
     if pos is None:
         return None
     if pos.motif == "":
@@ -117,8 +126,10 @@ def rejouer(barres: pd.DataFrame, liste: list[Ordre], fin_entree: int, spread: f
     return pos
 
 
-def seances(h: pd.DataFrame, heures: tuple[int, int]) -> dict:
-    s = h[(h.index.hour >= heures[0]) & (h.index.hour <= heures[1])]
+def seances(h: pd.DataFrame, heures: tuple[int, int], debut_min: int = 0) -> dict:
+    """Bougies de la séance, de heures[0]h{debut_min} à la fin de la bougie de heures[1]h (heure de Paris)."""
+    minutes = h.index.hour * 60 + h.index.minute
+    s = h[(minutes >= heures[0] * 60 + debut_min) & (h.index.hour <= heures[1])]
     return {d: g for d, g in s.groupby(s.index.date)}
 
 
@@ -131,7 +142,7 @@ def contexte(d: pd.DataFrame) -> pd.DataFrame:
 
 def backtest(h: pd.DataFrame, d: pd.DataFrame, info: dict) -> dict[str, list[float]]:
     """Points gagnés ou perdus par trade, pour chaque règle."""
-    ses, ctx = seances(h, info["heures"]), contexte(d)
+    ses, ctx = seances(h, info["heures"], info.get("debut_min", 0)), contexte(d)
     jours = sorted(ses)
     res = {r.cle: [] for r in REGLES}
     for veille, jour in zip(jours, jours[1:]):
@@ -237,7 +248,8 @@ def charger_ig(maintenant: pd.Timestamp, jours: int = 5) -> dict[str, pd.DataFra
     fin = (maintenant.tz_convert("UTC") + pd.Timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
     for s, info in INDICES.items():
         try:
-            out[s] = barres_ig(ig.historique(epics[info["ig"]], debut, fin))
+            # Bougies de 30 min pour les indices américains : la séance commence à 15h30, pas à 15h.
+            out[s] = barres_ig(ig.historique(epics[info["ig"]], debut, fin, info.get("resolution", "HOUR")))
         except Exception as e:
             print(f"IG {info['ig']} : {e}")
         time.sleep(PAUSE)
@@ -279,7 +291,7 @@ def preparer(maintenant: pd.Timestamp, st: dict, d: dict, h: dict, ig: dict) -> 
         if s not in st["indices"] or s not in d:
             continue
         source = "IG" if len(ig.get(s, [])) else "Yahoo"
-        ses = seances(ig[s] if source == "IG" else h[s], info["heures"])
+        ses = seances(ig[s] if source == "IG" else h[s], info["heures"], info.get("debut_min", 0))
         passees = [j for j in sorted(ses) if j < maintenant.date()]
         ctx = contexte(d[s])
         ctx = ctx[ctx.index < maintenant.date()]
@@ -308,7 +320,7 @@ def evaluer(plan: dict, barres: dict, maintenant: pd.Timestamp) -> dict[str, tup
         df = barres.get(s)
         if df is None or not len(df):
             continue
-        ses = seances(df, info["heures"]).get(jour)
+        ses = seances(df, info["heures"], info.get("debut_min", 0)).get(jour)
         fin = pd.Timestamp(jour, tz=matin.PARIS) + pd.Timedelta(hours=info["heures"][1] + 1)
         fini = maintenant >= fin
         if ses is None or not len(ses):
@@ -449,7 +461,7 @@ def tableau(j: pd.DataFrame) -> list[str]:
 def executer(out: Path, phase: str, telegram: bool = True) -> None:
     maintenant = pd.Timestamp.now(tz=matin.PARIS)
     rep = dossier(out)
-    ig = charger_ig(maintenant)
+    ig = charger_ig(maintenant, 4 if phase == "plan" else 1)  # quota IG : 10 000 bougies par semaine
     jr = rep / "journal.csv"
     j = pd.read_csv(jr) if jr.exists() else pd.DataFrame(columns=COLONNES)
     if phase == "plan":

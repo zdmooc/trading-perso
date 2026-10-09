@@ -327,3 +327,21 @@ def test_phase_plan():
     ete = pd.Timestamp("2026-10-07 06:50", tz="UTC")
     assert phase_du_cron("45 6 * * 1-5", ete, PHASES_PLAN) == "plan" and phase_du_cron("45 7 * * 1-5", ete, PHASES_PLAN) is None
     assert phase_du_cron("15 12 * * 1-5", pd.Timestamp("2026-10-07 12:20", tz="UTC"), PHASES_PLAN) == "point"
+
+
+def test_plan_gap_et_stop_entree():
+    from tradeperso.plan import Ordre, rejouer
+    vente = [Ordre(-1, 110, "haut", 10)]
+    # ouverture à 118 : 8 pts au-delà du niveau > 0,5 x 10 -> pas d'entrée avec gap_max
+    b = _barres([(118, 120, 100, 101)])
+    assert rejouer(b, vente, 15, 0).entree == 118 and rejouer(b, vente, 15, 0, gap_max=0.5) is None
+    # +1R atteint (100), puis retour à 110 : sorti à l'entrée au lieu du stop
+    b = _barres([(104, 111, 103, 108), (108, 109, 99, 101), (101, 121, 100, 119)])
+    assert rejouer(b, vente, 15, 0).motif == "stop" and rejouer(b, vente, 15, 0, stop_entree=True).pts == 0
+
+
+def test_seances_us_1530():
+    from tradeperso.plan import seances
+    idx = pd.date_range("2026-10-08 15:00", periods=4, freq="30min", tz="Europe/Paris")
+    df = pd.DataFrame({"Open": 1.0, "High": 1.0, "Low": 1.0, "Close": 1.0}, index=idx)
+    assert seances(df, (15, 21), 30)[idx[0].date()].index[0].minute == 30
