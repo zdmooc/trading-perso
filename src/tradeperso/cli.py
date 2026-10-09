@@ -557,18 +557,24 @@ def cmd_ig_test(out: Path) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(prog="tradeperso")
-    p.add_argument("commande", choices=["scan", "backtest", "matin", "plan", "ig-test", "ig-marches", "horaire"])
+    p.add_argument("commande", choices=["scan", "backtest", "matin", "plan", "ig-test", "ig-marches", "horaire", "serveur"])
     p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan", "plan", "point"])
     p.add_argument("--cron", default="", help="horaire de la tâche GitHub (pour --phase auto)")
     p.add_argument("--silencieux", action="store_true", help="pas de message Telegram")
     p.add_argument("--config", default="config.toml")
     p.add_argument("--out", default="reports")
+    p.add_argument("--port", type=int, default=8080, help="port de la page web (serveur)")
+    p.add_argument("--minutes", type=int, default=15, help="mise à jour de la page web (serveur)")
     p.add_argument("--period", default="10y", help="historique du backtest (ex. 5y, 10y, max)")
     a = p.parse_args()
     cfg = load_config(a.config)
     if a.commande == "ig-marches":
         from .ig_releve import releve
         releve(Path(a.out), telegram=not a.silencieux)
+        return
+    if a.commande == "serveur":
+        from . import horaire
+        horaire.servir(Path(a.out), a.port, a.minutes)
         return
     if a.commande == "horaire":
         from . import horaire

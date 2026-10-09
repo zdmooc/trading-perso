@@ -105,13 +105,13 @@ Voir [docs/analyse_nasdaq.md](docs/analyse_nasdaq.md). Chaque soir, le graphe es
 un point à 14h15 et le bilan à 17h45. Chaque règle est testée sur 2 ans (`reports/plan_du_jour.md`) et chaque trade
 du plan est suivi dans `reports/plan/journal.csv`. Aucun ordre n'est passé : tu décides seul.
 
-## Rapport horaire (HTML avec graphiques)
+## Page web du marché (HTML avec graphiques)
 
-`horaire.yml` (`tradeperso horaire`) écrit chaque heure de 9h à 22h `reports/html/marche.html` et l'envoie sur Telegram
-sans sonnerie. Pour le DAX, le Nasdaq 100 et le S&P 500 : cours IG du jour, écart avec la veille en points, état du plan
-du jour, graphique du jour avec les niveaux du plan (entrées, stops, objectifs) et les pivots de la semaine, graphique
-6 mois avec les moyennes 20 et 50 jours. Lecture seule. Environ 40 bougies IG par passage pour ménager le quota.
+Sur CRC : `tradeperso serveur` sert https://marche-trading-perso.apps-crc.testing, recalculée toutes les 15 minutes
+(`deploy/crc/README.md`, aucune clé nécessaire). En haut, « Que faire maintenant » : pour le DAX, le Nasdaq 100 et le
+S&P 500, ATTENDRE / EN POSITION / TERMINÉ avec entrée, stop et objectif en points et en €. Puis, par indice, le
+graphique du jour avec les niveaux du plan et les pivots de la semaine, et le graphique 6 mois. Lecture seule.
 
-Commentaire IA (étape 2) : `src/tradeperso/ia.py`. Si `IA_URL` est défini (Ollama ou LiteLLM, API compatible OpenAI),
-le modèle local décrit les chiffres en 3 à 5 lignes. Chaque nombre cité est vérifié ; au moindre nombre inventé, le
-commentaire est retiré. Déploiement sur CRC : `deploy/crc/README.md`.
+Commentaire IA : `src/tradeperso/ia.py`. Si `IA_URL` est défini (Ollama ou LiteLLM, API compatible OpenAI), le
+modèle local décrit les chiffres en 3 à 5 lignes. Chaque nombre cité est vérifié ; au moindre nombre inventé, le
+commentaire est retiré. `tradeperso horaire` (workflow manuel `horaire.yml`) produit la même page en une fois.

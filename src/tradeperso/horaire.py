@@ -75,21 +75,26 @@ def resume(s: str, jour_df: pd.DataFrame, d: pd.DataFrame | None, pl: dict | Non
         avant = jour_df[jour_df.index <= jour_df.index[-1] - pd.Timedelta(hours=1)]
         if len(avant):
             r["var_1h"] = r["prix"] - float(avant["Close"].iloc[-1])
-    if pl and "prix" in r:
-        r["var"] = r["prix"] - pl["cloture"]
-        r["var_pct"] = 100 * r["var"] / pl["cloture"]
+    if pl:
+        if "prix" in r:
+            r["var"] = r["prix"] - pl["cloture"]
+            r["var_pct"] = 100 * r["var"] / pl["cloture"]
         r["ordres"] = []
         for o in pl["ordres"]:
             stop, obj = o["niveau"] - o["sens"] * o["risque"], o["niveau"] + o["sens"] * plan.RATIO * o["risque"]
-            r["ordres"].append({**o, "stop": stop, "objectif": obj, "distance": o["niveau"] - r["prix"]})
-        ses = plan.seances(jour_df, info["heures"], info.get("debut_min", 0)).get(maintenant.date())
+            r["ordres"].append({**o, "stop": stop, "objectif": obj, "distance": o["niveau"] - r["prix"] if "prix" in r else None})
+        ses = plan.seances(jour_df, info["heures"], info.get("debut_min", 0)).get(maintenant.date()) if len(jour_df) else None
         fin = maintenant.normalize() + pd.Timedelta(hours=info["heures"][1] + 1)
+        r["entree_possible"] = maintenant.hour <= info["fin_entree"]
+        r["fenetre"] = info["fenetre"]
         if ses is not None and len(ses):
             t = plan.rejouer(ses, [plan.Ordre(**o) for o in pl["ordres"]], info["fin_entree"], info["spread"], maintenant >= fin)
             r["etat"] = plan.ligne_trade(t, info["taille"], maintenant >= fin)
             r["trade"] = t
         else:
-            r["etat"] = "séance pas encore ouverte" if maintenant < fin else "pas de séance aujourd'hui"
+            debut = maintenant.normalize() + pd.Timedelta(hours=info["heures"][0], minutes=info.get("debut_min", 0))
+            r["etat"] = "séance pas encore ouverte" if maintenant < debut else \
+                "pas de séance aujourd'hui" if maintenant >= fin else "cours pas encore disponibles"
     if d is not None and len(d) > 60:
         c = d["Close"]
         r["rsi"] = float(rsi(c, 14).iloc[-1])
@@ -183,7 +188,7 @@ def carte(s: str, r: dict) -> str:
         achat = o["sens"] > 0
         dist = o["distance"]
         # Un seul trade par jour : la distance au niveau n'a de sens que tant que rien n'est déclenché.
-        reste = "" if r.get("trade") is not None else \
+        reste = "" if r.get("trade") is not None or dist is None else \
             f' · niveau {alerts.nombre(abs(dist), 0)} pts {"au-dessus" if dist > 0 else "sous"} le cours'
         lignes.append(
             f'<p class="ordre"><span class="{"pos" if achat else "neg"}">{"Achat" if achat else "Vente"} '
@@ -200,6 +205,50 @@ def carte(s: str, r: dict) -> str:
             f'<h3>6 derniers mois</h3><div id="m-{s.strip("^")}" class="graphe"></div></section>')
 
 
+def decisions(resumes: dict[str, dict]) -> str:
+    """Tableau « que faire maintenant » : une ligne par indice, entrée, stop et objectif bien visibles."""
+    n = lambda x: alerts.nombre(x, 0)
+    lignes = []
+    for r in resumes.values():
+        t = r.get("trade")
+        nom = f'{r["drapeau"]} <b>{html.escape(r["nom"])}</b><br><span class="muted">{n(r["prix"]) if "prix" in r else "—"}</span>'
+        if not r.get("ordres") and t is None:
+            lignes.append(f'<tr><td>{nom}</td><td colspan="4" class="muted">Pas de plan aujourd\'hui</td></tr>')
+        elif t is not None and t.motif == "en cours":
+            sens = "ACHAT" if t.sens > 0 else "VENTE"
+            lignes.append(
+                f'<tr class="actif"><td>{nom}</td><td><span class="badge {"b-achat" if t.sens > 0 else "b-vente"}">EN POSITION · {sens}</span>'
+                f'<br><span class="{_signe(t.pts)}">{plan.pts(t.pts)} = {plan.eur(t.pts * r["taille"])}</span></td>'
+                f'<td>{n(t.entree)}<br><span class="muted">à {t.heure}</span></td><td class="neg">{n(t.stop)}</td>'
+                f'<td class="pos">{n(t.objectif)}</td></tr>')
+        elif t is not None:
+            fin = {"stop": "stoppé", "objectif": "objectif atteint ✅", "clôture": "fermé en fin de séance"}.get(t.motif, t.motif)
+            lignes.append(
+                f'<tr><td>{nom}</td><td><span class="badge b-fini">TERMINÉ</span><br>{fin} : '
+                f'<span class="{_signe(t.pts)}">{plan.pts(t.pts)} = {plan.eur(t.pts * r["taille"])}</span></td>'
+                f'<td>{n(t.entree)}</td><td>{n(t.stop)}</td><td>{n(t.objectif)}</td></tr>')
+        elif not r.get("entree_possible", True):
+            lignes.append(f'<tr><td>{nom}</td><td colspan="4"><span class="badge b-fini">RIEN AUJOURD\'HUI</span>'
+                          f'<br><span class="muted">aucun niveau touché avant l\'heure limite</span></td></tr>')
+        else:
+            premiere = f'<td rowspan="{len(r["ordres"])}">{nom}</td>'
+            for i, o in enumerate(r["ordres"]):
+                achat = o["sens"] > 0
+                quand = (f'si le cours <b>monte</b> à {n(o["niveau"])}' if o["cote"] == "haut" else
+                         f'si le cours <b>descend</b> à {n(o["niveau"])}')
+                dist = f'<br><span class="muted">encore {n(abs(o["distance"]))} pts</span>' if o["distance"] is not None else ""
+                lignes.append(
+                    f'<tr>{premiere if i == 0 else ""}'
+                    f'<td><span class="badge {"b-achat" if achat else "b-vente"}">ATTENDRE · {"ACHAT" if achat else "VENTE"}</span>'
+                    f'<br>{quand}{dist}</td><td>{n(o["niveau"])}</td>'
+                    f'<td class="neg">{n(o["stop"])}<br><span class="muted">{plan.eur(-o["risque"] * r["taille"])}</span></td>'
+                    f'<td class="pos">{n(o["objectif"])}<br><span class="muted">{plan.eur(plan.RATIO * o["risque"] * r["taille"])}</span></td></tr>')
+    return ('<section class="carte"><h2>🎯 Que faire maintenant</h2><div class="tab"><table><thead><tr><th>Indice</th><th>Action</th>'
+            '<th>Entrée</th><th>Stop (sortie si perte)</th><th>Objectif (sortie si gain)</th></tr></thead><tbody>'
+            + "".join(lignes) + '</tbody></table></div><p class="muted">Un seul trade par indice et par jour. '
+            'Dès qu\'une entrée est touchée, l\'autre est annulée.</p></section>')
+
+
 CSS = """
 :root{--bg:#f6f7f9;--carte:#fff;--texte:#1b1f24;--muted:#6b7280;--bord:#e5e7eb}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1117;--carte:#161b22;--texte:#e6edf3;--muted:#8b949e;--bord:#30363d}}
@@ -211,13 +260,17 @@ h1{font-size:20px;margin:8px 0 2px}h2{font-size:18px;margin:0 0 8px}h3{font-size
 .prix{font-size:26px;font-weight:600;margin:0}.prix small{font-size:13px;color:var(--muted);font-weight:400}
 p{margin:6px 0}.muted{color:var(--muted);font-size:13px}.pos{color:#22a06b}.neg{color:#e5484d}
 .etat{padding:8px 10px;border-radius:8px;background:var(--bg)}.ordre{margin:10px 0}
-.graphe{width:100%}.ia{border-left:4px solid #4c8dff}.note{font-size:12px;color:var(--muted);margin-top:24px}
+.graphe{width:100%}
+.tab{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th{text-align:left;color:var(--muted);font-weight:500;font-size:12px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--bord);vertical-align:top}td:nth-child(n+3){white-space:nowrap}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700;color:#fff}
+.b-achat{background:#22a06b}.b-vente{background:#e5484d}.b-fini{background:#6b7280}tr.actif td{background:rgba(76,141,255,.08)}.ia{border-left:4px solid #4c8dff}.note{font-size:12px;color:var(--muted);margin-top:24px}
 """
 
 
 def page(maintenant: pd.Timestamp, source: str, resumes: dict[str, dict], figures: dict[str, dict],
          commentaire: str | None = None) -> str:
-    cartes = "".join(carte(s, r) for s, r in resumes.items())
+    cartes = decisions(resumes) + "".join(carte(s, r) for s, r in resumes.items())
     if commentaire:
         cartes = ('<section class="carte ia"><h2>🧠 Commentaire de l\'heure</h2>'
                   + "".join(f"<p>{html.escape(l)}</p>" for l in commentaire.splitlines() if l.strip())
@@ -225,13 +278,14 @@ def page(maintenant: pd.Timestamp, source: str, resumes: dict[str, dict], figure
                   + "</section>" + cartes)
     js = json.dumps(figures, separators=(",", ":"), default=float)
     return f"""<!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="300">
 <title>Marché heure par heure</title><style>{CSS}</style><script src="{PLOTLY}"></script></head>
 <body><main>
 <h1>Marché à {maintenant:%Hh%M}</h1>
 <p class="muted">{alerts.date_fr(maintenant.date())} · cours du jour {source} · lecture seule, aucun ordre passé</p>
 {cartes}
 <p class="note">Lignes pleines : entrées du plan de 8h45. Pointillés gris : stops. Pointillés bleus : objectifs (3 fois le risque).
+Les niveaux du plan sont en cours IG ; si les cours du jour viennent de Yahoo, comptez quelques points d'écart.
 Orange : pivots de la semaine (calculés sur Yahoo, quelques points d'écart possibles avec IG).
 Les montants en € sont pour la taille du plan (DAX et Nasdaq 0,5 contrat, S&P 500 1 contrat).</p>
 </main>
@@ -293,3 +347,33 @@ def executer(out: Path, telegram: bool = True) -> Path:
         legende = f"📈 Marché à {maintenant:%Hh%M}\n{legende}" + (f"\n\n{commentaire}" if commentaire else "")
         alerts.send_document(str(chemin), legende, silencieux=True)
     return chemin
+
+
+def servir(out: Path, port: int = 8080, minutes: int = 15) -> None:
+    """Page web permanente (CRC) : rapport recalculé toutes les `minutes`, servi sur `port`. Aucun envoi Telegram."""
+    import functools
+    import shutil
+    import threading
+    import time
+    from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+
+    rep = out / "html"
+    rep.mkdir(parents=True, exist_ok=True)
+    index = rep / "index.html"
+    if not index.exists():
+        index.write_text('<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="30">'
+                         '<p style="font:16px system-ui;padding:16px">Premier calcul en cours, la page se recharge seule.</p>',
+                         encoding="utf-8")
+
+    def boucle() -> None:
+        while True:
+            try:
+                shutil.copyfile(executer(out, telegram=False), index)
+            except Exception as e:  # une erreur de données ne coupe pas la page
+                print(f"Rapport non mis à jour : {e}")
+            time.sleep(minutes * 60)
+
+    threading.Thread(target=boucle, daemon=True).start()
+    serveur = ThreadingHTTPServer(("0.0.0.0", port), functools.partial(SimpleHTTPRequestHandler, directory=str(rep)))
+    print(f"Page sur le port {port}, mise à jour toutes les {minutes} min")
+    serveur.serve_forever()

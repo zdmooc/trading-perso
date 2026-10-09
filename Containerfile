@@ -7,4 +7,5 @@ COPY reports/ig/epics.json ./reports/ig/epics.json
 RUN pip install --no-cache-dir . && rm -rf src
 # OpenShift lance le conteneur avec un utilisateur au hasard : tout ce qui s'écrit va dans /tmp.
 ENV HOME=/tmp XDG_CACHE_HOME=/tmp/.cache PYTHONUNBUFFERED=1
-CMD ["tradeperso", "horaire", "--out", "/tmp/reports"]
+EXPOSE 8080
+CMD ["tradeperso", "serveur", "--out", "/tmp/reports", "--port", "8080", "--minutes", "15"]

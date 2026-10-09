@@ -1,9 +1,8 @@
 name: rapport-horaire
 # Rapport HTML du marché (DAX, Nasdaq 100, S&P 500) chaque heure, 9h-22h heure de Paris.
 # Envoyé sur Telegram sans sonnerie. Lecture seule : aucun ordre.
+# Planification coupée le 09/10/2026 : la page tourne maintenant sur CRC (deploy/crc/rapport-horaire.yaml).
 on:
-  schedule:
-    - cron: "5 7-20 * * 1-5"
   workflow_dispatch:
     inputs:
       publier:
@@ -13,7 +12,7 @@ on:
       silencieux:
         description: "pas d'envoi Telegram"
         type: boolean
-        default: false
+        default: true
 permissions:
   contents: write
 concurrency:
