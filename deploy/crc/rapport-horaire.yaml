@@ -36,6 +36,8 @@ items:
       image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"rapport-horaire:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"rapport\")].image"}]'
   spec:
     replicas: 1
+    strategy:
+      type: Recreate   # CRC a peu de mémoire : jamais deux pods en même temps
     selector:
       matchLabels:
         app: rapport-horaire
@@ -66,8 +68,8 @@ items:
             httpGet: {path: /, port: 8080}
             initialDelaySeconds: 5
           resources:
-            requests: {cpu: 100m, memory: 256Mi}
-            limits: {cpu: "1", memory: 768Mi}
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {cpu: "1", memory: 640Mi}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities: {drop: [ALL]}
