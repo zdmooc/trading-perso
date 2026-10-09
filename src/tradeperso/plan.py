@@ -244,8 +244,9 @@ def charger_ig(maintenant: pd.Timestamp, jours: int = 5) -> dict[str, pd.DataFra
     except Exception as e:  # pas d'accès IG : on se rabat sur Yahoo
         print(f"IG indisponible : {e}")
         return out
-    debut = (maintenant.tz_convert("UTC") - pd.Timedelta(days=jours)).strftime("%Y-%m-%dT00:00:00")
-    fin = (maintenant.tz_convert("UTC") + pd.Timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
+    # IG lit "from" et "to" à l'heure du compte (Paris), pas en UTC : vérifié le 09/10/2026.
+    debut = (maintenant - pd.Timedelta(days=jours)).strftime("%Y-%m-%dT00:00:00")
+    fin = (maintenant + pd.Timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
     for s, info in INDICES.items():
         try:
             # Bougies de 30 min pour les indices américains : la séance commence à 15h30, pas à 15h.

@@ -33,11 +33,12 @@ def charger_jour(maintenant: pd.Timestamp) -> tuple[dict[str, pd.DataFrame], str
         ig = IG()
         ig.connexion()
         jour = maintenant.normalize()
-        fin = (maintenant.tz_convert("UTC") + pd.Timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
+        # IG lit "from" et "to" à l'heure du compte (Paris), pas en UTC.
+        fin = (maintenant + pd.Timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
         for s, info in plan.INDICES.items():
             debut = jour + pd.Timedelta(hours=info["heures"][0] - 1)
             try:
-                out[s] = plan.barres_ig(ig.historique(epics[info["ig"]], debut.tz_convert("UTC").strftime("%Y-%m-%dT%H:%M:%S"),
+                out[s] = plan.barres_ig(ig.historique(epics[info["ig"]], debut.strftime("%Y-%m-%dT%H:%M:%S"),
                                                       fin, info.get("resolution", "HOUR")))
             except Exception as e:
                 print(f"IG {info['ig']} : {e}")
