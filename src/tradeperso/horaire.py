@@ -199,7 +199,8 @@ def carte(s: str, r: dict) -> str:
 
 CSS = """
 :root{--bg:#f6f7f9;--carte:#fff;--texte:#1b1f24;--muted:#6b7280;--bord:#e5e7eb}
-@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--carte:#161b22;--texte:#e6edf3;--muted:#8b949e;--bord:#30363d}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1117;--carte:#161b22;--texte:#e6edf3;--muted:#8b949e;--bord:#30363d}}
+:root[data-theme="dark"]{--bg:#0d1117;--carte:#161b22;--texte:#e6edf3;--muted:#8b949e;--bord:#30363d}
 body{margin:0;background:var(--bg);color:var(--texte);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 main{max-width:980px;margin:0 auto;padding:16px}
 h1{font-size:20px;margin:8px 0 2px}h2{font-size:18px;margin:0 0 8px}h3{font-size:14px;color:var(--muted);margin:18px 0 4px}
