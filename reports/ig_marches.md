@@ -1,6 +1,6 @@
 # Marchés sur IG (démo, lecture seule)
 
-Relevé du 10/10/2026 à 02h04 (Paris).
+Relevé du 10/10/2026 à 17h46 (Paris).
 
 ## Indices
 
@@ -29,17 +29,17 @@ Relevé du 10/10/2026 à 02h04 (Paris).
 
 | Marché | Produit | Vente | Achat | Spread | Var. jour | Plus haut | Plus bas | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Bitcoin | Bitcoin ($0.1) | 82418 | 82568 | 150 | 0.03 % (26 pts) | 82731 | 82325 | TRADEABLE |
+| Bitcoin | Bitcoin ($0.1) | 82977 | 83127 | 150 | 0.71 % (585 pts) | 83133 | 82325 | TRADEABLE |
 
 ## Fiches produits
 
 - **Germany 40** `IX.D.DAX.IFMM.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 8.0, marge 5 %
-- **France 40** `IX.D.CAC.IMF.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 8.0, marge 5 %
-- **EU Stocks 50** `IX.D.STXE.IFM.IP` : 1 point = 2.00 EUR, taille min 0.5, stop min 6.0, marge 5 %
-- **FTSE 100** `IX.D.FTSE.IFE.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 4.0, marge 5 %
+- **France 40** `IX.D.CAC.IMF.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 4.0, marge 5 %
+- **EU Stocks 50** `IX.D.STXE.IFM.IP` : 1 point = 2.00 EUR, taille min 0.5, stop min 3.0, marge 5 %
+- **FTSE 100** `IX.D.FTSE.IFE.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 6.0, marge 5 %
 - **US 500** `IX.D.SPTRD.IFE.IP` : 1 point = 1.00 EUR, taille min 1.0, stop min 1.0, marge 5 %
 - **US Tech 100** `IX.D.NASDAQ.IFE.IP` : 1 point = 1.00 EUR, taille min 0.5, stop min 4.0, marge 5 %
-- **Wall Street** `IX.D.DOW.IFE.IP` : 1 point = 1.00 EUR, taille min 0.2, stop min 6.0, marge 5 %
+- **Wall Street** `IX.D.DOW.IFE.IP` : 1 point = 1.00 EUR, taille min 0.2, stop min 12.0, marge 5 %
 - **Japan 225** `IX.D.NIKKEI.IFM.IP` : 1 point = 1.00 USD, taille min 0.5, stop min 20.0, marge 5 %
 - **Spot Gold** `CS.D.CFEGOLD.CEF.IP` : 1 point = 1.00 USD, taille min 0.1, stop min 1.0, marge 5 %
 - **Silver** `CS.D.CFDSILVER.CFM.IP` : 1 point = 5.00 USD, taille min 0.1, stop min 4.0, marge 10 %
