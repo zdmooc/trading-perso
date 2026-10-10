@@ -4,8 +4,8 @@ Un seul côté par indice : le premier niveau touché. Knock-out = stop. Si ni l
 
 **En test : aucun message Telegram tant que le backtest n'est pas positif.**
 
-### Nikkei 225
+### CAC 40
 
-- Achat si le cours dépasse 68811.77 : knock-out 68201.63, objectif 70642.20
-- Vente si le cours passe sous 68027.99 : knock-out 68638.14, objectif 66197.56
-- Mise ≈ 0.05 € par point, soit une prime d'environ 30 €
+- Achat si le cours dépasse 7834.54 : knock-out 7788.56, objectif 7972.48
+- Vente si le cours passe sous 7757.79 : knock-out 7803.77, objectif 7619.85
+- Mise ≈ 0.65 € par point, soit une prime d'environ 30 €
