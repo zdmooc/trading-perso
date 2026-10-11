@@ -2,29 +2,29 @@
 
 ## Résultat réaliste du portefeuille (stratégies actives, 4 positions au maximum)
 
-**+8.3 % par an** (+115.7 % au total), pire baisse **-23.8 %**, plus longue période sous un ancien sommet : 38.5 mois.
+**+8.3 % par an** (+117.1 % au total), pire baisse **-23.8 %**, plus longue période sous un ancien sommet : 38.5 mois.
 
 | Trades | Réussite | Gain moyen | Perte moyenne | Espérance par trade | Profit factor |
 | --- | --- | --- | --- | --- | --- |
-| 546 | 29.9 % | +2.03 R | -0.64 R | +0.16 R | 1.36 |
+| 547 | 30.0 % | +2.0 R | -0.62 R | +0.16 R | 1.37 |
 
-Par stratégie : cassure_20j 210 trades (+36.2 R), cassure_20j_vente 69 trades (-4.0 R), repli_tendance 191 trades (+14.0 R), tendance_mm 67 trades (+42.3 R), tendance_mm_vente 9 trades (-0.5 R).
+Par stratégie : cassure_20j 217 trades (+40.2 R), cassure_20j_vente 69 trades (-4.0 R), repli_tendance 184 trades (+15.1 R), tendance_mm 68 trades (+37.6 R), tendance_mm_vente 9 trades (-0.5 R).
 
 ### Comparaison avec « acheter et garder » (02/2017 à 10/2026)
 
 | Méthode | Rendement par an | Total | Pire baisse | Plus longue période sous un sommet |
 | --- | --- | --- | --- | --- |
-| **Ce système** (4 positions, risque 1% par trade) | +8.3 % | +115.7 % | -23.8 % | 38.5 mois |
-| Garder le S&P 500 (ETF SPY, dividendes inclus) | +15.2 % | +293.6 % | -33.7 % | 23.2 mois |
-| Garder le Nasdaq 100 (ETF QQQ, dividendes inclus) | +21.1 % | +537.6 % | -35.1 % | 23.5 mois |
-| Garder Apple, Microsoft, Alphabet, Amazon, Meta et Nvidia (parts égales) | +36.8 % | +1966.9 % | -46.6 % | 18.1 mois |
+| **Ce système** (4 positions, risque 1% par trade) | +8.3 % | +117.1 % | -23.8 % | 38.5 mois |
+| Garder le S&P 500 (ETF SPY, dividendes inclus) | +15.3 % | +298.2 % | -33.7 % | 23.2 mois |
+| Garder le Nasdaq 100 (ETF QQQ, dividendes inclus) | +21.1 % | +539.0 % | -35.1 % | 23.5 mois |
+| Garder Apple, Microsoft, Alphabet, Amazon, Meta et Nvidia (parts égales) | +36.6 % | +1952.4 % | -46.6 % | 18.1 mois |
 
 ### Spéculation : rotation sur les actions leaders (actions réelles, parts égales)
 
 | Variante | Rendement par an | Total | Pire baisse | Plus longue période sous un sommet |
 | --- | --- | --- | --- | --- |
-| Avec filtre de marché | +14.1 % | +250.7 % | -28.8 % | 22.3 mois |
-| Sans filtre de marché | +20.6 % | +491.0 % | -39.4 % | 18.4 mois |
+| Avec filtre de marché | +13.7 % | +238.3 % | -28.8 % | 22.3 mois |
+| Sans filtre de marché | +20.0 % | +466.4 % | -39.4 % | 18.4 mois |
 
 ⚠️ Biais : la liste contient les grandes actions d'aujourd'hui, donc des gagnantes connues après coup. Le résultat réel sera plus faible.
 
@@ -35,15 +35,15 @@ Si un petit changement de réglage fait s'effondrer le résultat, la stratégie 
 
 | Variante | Trades | Espérance par trade | Rendement par an | Pire baisse |
 | --- | --- | --- | --- | --- |
-| Réglage actuel | 546 | +0.16 R | +8.3 % | -23.8 % |
-| Cassure sur 15 jours | 556 | +0.12 R | +5.8 % | -28.2 % |
-| Cassure sur 25 jours | 552 | +0.16 R | +8.5 % | -28.4 % |
-| Moyenne longue 150 jours | 554 | +0.2 R | +10.6 % | -24.3 % |
-| Moyenne longue 250 jours | 562 | +0.22 R | +12.4 % | -21.6 % |
-| Stop à 1,5 ATR | 697 | +0.15 R | +9.7 % | -26.7 % |
-| Stop à 2,5 ATR | 449 | +0.18 R | +8.1 % | -15.2 % |
-| Sans stop au prix d'entrée | 522 | +0.13 R | +6.4 % | -21.1 % |
-| Sans filtre de marché | 625 | +0.24 R | +14.5 % | -26.4 % |
+| Réglage actuel | 547 | +0.16 R | +8.3 % | -23.8 % |
+| Cassure sur 15 jours | 563 | +0.11 R | +5.3 % | -28.2 % |
+| Cassure sur 25 jours | 552 | +0.17 R | +8.8 % | -28.4 % |
+| Moyenne longue 150 jours | 558 | +0.18 R | +9.5 % | -24.3 % |
+| Moyenne longue 250 jours | 562 | +0.22 R | +12.1 % | -21.6 % |
+| Stop à 1,5 ATR | 699 | +0.15 R | +9.6 % | -26.7 % |
+| Stop à 2,5 ATR | 453 | +0.19 R | +8.6 % | -15.2 % |
+| Sans stop au prix d'entrée | 524 | +0.12 R | +5.8 % | -20.2 % |
+| Sans filtre de marché | 619 | +0.26 R | +15.6 % | -26.4 % |
 
 # Détail par stratégie (trades indépendants)
 
@@ -55,26 +55,26 @@ Filtre de marché S&P 500 / MM200 : oui. Stop ramené au prix d'entrée à +1.0 
 
 | stratégie | trades | reussite_pct | r_moyen | profit_factor | rendement_pct | drawdown_max_pct |
 | --- | --- | --- | --- | --- | --- | --- |
-| tendance_mm | 892 | 28.8 | 0.26 | 1.56 | 805.7 | -31.6 |
-| rsi2_repli | 3664 | 63.9 | 0.03 | 1.12 | 138.9 | -65.1 |
-| cassure_20j | 2661 | 31.9 | 0.18 | 1.38 | 9246.3 | -49.8 |
+| tendance_mm | 893 | 28.8 | 0.26 | 1.56 | 805.8 | -31.6 |
+| rsi2_repli | 3670 | 64.0 | 0.03 | 1.12 | 138.6 | -65.0 |
+| cassure_20j | 2655 | 31.9 | 0.18 | 1.39 | 9459.4 | -49.3 |
 | tendance_mm_vente | 34 | 11.8 | -0.36 | 0.39 | -11.6 | -10.6 |
 | cassure_20j_vente | 106 | 19.8 | -0.17 | 0.68 | -17.6 | -21.6 |
-| repli_tendance | 2207 | 27.1 | 0.14 | 1.37 | 1737.8 | -30.9 |
-| repli_tendance_2r (test) | 2394 | 31.3 | 0.12 | 1.31 | 1266.0 | -36.4 |
+| repli_tendance | 2197 | 27.2 | 0.14 | 1.38 | 1840.3 | -30.9 |
+| repli_tendance_2r (test) | 2383 | 31.4 | 0.12 | 1.31 | 1299.3 | -36.6 |
 | repli_tendance_vente (test) | 47 | 23.4 | -0.08 | 0.81 | -4.2 | -9.6 |
 
 ## Sans protections (pour comparaison)
 
 | stratégie | trades | reussite_pct | r_moyen | profit_factor | rendement_pct | drawdown_max_pct |
 | --- | --- | --- | --- | --- | --- | --- |
-| tendance_mm | 1092 | 39.7 | 0.35 | 1.58 | 3520.7 | -37.2 |
-| rsi2_repli | 4137 | 64.3 | 0.03 | 1.14 | 206.1 | -65.8 |
-| cassure_20j | 2929 | 40.9 | 0.26 | 1.5 | 139271.2 | -50.1 |
+| tendance_mm | 1092 | 39.5 | 0.34 | 1.57 | 3352.0 | -37.2 |
+| rsi2_repli | 4144 | 64.4 | 0.03 | 1.14 | 207.7 | -65.8 |
+| cassure_20j | 2919 | 40.9 | 0.26 | 1.5 | 137911.5 | -50.7 |
 | tendance_mm_vente | 60 | 20.0 | -0.35 | 0.55 | -19.7 | -18.8 |
 | cassure_20j_vente | 162 | 17.9 | -0.45 | 0.39 | -52.1 | -51.6 |
-| repli_tendance | 2256 | 31.7 | 0.12 | 1.29 | 1156.7 | -40.3 |
-| repli_tendance_2r (test) | 2469 | 35.4 | 0.12 | 1.29 | 1400.8 | -39.2 |
+| repli_tendance | 2247 | 31.9 | 0.12 | 1.29 | 1205.4 | -40.3 |
+| repli_tendance_2r (test) | 2459 | 35.5 | 0.12 | 1.29 | 1415.9 | -39.4 |
 | repli_tendance_vente (test) | 72 | 16.7 | -0.19 | 0.64 | -13.1 | -21.2 |
 
 ## Day trading en barrières IG (indices, cassure du plus haut ou du plus bas de la veille)
@@ -83,29 +83,29 @@ Un trade par jour au plus, clôture en fin de séance. Si le stop et l'objectif 
 
 | Filtre de la veille | Sens | Knock-out | Trades | Réussite | Espérance par trade | Profit factor | Total |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| tous | deux_sens | 0.5 ATR | 12075 | 33.5 % | -0.341 R | 0.42 | -4114.1 R |
-| tous | deux_sens | 1.0 ATR | 12075 | 43.8 % | -0.062 R | 0.73 | -753.3 R |
-| tous | tendance | 0.5 ATR | 6953 | 33.4 % | -0.344 R | 0.41 | -2390.3 R |
-| tous | tendance | 1.0 ATR | 6953 | 42.9 % | -0.083 R | 0.67 | -574.1 R |
-| nr4 ⬅ | deux_sens | 0.5 ATR | 3575 | 35.6 % | -0.277 R | 0.48 | -988.7 R |
-| nr4 | deux_sens | 1.0 ATR | 3575 | 43.9 % | -0.04 R | 0.8 | -141.7 R |
-| nr4 | tendance | 0.5 ATR | 2028 | 35.3 % | -0.304 R | 0.44 | -616.4 R |
-| nr4 | tendance | 1.0 ATR | 2028 | 42.9 % | -0.071 R | 0.69 | -144.1 R |
-| inside | deux_sens | 0.5 ATR | 1525 | 33.6 % | -0.343 R | 0.41 | -522.9 R |
-| inside | deux_sens | 1.0 ATR | 1525 | 43.3 % | -0.077 R | 0.68 | -116.9 R |
-| inside | tendance | 0.5 ATR | 845 | 30.9 % | -0.425 R | 0.33 | -359.3 R |
-| inside | tendance | 1.0 ATR | 845 | 40.9 % | -0.138 R | 0.5 | -116.7 R |
+| tous | deux_sens | 0.5 ATR | 12080 | 33.6 % | -0.34 R | 0.42 | -4108.9 R |
+| tous | deux_sens | 1.0 ATR | 12080 | 43.8 % | -0.062 R | 0.73 | -745.1 R |
+| tous | tendance | 0.5 ATR | 6947 | 33.4 % | -0.344 R | 0.41 | -2393.1 R |
+| tous | tendance | 1.0 ATR | 6947 | 42.9 % | -0.083 R | 0.67 | -573.4 R |
+| nr4 ⬅ | deux_sens | 0.5 ATR | 3577 | 35.7 % | -0.276 R | 0.48 | -986.1 R |
+| nr4 | deux_sens | 1.0 ATR | 3577 | 43.9 % | -0.039 R | 0.81 | -140.9 R |
+| nr4 | tendance | 0.5 ATR | 2023 | 35.3 % | -0.303 R | 0.45 | -612.9 R |
+| nr4 | tendance | 1.0 ATR | 2023 | 43.0 % | -0.071 R | 0.69 | -143.2 R |
+| inside | deux_sens | 0.5 ATR | 1526 | 33.6 % | -0.343 R | 0.41 | -523.3 R |
+| inside | deux_sens | 1.0 ATR | 1526 | 43.3 % | -0.076 R | 0.68 | -116.2 R |
+| inside | tendance | 0.5 ATR | 843 | 31.0 % | -0.425 R | 0.32 | -357.9 R |
+| inside | tendance | 1.0 ATR | 843 | 40.8 % | -0.138 R | 0.5 | -116.6 R |
 
 Par indice (réglage actuel ⬅) :
 
 | Indice | Trades | Espérance par trade | Total |
 | --- | --- | --- | --- |
-| S&P 500 | 623 | -0.241 R | -150.2 R |
-| Nasdaq 100 | 602 | -0.263 R | -158.5 R |
-| DAX 40 | 581 | -0.304 R | -176.5 R |
-| Nikkei 225 | 603 | -0.157 R | -94.4 R |
-| FTSE 100 | 565 | -0.358 R | -202.1 R |
-| CAC 40 | 601 | -0.344 R | -207.0 R |
+| S&P 500 | 623 | -0.242 R | -150.7 R |
+| Nasdaq 100 | 602 | -0.264 R | -159.2 R |
+| DAX 40 | 582 | -0.302 R | -175.6 R |
+| Nikkei 225 | 604 | -0.155 R | -93.5 R |
+| FTSE 100 | 565 | -0.356 R | -201.0 R |
+| CAC 40 | 601 | -0.343 R | -206.2 R |
 
 ## Loi des 20/80 par actif (stratégies envoyées, avec protections)
 
@@ -115,61 +115,61 @@ Stabilité : les 11 meilleurs actifs de la 1re moitié (2021) font +0.15 R par t
 
 | Rang | Actif | Trades | Résultat | Part cumulée du gain | 1re moitié | 2e moitié |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | AMD | 103 | +55.7 R | 5 % | +30.3 R | +25.4 R |
-| 2 | Apple | 114 | +55.5 R | 10 % | +45.3 R | +10.3 R |
-| 3 | Caterpillar | 92 | +50.2 R | 14 % | +17.7 R | +32.5 R |
-| 4 | Costco | 116 | +50.2 R | 19 % | +45.8 R | +4.3 R |
-| 5 | Alphabet | 119 | +48.1 R | 23 % | +28.3 R | +19.7 R |
-| 6 | Nasdaq 100 | 141 | +47.6 R | 27 % | +24.2 R | +23.4 R |
-| 7 | Nvidia | 132 | +45.5 R | 31 % | +21.4 R | +24.2 R |
-| 8 | S&P 500 | 142 | +44.4 R | 35 % | +26.8 R | +17.6 R |
-| 9 | Eli Lilly | 96 | +42.5 R | 39 % | +23.7 R | +18.8 R |
-| 10 | Cisco | 104 | +40.1 R | 42 % | +15.7 R | +24.4 R |
-| 11 | Tesla | 94 | +36.1 R | 45 % | +32.3 R | +3.8 R |
+| 1 | Caterpillar | 93 | +53.4 R | 5 % | +21.8 R | +31.5 R |
+| 2 | Apple | 113 | +53.3 R | 9 % | +43.1 R | +10.3 R |
+| 3 | AMD | 103 | +53.1 R | 14 % | +27.7 R | +25.3 R |
+| 4 | Costco | 116 | +50.2 R | 18 % | +45.8 R | +4.3 R |
+| 5 | Nasdaq 100 | 140 | +48.6 R | 23 % | +25.2 R | +23.4 R |
+| 6 | Alphabet | 119 | +48.1 R | 27 % | +28.3 R | +19.7 R |
+| 7 | S&P 500 | 141 | +45.4 R | 31 % | +27.9 R | +17.6 R |
+| 8 | Nvidia | 132 | +45.1 R | 35 % | +20.9 R | +24.2 R |
+| 9 | Eli Lilly | 96 | +42.5 R | 38 % | +23.7 R | +18.8 R |
+| 10 | Cisco | 104 | +37.5 R | 42 % | +13.2 R | +24.4 R |
+| 11 | Tesla | 93 | +36.3 R | 45 % | +31.5 R | +4.8 R |
 | 12 | Home Depot | 88 | +35.6 R | 48 % | +33.1 R | +2.5 R |
-| 13 | Berkshire Hathaway | 101 | +34.8 R | 51 % | +16.0 R | +18.8 R |
-| 14 | Morgan Stanley | 101 | +34.7 R | 55 % | +18.9 R | +15.9 R |
-| 15 | Goldman Sachs | 104 | +32.6 R | 57 % | +7.8 R | +24.8 R |
-| 16 | Mastercard | 105 | +31.9 R | 60 % | +22.5 R | +9.5 R |
-| 17 | Walmart | 111 | +30.4 R | 63 % | +17.7 R | +12.6 R |
-| 18 | JPMorgan | 103 | +30.1 R | 65 % | +8.8 R | +21.3 R |
-| 19 | Microsoft | 131 | +29.1 R | 68 % | +30.2 R | -1.1 R |
-| 20 | Abbott | 116 | +26.8 R | 70 % | +19.1 R | +7.7 R |
-| 21 | AbbVie | 105 | +24.4 R | 73 % | +13.3 R | +11.1 R |
-| 22 | Adobe | 93 | +23.7 R | 75 % | +32.3 R | -8.6 R |
-| 23 | Amgen | 96 | +23.6 R | 77 % | +13.6 R | +10.0 R |
-| 24 | GE Aerospace | 84 | +23.1 R | 79 % | -3.5 R | +26.6 R |
-| 25 | Salesforce | 97 | +22.5 R | 81 % | +10.3 R | +12.2 R |
-| 26 | McDonald's | 93 | +18.8 R | 82 % | +22.3 R | -3.4 R |
-| 27 | IBM | 84 | +14.9 R | 84 % | -4.7 R | +19.6 R |
-| 28 | Wells Fargo | 86 | +14.6 R | 85 % | +10.6 R | +4.0 R |
-| 29 | Visa | 103 | +14.5 R | 86 % | +12.1 R | +2.4 R |
-| 30 | Bank of America | 98 | +13.9 R | 87 % | +5.5 R | +8.4 R |
-| 31 | PepsiCo | 89 | +13.5 R | 89 % | +15.8 R | -2.3 R |
-| 32 | Philip Morris | 81 | +12.5 R | 90 % | +8.1 R | +4.4 R |
-| 33 | Intel | 82 | +12.3 R | 91 % | -4.5 R | +16.8 R |
-| 34 | Nikkei 225 | 141 | +12.2 R | 92 % | +8.8 R | +3.3 R |
-| 35 | Netflix | 103 | +11.9 R | 93 % | +4.5 R | +7.3 R |
+| 13 | Morgan Stanley | 101 | +33.1 R | 51 % | +17.3 R | +15.8 R |
+| 14 | Goldman Sachs | 104 | +32.6 R | 54 % | +7.8 R | +24.8 R |
+| 15 | Mastercard | 104 | +31.6 R | 57 % | +22.1 R | +9.5 R |
+| 16 | Microsoft | 130 | +31.2 R | 59 % | +32.3 R | -1.1 R |
+| 17 | Walmart | 111 | +31.1 R | 62 % | +17.5 R | +13.6 R |
+| 18 | JPMorgan | 103 | +31.1 R | 65 % | +9.8 R | +21.3 R |
+| 19 | Berkshire Hathaway | 99 | +31.0 R | 67 % | +12.2 R | +18.8 R |
+| 20 | Abbott | 114 | +28.5 R | 70 % | +20.9 R | +7.7 R |
+| 21 | AbbVie | 103 | +26.4 R | 72 % | +15.3 R | +11.1 R |
+| 22 | Amgen | 96 | +24.3 R | 74 % | +14.6 R | +9.7 R |
+| 23 | Adobe | 93 | +23.7 R | 76 % | +31.3 R | -7.6 R |
+| 24 | GE Aerospace | 83 | +23.5 R | 78 % | -3.1 R | +26.6 R |
+| 25 | Salesforce | 97 | +22.5 R | 80 % | +10.3 R | +12.2 R |
+| 26 | McDonald's | 92 | +20.2 R | 82 % | +23.6 R | -3.4 R |
+| 27 | Wells Fargo | 86 | +15.3 R | 84 % | +11.4 R | +4.0 R |
+| 28 | IBM | 84 | +14.9 R | 85 % | -4.7 R | +19.6 R |
+| 29 | Bank of America | 98 | +14.2 R | 86 % | +5.8 R | +8.4 R |
+| 30 | Netflix | 101 | +13.9 R | 87 % | +6.6 R | +7.3 R |
+| 31 | Visa | 102 | +13.8 R | 89 % | +11.4 R | +2.3 R |
+| 32 | PepsiCo | 89 | +13.2 R | 90 % | +15.5 R | -2.3 R |
+| 33 | Philip Morris | 80 | +12.6 R | 91 % | +8.2 R | +4.4 R |
+| 34 | Nikkei 225 | 142 | +12.1 R | 92 % | +8.8 R | +3.3 R |
+| 35 | Coca-Cola | 101 | +12.0 R | 93 % | +8.5 R | +3.5 R |
 | 36 | Broadcom | 135 | +11.5 R | 94 % | -6.9 R | +18.4 R |
-| 37 | Coca-Cola | 102 | +11.0 R | 95 % | +7.5 R | +3.5 R |
-| 38 | Uber | 68 | +10.9 R | 96 % | +2.2 R | +8.7 R |
-| 39 | Intuit | 110 | +10.6 R | 97 % | +26.2 R | -15.6 R |
-| 40 | Qualcomm | 93 | +10.0 R | 98 % | +9.7 R | +0.3 R |
-| 41 | Thermo Fisher | 108 | +9.4 R | 98 % | +22.3 R | -12.9 R |
-| 42 | ServiceNow | 116 | +8.7 R | 99 % | +7.2 R | +1.5 R |
+| 37 | Intel | 84 | +11.4 R | 95 % | -4.5 R | +16.0 R |
+| 38 | Intuit | 108 | +11.0 R | 96 % | +26.5 R | -15.6 R |
+| 39 | Uber | 68 | +10.9 R | 97 % | +2.2 R | +8.7 R |
+| 40 | Qualcomm | 95 | +10.3 R | 98 % | +9.7 R | +0.6 R |
+| 41 | ServiceNow | 116 | +8.7 R | 98 % | +7.2 R | +1.5 R |
+| 42 | Thermo Fisher | 110 | +8.4 R | 99 % | +22.3 R | -14.0 R |
 | 43 | Exxon Mobil | 93 | +4.6 R | 100 % | +5.9 R | -1.3 R |
 | 44 | Disney | 66 | +4.2 R | 100 % | -2.3 R | +6.5 R |
-| 45 | Merck | 93 | -0.7 R | 100 % | -5.2 R | +4.5 R |
-| 46 | UnitedHealth | 95 | -1.2 R | 100 % | -1.2 R | -0.0 R |
-| 47 | Procter & Gamble | 93 | -2.6 R | 100 % | +5.3 R | -7.9 R |
-| 48 | Amazon | 114 | -3.1 R | 100 % | +3.5 R | -6.6 R |
-| 49 | Johnson & Johnson | 104 | -3.1 R | 100 % | -5.6 R | +2.4 R |
+| 45 | Merck | 94 | +0.1 R | 100 % | -5.2 R | +5.3 R |
+| 46 | Procter & Gamble | 93 | -1.4 R | 100 % | +6.5 R | -7.9 R |
+| 47 | Johnson & Johnson | 103 | -2.2 R | 100 % | -4.6 R | +2.4 R |
+| 48 | UnitedHealth | 95 | -2.4 R | 100 % | -2.4 R | -0.0 R |
+| 49 | Amazon | 115 | -4.0 R | 100 % | +2.8 R | -6.8 R |
 | 50 | Meta | 109 | -5.8 R | 100 % | -15.8 R | +10.1 R |
 | 51 | Chevron | 95 | -8.2 R | 100 % | -1.7 R | -6.5 R |
-| 52 | Oracle | 106 | -11.9 R | 100 % | -13.0 R | +1.1 R |
+| 52 | Oracle | 105 | -10.9 R | 100 % | -13.0 R | +2.1 R |
 | 53 | DAX 40 | 144 | -19.5 R | 100 % | -6.1 R | -13.3 R |
 | 54 | Texas Instruments | 134 | -22.4 R | 100 % | -9.5 R | -12.9 R |
 | 55 | CAC 40 | 132 | -26.7 R | 100 % | -1.7 R | -25.0 R |
-| 56 | FTSE 100 | 142 | -37.1 R | 100 % | -24.7 R | -12.3 R |
+| 56 | FTSE 100 | 140 | -35.3 R | 100 % | -22.9 R | -12.3 R |
 
 Résultats passés : aucune garantie pour l'avenir.
