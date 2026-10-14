@@ -1,4 +1,4 @@
-# Spéculation : actions leaders (séance du 13/10/2026)
+# Spéculation : actions leaders (séance du 14/10/2026)
 
 Capital spéculation : 1000 €, en parts égales, en **actions réelles sur eToro** (sans levier).
 
@@ -28,8 +28,8 @@ Règle : les actions qui montent le plus par rapport au S&P 500 sur 6 mois, au-d
 | 8 | Qualcomm | +20.8 % | oui |
 | 9 | Apple | +18.4 % | oui |
 | 10 | Texas Instruments | +18.0 % | oui |
-| 11 | Thermo Fisher | +15.6 % | oui |
+| 11 | Thermo Fisher | +15.7 % | oui |
 | 12 | Eli Lilly | +14.3 % | oui |
-| 13 | Visa | +12.9 % | oui |
-| 14 | Philip Morris | +12.8 % | oui |
+| 13 | Visa | +13.0 % | oui |
+| 14 | Philip Morris | +12.9 % | oui |
 | 15 | Merck | +9.3 % | oui |
