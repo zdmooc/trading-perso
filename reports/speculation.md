@@ -1,4 +1,4 @@
-# Spéculation : actions leaders (séance du 15/10/2026)
+# Spéculation : actions leaders (séance du 16/10/2026)
 
 Capital spéculation : 1000 €, en parts égales, en **actions réelles sur eToro** (sans levier).
 
@@ -8,28 +8,31 @@ Règle : les actions qui montent le plus par rapport au S&P 500 sur 6 mois, au-d
 
 | Action | Rang | Force relative 6 mois | Cours | Moyenne 50 jours | Montant |
 | --- | --- | --- | --- | --- | --- |
-| AMD | 1 | +111.2 % | 570.82 | 534.75 | 200 € |
-| Intel | 3 | +41.2 % | 98.12 | 103.49 | 200 € |
-| Texas Instruments | 9 | +21.2 % | 280.65 | 272.31 | 200 € |
-| Qualcomm | 10 | +21.0 % | 172.62 | 173.98 | 200 € |
-| Cisco | 4 | +29.1 % | 113.64 | 111.77 | 200 € |
+| AMD | 1 | +110.9 % | 570.82 | 534.75 | 200 € |
+| Texas Instruments | 9 | +20.8 % | 280.65 | 272.31 | 200 € |
+| Cisco | 4 | +28.8 % | 113.64 | 111.77 | 200 € |
+| ServiceNow | 3 | +38.3 % | 139.98 | 133.73 | 200 € |
+| AbbVie | 5 | +26.7 % | 283.48 | 260.88 | 200 € |
+
+**À vendre** : Intel, Qualcomm.
+
 
 ## Classement complet (15 premiers)
 
 | Rang | Action | Force relative 6 mois | Au-dessus de la MM50 |
 | --- | --- | --- | --- |
-| 1 | AMD | +111.2 % | oui |
-| 2 | ServiceNow | +47.1 % | oui |
-| 3 | Intel | +41.2 % | non |
-| 4 | Cisco | +29.1 % | oui |
-| 5 | Eli Lilly | +24.1 % | oui |
-| 6 | Salesforce | +23.5 % | oui |
-| 7 | Philip Morris | +23.1 % | oui |
-| 8 | AbbVie | +21.7 % | oui |
-| 9 | Texas Instruments | +21.2 % | oui |
-| 10 | Qualcomm | +21.0 % | non |
-| 11 | Microsoft | +20.4 % | oui |
-| 12 | Apple | +19.0 % | oui |
-| 13 | UnitedHealth | +17.6 % | oui |
-| 14 | Thermo Fisher | +16.9 % | oui |
-| 15 | Merck | +16.7 % | oui |
+| 1 | AMD | +110.9 % | oui |
+| 2 | Intel | +40.8 % | non |
+| 3 | ServiceNow | +38.3 % | oui |
+| 4 | Cisco | +28.8 % | oui |
+| 5 | AbbVie | +26.7 % | oui |
+| 6 | Eli Lilly | +23.7 % | oui |
+| 7 | Salesforce | +23.2 % | oui |
+| 8 | Philip Morris | +22.7 % | oui |
+| 9 | Texas Instruments | +20.8 % | oui |
+| 10 | Qualcomm | +20.7 % | non |
+| 11 | Microsoft | +20.0 % | oui |
+| 12 | Apple | +18.7 % | oui |
+| 13 | UnitedHealth | +17.2 % | oui |
+| 14 | Thermo Fisher | +16.6 % | oui |
+| 15 | Merck | +16.4 % | oui |
