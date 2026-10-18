@@ -1,6 +1,6 @@
 # Marchés sur IG (démo, lecture seule)
 
-Relevé du 17/10/2026 à 15h30 (Paris).
+Relevé du 18/10/2026 à 15h48 (Paris).
 
 ## Indices
 
@@ -29,7 +29,7 @@ Relevé du 17/10/2026 à 15h30 (Paris).
 
 | Marché | Produit | Vente | Achat | Spread | Var. jour | Plus haut | Plus bas | Statut |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Bitcoin | Bitcoin ($0.1) | 81361 | 81511 | 150 | -0.2 % (-164 pts) | 81790 | 81221 | TRADEABLE |
+| Bitcoin | Bitcoin ($0.1) | 81322 | 81472 | 150 | -0.21 % (-174 pts) | 82249 | 80694 | TRADEABLE |
 
 ## Fiches produits
 
