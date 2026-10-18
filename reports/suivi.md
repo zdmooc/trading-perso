@@ -1,6 +1,6 @@
-# Suivi des signaux (mis à jour le 17/10/2026)
+# Suivi des signaux (mis à jour le 18/10/2026)
 
-**4 signaux clôturés : 0 succès, 3 échecs, 1 neutres (réussite 0.0 %, résultat cumulé -3.06 R).** 3 positions ouvertes, 1 en attente d'entrée.
+**4 signaux clôturés : 0 succès, 3 échecs, 1 neutres (réussite 0.0 %, résultat cumulé -3.06 R).** 4 positions ouvertes, 0 en attente d'entrée.
 
 R = gain ou perte en multiple du risque pris (1 R = perte si le stop est touché). Neutre = sortie au prix d'entrée après remontée du stop.
 
@@ -14,7 +14,7 @@ R = gain ou perte en multiple du risque pris (1 R = perte si le stop est touché
 
 | Signal | Actif | Type | Stratégie | Entrée prévue | Stop | Objectif | Ratio | Statut | Sortie | Résultat |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-10-15 | Walmart | achat | swing | tendance_mm | 117.87 | 112.8365 | 132.9704 | 3.0 | en attente | - | - |
+| 2026-10-15 | Walmart | achat | swing | tendance_mm | 117.87 | 112.8365 | 132.9704 | 3.0 | ouvert | - | - |
 | 2026-10-14 | Costco | achat | swing | cassure_20j | 982.0 | 951.0496 | 1074.8511 | 3.0 | ouvert | - | - |
 | 2026-10-12 | Procter & Gamble | achat | swing | cassure_20j | 153.2 | 148.3739 | 167.6783 | 3.0 | ouvert | - | - |
 | 2026-10-08 | Berkshire Hathaway | achat | swing | repli_tendance | 511.05 | 497.6215 | 551.3354 | 3.0 | ouvert | - | - |
