@@ -1,4 +1,4 @@
-# Spéculation : actions leaders (séance du 22/10/2026)
+# Spéculation : actions leaders (séance du 23/10/2026)
 
 Capital spéculation : 1000 €, en parts égales, en **actions réelles sur eToro** (sans levier).
 
@@ -8,28 +8,31 @@ Règle : les actions qui montent le plus par rapport au S&P 500 sur 6 mois, au-d
 
 | Action | Rang | Force relative 6 mois | Cours | Moyenne 50 jours | Montant |
 | --- | --- | --- | --- | --- | --- |
-| ServiceNow | 2 | +39.5 % | 149.54 | 135.7 | 200 € |
-| AbbVie | 3 | +33.0 % | 289.08 | 262.53 | 200 € |
-| Eli Lilly | 4 | +32.8 % | 1283.66 | 1182.37 | 200 € |
-| Salesforce | 11 | +20.3 % | 242.43 | 231.81 | 200 € |
-| Philip Morris | 7 | +22.8 % | 199.9 | 190.6 | 200 € |
+| ServiceNow | 2 | +41.2 % | 153.12 | 136.21 | 200 € |
+| AbbVie | 3 | +36.6 % | 284.8 | 263.26 | 200 € |
+| Eli Lilly | 5 | +31.0 % | 1270.75 | 1183.52 | 200 € |
+| AMD | 1 | +74.8 % | 552.72 | 541.1 | 200 € |
+| Thermo Fisher | 6 | +27.9 % | 694.02 | 641.72 | 200 € |
+
+**À vendre** : Salesforce, Philip Morris.
+
 
 ## Classement complet (15 premiers)
 
 | Rang | Action | Force relative 6 mois | Au-dessus de la MM50 |
 | --- | --- | --- | --- |
-| 1 | AMD | +78.2 % | non |
-| 2 | ServiceNow | +39.5 % | oui |
-| 3 | AbbVie | +33.0 % | oui |
-| 4 | Eli Lilly | +32.8 % | oui |
-| 5 | Intel | +28.6 % | non |
-| 6 | Merck | +23.7 % | oui |
-| 7 | Philip Morris | +22.8 % | oui |
-| 8 | Visa | +21.9 % | oui |
-| 9 | Thermo Fisher | +21.5 % | oui |
-| 10 | Qualcomm | +21.0 % | oui |
-| 11 | Salesforce | +20.3 % | oui |
-| 12 | Amgen | +19.2 % | oui |
-| 13 | Apple | +18.0 % | oui |
-| 14 | Coca-Cola | +16.9 % | oui |
-| 15 | Microsoft | +16.1 % | oui |
+| 1 | AMD | +74.8 % | oui |
+| 2 | ServiceNow | +41.2 % | oui |
+| 3 | AbbVie | +36.6 % | oui |
+| 4 | Intel | +35.1 % | non |
+| 5 | Eli Lilly | +31.0 % | oui |
+| 6 | Thermo Fisher | +27.9 % | oui |
+| 7 | Merck | +27.1 % | oui |
+| 8 | Qualcomm | +24.6 % | oui |
+| 9 | Visa | +24.2 % | oui |
+| 10 | Amgen | +21.1 % | oui |
+| 11 | Salesforce | +20.6 % | oui |
+| 12 | Apple | +18.8 % | oui |
+| 13 | Coca-Cola | +18.4 % | oui |
+| 14 | Chevron | +16.5 % | oui |
+| 15 | Microsoft | +16.2 % | oui |
