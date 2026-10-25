@@ -8,31 +8,28 @@ Règle : les actions qui montent le plus par rapport au S&P 500 sur 6 mois, au-d
 
 | Action | Rang | Force relative 6 mois | Cours | Moyenne 50 jours | Montant |
 | --- | --- | --- | --- | --- | --- |
-| ServiceNow | 1 | +77.9 % | 157.0 | 136.85 | 200 € |
-| AbbVie | 5 | +36.6 % | 285.19 | 264.02 | 200 € |
-| Eli Lilly | 6 | +35.6 % | 1306.69 | 1185.28 | 200 € |
-| Thermo Fisher | 3 | +38.0 % | 676.54 | 643.19 | 200 € |
-| Salesforce | 4 | +37.8 % | 250.29 | 233.84 | 200 € |
-
-**À vendre** : AMD.
-
+| ServiceNow | 1 | +69.9 % | 158.96 | 137.49 | 200 € |
+| AbbVie | 3 | +39.3 % | 285.64 | 264.74 | 200 € |
+| Eli Lilly | 4 | +38.1 % | 1273.46 | 1186.6 | 200 € |
+| Thermo Fisher | 5 | +37.3 % | 673.82 | 644.76 | 200 € |
+| Salesforce | 6 | +33.7 % | 248.57 | 234.8 | 200 € |
 
 ## Classement complet (15 premiers)
 
 | Rang | Action | Force relative 6 mois | Au-dessus de la MM50 |
 | --- | --- | --- | --- |
-| 1 | ServiceNow | +77.9 % | oui |
-| 2 | AMD | +59.1 % | non |
-| 3 | Thermo Fisher | +38.0 % | oui |
-| 4 | Salesforce | +37.8 % | oui |
-| 5 | AbbVie | +36.6 % | oui |
-| 6 | Eli Lilly | +35.6 % | oui |
-| 7 | Visa | +27.4 % | oui |
-| 8 | Qualcomm | +23.0 % | non |
-| 9 | Merck | +22.9 % | oui |
-| 10 | Amgen | +22.8 % | oui |
-| 11 | Intel | +20.8 % | non |
-| 12 | Apple | +20.3 % | oui |
-| 13 | Coca-Cola | +19.3 % | oui |
-| 14 | Mastercard | +19.2 % | oui |
-| 15 | Microsoft | +18.6 % | oui |
+| 1 | ServiceNow | +69.9 % | oui |
+| 2 | AMD | +42.2 % | non |
+| 3 | AbbVie | +39.3 % | oui |
+| 4 | Eli Lilly | +38.1 % | oui |
+| 5 | Thermo Fisher | +37.3 % | oui |
+| 6 | Salesforce | +33.7 % | oui |
+| 7 | Visa | +26.0 % | oui |
+| 8 | Merck | +25.1 % | non |
+| 9 | Amgen | +22.8 % | oui |
+| 10 | Apple | +22.1 % | oui |
+| 11 | Chevron | +21.8 % | oui |
+| 12 | Exxon Mobil | +18.3 % | oui |
+| 13 | Mastercard | +17.7 % | oui |
+| 14 | Microsoft | +17.6 % | oui |
+| 15 | Philip Morris | +17.1 % | oui |
