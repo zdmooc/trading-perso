@@ -1,0 +1,30 @@
+name: NASDAQ100 AI research tests
+
+on:
+  push:
+    paths:
+      - "research/nasdaq100-ai/**"
+      - ".github/workflows/nasdaq100-ai-research.yml"
+  pull_request:
+    paths:
+      - "research/nasdaq100-ai/**"
+      - ".github/workflows/nasdaq100-ai-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-model-protocol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install test requirements
+        run: python -m pip install "pandas>=2,<3" "numpy>=1.26,<3" "scikit-learn>=1.5,<2" "pytest>=8,<10"
+      - name: Validate chronological data and synthetic experiment
+        run: python -m pytest -q research/nasdaq100-ai/test_experiment.py
