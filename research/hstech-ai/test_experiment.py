@@ -51,7 +51,7 @@ def test_temporal_splits_purge_boundary():
 
 def test_reject_bad_ohlc_and_short_history(tmp_path):
     fixture_prices(350).assign(High=0).to_csv(tmp_path / "bad.csv", index=False)
-    with pytest.raises(ValueError, match="cohérente"):
+    with pytest.raises(ValueError, match="Prix"):
         exp.load_ohlc(tmp_path / "bad.csv")
     short = exp.prepare(fixture_prices(90).set_index("Date"))
     with pytest.raises(ValueError, match="300"):
