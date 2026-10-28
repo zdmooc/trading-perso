@@ -1,6 +1,6 @@
-# Signaux de la séance du mardi 27 octobre 2026
+# Signaux de la séance du mercredi 28 octobre 2026
 
-Calculés le 27/10/2026 sur les cours de clôture du 27/10/2026.  
+Calculés le 28/10/2026 sur les cours de clôture du 28/10/2026.  
 Marché (S&P 500 vs moyenne 200 jours) : haussier, achats seulement.  
 Positions en cours : 4 sur 4.
 
