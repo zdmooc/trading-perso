@@ -25,3 +25,5 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+# research/ a ses propres dépendances (scikit-learn) et son workflow : nasdaq100-ai-research.yml
+testpaths = ["tests"]
