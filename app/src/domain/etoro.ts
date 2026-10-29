@@ -37,21 +37,27 @@ function champ(o: Brut, ...noms: string[]): unknown {
 }
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
+/** Sans stop ni objectif, eToro garde des niveaux factices très loin du prix (0, ou 10 fois l'entrée) : on les ignore. */
+function niveau(v: number | null, ouverture: number): number | null {
+  return v === null || v <= 0 || (ouverture > 0 && (v > ouverture * 5 || v < ouverture / 5)) ? null : v;
+}
+
 export function lireCompte(rep: unknown): CompteEtoro {
   const cp = ((rep as Brut)?.clientPortfolio ?? {}) as Brut;
   const positions = ((champ(cp, 'positions') as Brut[] | undefined) ?? []).map((p): PositionEtoro => {
     const u = (champ(p, 'unrealizedPnL') ?? {}) as Brut;
+    const ouverture = num(champ(p, 'openRate')) ?? 0;
     return {
       id: num(champ(p, 'positionId')) ?? 0,
       instrumentId: num(champ(p, 'instrumentId')) ?? 0,
       achat: champ(p, 'isBuy') !== false,
       unites: num(champ(p, 'units')) ?? 0,
-      ouverture: num(champ(p, 'openRate')) ?? 0,
+      ouverture,
       actuel: num(champ(u, 'closeRate')) ?? num(champ(p, 'closeRate')),
       pnlUsd: num(champ(u, 'pnL')) ?? num(champ(p, 'pnL')),
       levier: num(champ(p, 'leverage')) ?? 1,
-      stop: champ(p, 'isNoStopLoss') === true ? null : num(champ(p, 'stopLossRate')),
-      objectif: champ(p, 'isNoTakeProfit') === true ? null : num(champ(p, 'takeProfitRate')),
+      stop: champ(p, 'isNoStopLoss') === true ? null : niveau(num(champ(p, 'stopLossRate')), ouverture),
+      objectif: champ(p, 'isNoTakeProfit') === true ? null : niveau(num(champ(p, 'takeProfitRate')), ouverture),
       depuis: String(champ(p, 'openDateTime') ?? '').slice(0, 10),
     };
   });
