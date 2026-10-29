@@ -35,6 +35,7 @@ export const planDepot = (date: string) => json<{ date: string; indices: Record<
 export interface LigneJournal {
   date_signal: string;
   symbole: string;
+  nom?: string;
   strategie: string;
   entree_prevue: number;
   stop: number;

@@ -22,6 +22,8 @@ export interface Marche {
   swing: Record<string, Swing | null>;
   /** lignes du journal swing du scanner, pour les 3 indices */
   journal: LigneJournal[];
+  /** tout le journal du scanner (actions comprises), pour le tableau de bord */
+  journalTout: LigneJournal[];
   /** résultats réels du plan intraday */
   planJournal: LignePlan[];
   /** 1 € = eurUsd $ */
@@ -70,6 +72,6 @@ export async function charger(src: Sources, maintenant = Date.now()): Promise<Ma
     swing[ind.symbole] = d.length ? analyserSwing(d, paris(d[d.length - 1].t).date, marcheHaussier) : null;
   }
   const symboles = new Set(INDICES.map((i) => i.symbole));
-  return { maintenant, resumes, quotidien, stats: st, debutTest: stats?.debut, swing, journal: journal.filter((l) => symboles.has(l.symbole)), planJournal,
+  return { maintenant, resumes, quotidien, stats: st, debutTest: stats?.debut, swing, journal: journal.filter((l) => symboles.has(l.symbole)), journalTout: journal, planJournal,
     eurUsd: fx.length ? fx[fx.length - 1].c : 1.08, erreurs };
 }

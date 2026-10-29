@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Pressable, Switch, Text, TextInput, View } from 'react-native';
-import { type Bilan, INDICES, type TradePerso, bilan, bilanPerso, dateFr, eur, euros, nombre, paris, points, pts } from '../domain';
+import { type Bilan, INDICES, type TradePerso, bilan, bilanPerso, dateFr, tableau, eur, euros, nombre, paris, points, pts } from '../domain';
 import type { LigneJournal, LignePlan } from '../adapters/depot';
 import { styles } from './Decisions';
 import { CloturerTrade } from './PrendreTrade';
 import { type MesDonnees, lireNombre } from './mesTrades';
+import { TableauDeBord } from './TableauDeBord';
 import { type Couleurs, espace, useCouleurs } from './theme';
 
 const n = (x: number) => nombre(x, 0);
@@ -34,8 +35,8 @@ function Carte({ titre, children, c }: { titre: string; children: React.ReactNod
   );
 }
 
-export function BilanEcran({ donnees, cours, planJournal, journal }: {
-  donnees: MesDonnees; cours: Record<string, number | undefined>; planJournal: LignePlan[]; journal: LigneJournal[];
+export function BilanEcran({ donnees, cours, planJournal, journal, journalTout }: {
+  donnees: MesDonnees; cours: Record<string, number | undefined>; planJournal: LignePlan[]; journal: LigneJournal[]; journalTout: LigneJournal[];
 }) {
   const c = useCouleurs();
   const [aCloturer, setACloturer] = useState<TradePerso | null>(null);
@@ -50,6 +51,8 @@ export function BilanEcran({ donnees, cours, planJournal, journal }: {
 
   return (
     <View>
+      <TableauDeBord t={tableau(planJournal, journalTout, reglages.risqueEur)} risqueEur={reglages.risqueEur} />
+
       <Carte titre="📒 Mes trades en cours" c={c}>
         {!ouverts.length && <Text style={doux}>Aucun. Touche « ✋ J’ai pris ce trade » sous un ordre pour en ajouter un.</Text>}
         {ouverts.map((t) => {
