@@ -40,7 +40,13 @@
     },
     "updates": {
       "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/2ddc4f33-948f-4790-9064-029fa4acc51c"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2ddc4f33-948f-4790-9064-029fa4acc51c"
+      }
     }
   }
 }
