@@ -15,6 +15,11 @@ describe('compte eToro', () => {
     expect(pointsPosition(c.positions[0])).toBe(15);
   });
 
+  it('ignore les stops et objectifs factices d’eToro', () => {
+    const c = lireCompte({ clientPortfolio: { positions: [{ positionId: 1, instrumentId: 100001, isBuy: true, units: 0.01, openRate: 1876, stopLossRate: 0.0001, takeProfitRate: 20633 }] } });
+    expect(c.positions[0]).toMatchObject({ stop: null, objectif: null });
+  });
+
   it('réponse vide : aucun plantage', () => {
     expect(lireCompte(null)).toEqual({ creditUsd: null, pnlUsd: null, positions: [] });
   });
