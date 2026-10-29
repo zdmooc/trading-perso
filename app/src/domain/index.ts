@@ -4,3 +4,6 @@ export * from './marche';
 export * from './plan';
 export * from './temps';
 export * from './swing';
+export * from './alertes';
+export * from './journalPerso';
+export * from './taille';

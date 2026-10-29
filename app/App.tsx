@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, AppState, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { bougiesYahoo } from './src/adapters/yahoo';
-import { journalDepot, planDepot, statsDepot } from './src/adapters/depot';
+import { SOURCES } from './src/adapters/sources';
+import { activerAlertes, prevenir } from './src/adapters/alertesTelephone';
 import { type Marche, charger } from './src/application/marche';
 import { INDICES, dateFr, hhmm, paris, weekEnd } from './src/domain';
 import { BandeauMiseAJour } from './src/ui/BandeauMiseAJour';
@@ -11,10 +11,12 @@ import { CarteIndice } from './src/ui/CarteIndice';
 import { Decisions } from './src/ui/Decisions';
 import { Choix } from './src/ui/Onglets';
 import { CarteSwing, ResumeSwing } from './src/ui/Swing';
+import { BilanEcran } from './src/ui/Bilan';
+import { PrendreTrade, type Proposition } from './src/ui/PrendreTrade';
+import { useMesDonnees } from './src/ui/mesTrades';
 import { espace, useCouleurs } from './src/ui/theme';
 
-const SOURCES = { bougies: bougiesYahoo, stats: statsDepot, plan: planDepot, journal: journalDepot };
-const ONGLETS = [{ cle: 'intraday' as const, texte: '⚡ Intraday' }, { cle: 'swing' as const, texte: '📈 Swing' }];
+const ONGLETS = [{ cle: 'intraday' as const, texte: '⚡ Intraday' }, { cle: 'swing' as const, texte: '📈 Swing' }, { cle: 'bilan' as const, texte: '📒 Bilan' }];
 const PUCES = INDICES.map((i) => ({ cle: i.symbole, texte: i.nom.replace(' 40', '').replace(' 100', '') }));
 const RAFRAICHIR_MS = 5 * 60_000;
 
@@ -24,19 +26,27 @@ export default function App() {
   const [marche, setMarche] = useState<Marche | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
-  const [onglet, setOnglet] = useState<'intraday' | 'swing'>('intraday');
+  const [onglet, setOnglet] = useState<'intraday' | 'swing' | 'bilan'>('intraday');
+  const [proposition, setProposition] = useState<Proposition | null>(null);
+  const donnees = useMesDonnees();
   const [choisi, setChoisi] = useState(INDICES[0].symbole);
 
   const rafraichir = useCallback(async () => {
     setEnCours(true);
     try {
-      setMarche(await charger(SOURCES));
+      const m = await charger(SOURCES);
+      setMarche(m);
       setErreur(null);
+      void prevenir(m.resumes).catch(() => undefined);
     } catch (e) {
       setErreur((e as Error).message);
     } finally {
       setEnCours(false);
     }
+  }, []);
+
+  useEffect(() => {
+    void activerAlertes().catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -79,7 +89,8 @@ export default function App() {
                   {!weekEnd(marche.maintenant) && <Decisions resumes={marche.resumes} choisi={choisi} onChoisir={setChoisi} />}
                   <Choix options={PUCES} valeur={choisi} onChoisir={setChoisi} />
                   {marche.resumes.filter((r) => r.indice.symbole === choisi).map((r) => (
-                    <CarteIndice key={r.indice.symbole} r={r} stats={marche.stats[r.indice.symbole]} debutTest={marche.debutTest} />
+                    <CarteIndice key={r.indice.symbole} r={r} stats={marche.stats[r.indice.symbole]} debutTest={marche.debutTest}
+                      risqueEur={donnees.reglages.risqueEur} eurUsd={marche.eurUsd} onPrendre={setProposition} />
                   ))}
                   <Text style={{ color: c.doux, fontSize: 12, marginBottom: espace(8) }}>
                     Lignes pleines : entrées du plan. Pointillés gris : stops. Pointillés bleus : objectifs (3 fois le risque).
@@ -87,12 +98,16 @@ export default function App() {
                     Montants en € pour la taille du plan (DAX et Nasdaq 0,5 contrat, S&P 500 1 contrat).
                   </Text>
                 </>
+              ) : onglet === 'bilan' ? (
+                <BilanEcran donnees={donnees} planJournal={marche.planJournal} journal={marche.journal}
+                  cours={Object.fromEntries(marche.resumes.map((r) => [r.indice.symbole, r.prix]))} />
               ) : (
                 <>
                   <ResumeSwing indices={INDICES} swing={marche.swing} journal={marche.journal} choisi={choisi} onChoisir={setChoisi} />
                   <Choix options={PUCES} valeur={choisi} onChoisir={setChoisi} />
                   {INDICES.filter((i) => i.symbole === choisi).map((i) => (
-                    <CarteSwing key={i.symbole} ind={i} s={marche.swing[i.symbole]} quotidien={marche.quotidien[i.symbole] ?? []} journal={marche.journal} />
+                    <CarteSwing key={i.symbole} ind={i} s={marche.swing[i.symbole]} quotidien={marche.quotidien[i.symbole] ?? []} journal={marche.journal}
+                      risqueEur={donnees.reglages.risqueEur} eurUsd={marche.eurUsd} onPrendre={setProposition} />
                   ))}
                   <View style={{ height: espace(8) }} />
                 </>
@@ -100,6 +115,14 @@ export default function App() {
             </View>
           )}
         </ScrollView>
+        {proposition && marche && (
+          <PrendreTrade proposition={proposition} risqueEur={donnees.reglages.risqueEur} eurUsd={marche.eurUsd}
+            onFermer={() => setProposition(null)} onValider={(t) => {
+              donnees.ajouter(t);
+              setProposition(null);
+              setOnglet('bilan');
+            }} />
+        )}
         <BandeauMiseAJour />
       </SafeAreaView>
     </SafeAreaProvider>

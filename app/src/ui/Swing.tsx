@@ -3,6 +3,8 @@ import { type Bougie, type Indice, type Swing, dateFr, eur, nombre, pts, sma, va
 import type { LigneJournal } from '../adapters/depot';
 import { Graphique, type Niveau } from './Graphique';
 import { styles } from './Decisions';
+import { LigneTaille } from './LigneTaille';
+import { BoutonPris, type Proposition } from './PrendreTrade';
 import { type Couleurs, espace, useCouleurs } from './theme';
 
 const n = (x: number) => nombre(x, 0);
@@ -74,7 +76,9 @@ export function ResumeSwing({ indices, swing, journal, choisi, onChoisir }: {
   );
 }
 
-export function CarteSwing({ ind, s, quotidien, journal }: { ind: Indice; s: Swing | null; quotidien: Bougie[]; journal: LigneJournal[] }) {
+export function CarteSwing({ ind, s, quotidien, journal, risqueEur, eurUsd, onPrendre }: {
+  ind: Indice; s: Swing | null; quotidien: Bougie[]; journal: LigneJournal[]; risqueEur: number; eurUsd: number; onPrendre: (p: Proposition) => void;
+}) {
   const c = useCouleurs();
   const doux = { color: c.doux, fontSize: 13 };
   if (!s) {
@@ -108,6 +112,8 @@ export function CarteSwing({ ind, s, quotidien, journal }: { ind: Indice; s: Swi
           <Niveaux c={c} entree={n(pos.statut === 'ouvert' ? pos.prix_entree : pos.entree_prevue)}
             stop={`${n(pos.stop)} (${eur(-Math.abs(pos.entree_prevue - pos.stop) * ind.taille)})`}
             objectif={`${n(pos.objectif)} (${eur(Math.abs(pos.objectif - pos.entree_prevue) * ind.taille)})`} />
+          <BoutonPris onPress={() => onPrendre({ symbole: ind.symbole, type: 'swing', sens: pos.sens > 0 ? 1 : -1,
+            entree: pos.statut === 'ouvert' ? pos.prix_entree : pos.entree_prevue, stop: pos.stop, objectif: pos.objectif })} />
         </View>
       )}
 
@@ -117,6 +123,8 @@ export function CarteSwing({ ind, s, quotidien, journal }: { ind: Indice; s: Swi
           <Text style={{ color: c.texte }}>{x.regle.nom} : entrée à l’ouverture de la prochaine séance, vers {n(x.cours)}</Text>
           <Niveaux c={c} entree={n(x.cours)} stop={`${n(x.stop)} (${eur(-Math.abs(x.cours - x.stop) * ind.taille)})`}
             objectif={`${n(x.objectif)} (${eur(Math.abs(x.objectif - x.cours) * ind.taille)})`} />
+          <LigneTaille ind={ind} entree={x.cours} stop={x.stop} risqueEur={risqueEur} eurUsd={eurUsd} />
+          <BoutonPris onPress={() => onPrendre({ symbole: ind.symbole, type: 'swing', sens: x.regle.sens, entree: x.cours, stop: x.stop, objectif: x.objectif })} />
         </View>
       ))}
 

@@ -79,3 +79,37 @@ export async function journalDepot(): Promise<LigneJournal[]> {
     return [];
   }
 }
+
+export interface LignePlan {
+  date: string;
+  indice: string;
+  sens: string;
+  entree: number;
+  heure: string;
+  sortie: number;
+  motif: string;
+  pts: number;
+  euros: number;
+  statut: string;
+}
+
+/** Résultats réels du plan intraday (reports/plan/journal.csv, tenu par plan.yml). */
+export function lirePlanJournal(texte: string): LignePlan[] {
+  const [tete, ...lignes] = texte.trim().split(/\r?\n/);
+  const cols = tete.split(',');
+  return lignes.filter(Boolean).map((l) => {
+    const v = l.split(',');
+    const o: Record<string, string | number> = {};
+    cols.forEach((c, i) => (o[c] = ['entree', 'sortie', 'pts', 'euros'].includes(c) ? (v[i] ? Number(v[i]) : NaN) : v[i] ?? ''));
+    return o as unknown as LignePlan;
+  });
+}
+
+export async function planJournalDepot(): Promise<LignePlan[]> {
+  try {
+    const r = await fetch(`${BRUT}/journal.csv`, { cache: 'no-store' });
+    return r.ok ? lirePlanJournal(await r.text()) : [];
+  } catch {
+    return [];
+  }
+}
