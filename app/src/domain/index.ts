@@ -8,3 +8,4 @@ export * from './alertes';
 export * from './journalPerso';
 export * from './taille';
 export * from './tableau';
+export * from './etoro';

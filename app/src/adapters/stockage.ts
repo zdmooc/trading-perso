@@ -43,3 +43,7 @@ export function ajouterAlertesVues(cles: string[]): void {
   const garde = [...lireAlertesVues(), ...cles].filter((k) => k.slice(0, 10) >= limite);
   ecrire('alertes-vues', [...new Set(garde)]);
 }
+
+/** Clés de l'API eToro (lecture seule), saisies dans l'onglet eToro. */
+export const lireClesEtoro = (): { api: string; user: string } | null => lire<{ api: string; user: string } | null>('etoro-cles', null);
+export const ecrireClesEtoro = (c: { api: string; user: string } | null) => ecrire('etoro-cles', c);

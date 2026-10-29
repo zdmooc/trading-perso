@@ -25,6 +25,10 @@ avec des cas produits par le code Python : `python app/scripts/parite.py` les r�
 - **📒 Bilan** : mes trades (bouton « ✋ J'ai pris ce trade », puis clôture), mes résultats, résultats
   réels du plan et du scanner, réglages.
 
+- **🟢 eToro** : mon compte eToro (positions, gain ou perte en cours) et les achats / ventes du plan et du
+  scanner recalés sur le cours eToro, avec les unités pour le risque choisi. Clés API eToro « lecture »
+  saisies dans l'onglet, gardées sur le téléphone ; `src/adapters/etoro.ts` ne fait que des GET.
+
 Les trades notés restent sur le téléphone (`expo-sqlite`). Les alertes (entrée proche, entrée touchée,
 stop, objectif) sont des notifications locales : à chaque rafraîchissement quand l'app est ouverte,
 et au mieux toutes les 15 min en arrière-plan (Android décide du moment exact).

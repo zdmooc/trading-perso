@@ -26,3 +26,5 @@ export const lireTrades = (): TradePerso[] => lire<TradePerso[]>('trades', []);
 export const ecrireTrades = (t: TradePerso[]) => ecrire('trades', t);
 export const lireAlertesVues = () => new Set<string>();
 export const ajouterAlertesVues = (_cles: string[]) => undefined;
+export const lireClesEtoro = (): { api: string; user: string } | null => lire<{ api: string; user: string } | null>('etoro-cles', null);
+export const ecrireClesEtoro = (c: { api: string; user: string } | null) => ecrire('etoro-cles', c);
