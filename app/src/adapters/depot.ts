@@ -31,3 +31,51 @@ export const statsDepot = () => json<StatsDepot>('stats.json');
 
 /** Plan de 8h45 en cours IG, s'il a été publié aujourd'hui. */
 export const planDepot = (date: string) => json<{ date: string; indices: Record<string, PlanIndice> }>(`plan_${date}.json`);
+
+export interface LigneJournal {
+  date_signal: string;
+  symbole: string;
+  strategie: string;
+  entree_prevue: number;
+  stop: number;
+  objectif: number;
+  /** 1 achat, -1 vente (vide dans les anciennes lignes : achat) */
+  sens: number;
+  statut: string;
+  date_entree: string;
+  prix_entree: number;
+  date_sortie: string;
+  prix_sortie: number;
+  motif: string;
+  r: number;
+}
+
+const NUMERIQUES = ['entree_prevue', 'stop', 'objectif', 'sens', 'prix_entree', 'prix_sortie', 'r'];
+
+/** Journal des signaux swing du scanner (reports/journal.csv), doublons retirés. */
+export function lireJournal(texte: string): LigneJournal[] {
+  const [tete, ...lignes] = texte.trim().split(/\r?\n/);
+  const cols = tete.split(',');
+  const vus = new Set<string>();
+  const out: LigneJournal[] = [];
+  for (const l of lignes) {
+    const v = l.split(',');
+    const o: Record<string, string | number> = {};
+    cols.forEach((c, i) => (o[c] = NUMERIQUES.includes(c) ? (v[i] === '' || v[i] === undefined ? NaN : Number(v[i])) : v[i] ?? ''));
+    if (Number.isNaN(o.sens)) o.sens = 1;
+    const cle = `${o.date_signal}|${o.symbole}|${o.strategie}`;
+    if (vus.has(cle)) continue;
+    vus.add(cle);
+    out.push(o as unknown as LigneJournal);
+  }
+  return out;
+}
+
+export async function journalDepot(): Promise<LigneJournal[]> {
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/zdmooc/trading-perso/main/reports/journal.csv', { cache: 'no-store' });
+    return r.ok ? lireJournal(await r.text()) : [];
+  } catch {
+    return [];
+  }
+}

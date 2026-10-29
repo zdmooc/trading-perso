@@ -2,13 +2,14 @@
  * Charge tout l'écran : cours Yahoo, plan du jour (celui d'IG publié à 8h45 s'il existe, sinon calculé
  * sur le téléphone avec la même règle), état de chaque indice. Lecture seule : aucun ordre passé.
  */
-import { type Bougie, INDICES, type PlanIndice, REGLES_PAR_DEFAUT, type Resume, paris, preparer, resumer, weekEnd } from '../domain';
-import type { StatsDepot, StatsRegle } from '../adapters/depot';
+import { type Bougie, INDICES, type PlanIndice, REGLES_PAR_DEFAUT, type Resume, type Swing, analyserSwing, depuisParis, paris, preparer, resumer, sma, weekEnd } from '../domain';
+import type { LigneJournal, StatsDepot, StatsRegle } from '../adapters/depot';
 
 export interface Sources {
   bougies(symbole: string, periode: string, intervalle: string): Promise<Bougie[]>;
   stats(): Promise<StatsDepot | null>;
   plan(date: string): Promise<{ indices: Record<string, PlanIndice> } | null>;
+  journal(): Promise<LigneJournal[]>;
 }
 
 export interface Marche {
@@ -17,18 +18,28 @@ export interface Marche {
   quotidien: Record<string, Bougie[]>;
   stats: Record<string, StatsRegle | undefined>;
   debutTest?: string;
+  swing: Record<string, Swing | null>;
+  /** lignes du journal swing du scanner, pour les 3 indices */
+  journal: LigneJournal[];
   erreurs: string[];
+}
+
+/** Bougies journalières terminées : celle du jour seulement après la fin de la séance. */
+export function terminees(d: Bougie[], heureFin: number, maintenant: number): Bougie[] {
+  const date = paris(maintenant).date;
+  const fini = maintenant >= depuisParis(date, heureFin + 1);
+  return d.filter((b) => paris(b.t).date < date || fini);
 }
 
 export async function charger(src: Sources, maintenant = Date.now()): Promise<Marche> {
   const date = paris(maintenant).date;
   const ferme = weekEnd(maintenant);
-  const [stats, publie] = await Promise.all([src.stats(), ferme ? null : src.plan(date)]);
+  const [stats, publie, journal] = await Promise.all([src.stats(), ferme ? null : src.plan(date), src.journal()]);
   const erreurs: string[] = [];
   const quotidien: Record<string, Bougie[]> = {};
   const resumes = await Promise.all(INDICES.map(async (ind) => {
     const [d, h] = await Promise.all([
-      src.bougies(ind.symbole, '1y', '1d').catch((e: Error) => (erreurs.push(e.message), [] as Bougie[])),
+      src.bougies(ind.symbole, '2y', '1d').catch((e: Error) => (erreurs.push(e.message), [] as Bougie[])),
       src.bougies(ind.symbole, '5d', '30m').catch((e: Error) => (erreurs.push(e.message), [] as Bougie[])),
     ]);
     quotidien[ind.symbole] = d;
@@ -41,5 +52,15 @@ export async function charger(src: Sources, maintenant = Date.now()): Promise<Ma
     const s = stats?.indices[ind.symbole];
     st[ind.symbole] = s?.regles[s.choisie];
   }
-  return { maintenant, resumes, quotidien, stats: st, debutTest: stats?.debut, erreurs };
+  // Filtre de marché du scanner : S&P 500 au-dessus de sa moyenne 200 jours = achats seulement, sinon ventes seulement.
+  const spx = terminees(quotidien['^GSPC'] ?? [], 21, maintenant).map((b) => b.c);
+  const m200 = sma(spx, 200)[spx.length - 1];
+  const marcheHaussier = m200 === null || m200 === undefined ? null : spx[spx.length - 1] > m200;
+  const swing: Record<string, Swing | null> = {};
+  for (const ind of INDICES) {
+    const d = terminees(quotidien[ind.symbole], ind.heures[1], maintenant);
+    swing[ind.symbole] = d.length ? analyserSwing(d, paris(d[d.length - 1].t).date, marcheHaussier) : null;
+  }
+  const symboles = new Set(INDICES.map((i) => i.symbole));
+  return { maintenant, resumes, quotidien, stats: st, debutTest: stats?.debut, swing, journal: journal.filter((l) => symboles.has(l.symbole)), erreurs };
 }
