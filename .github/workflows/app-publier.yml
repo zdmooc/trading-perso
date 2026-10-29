@@ -1,0 +1,57 @@
+name: app-publier
+# Publie l'application mobile sur le téléphone sans passer par le PC (EAS Update, canal preview) :
+# après chaque push sur main qui touche app/, ou à la main (Actions → app-publier → Run workflow).
+# Cocher « apk » lance aussi la construction d'un nouvel APK sur EAS (seulement si le code natif change).
+#
+# Prérequis : secret EXPO_TOKEN (expo.dev → Account settings → Access tokens), et un premier APK
+# construit depuis le PC (voir app/README.md) pour créer la clé de signature Android.
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', '.github/workflows/app-publier.yml']
+  workflow_dispatch:
+    inputs:
+      apk:
+        description: Construire aussi un nouvel APK
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: app-publier
+  cancel-in-progress: false
+env:
+  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - name: Vérifier avant de publier
+        run: npm run lint && npm run typecheck && npm test
+      - name: Jeton Expo absent
+        if: env.EXPO_TOKEN == ''
+        run: echo "::warning::Secret EXPO_TOKEN absent, rien n'est publié (Settings, Secrets and variables, Actions)."
+      # Relie le projet EAS (le crée la première fois) et règle l'adresse des mises à jour dans app.json.
+      - name: Projet EAS
+        if: env.EXPO_TOKEN != ''
+        run: |
+          npx eas-cli@latest init --non-interactive --force
+          node -e "const f='app.json',j=require('./'+f),id=j.expo.extra.eas.projectId;j.expo.updates.url='https://u.expo.dev/'+id;require('fs').writeFileSync(f,JSON.stringify(j,null,2))"
+      - name: Nouvel APK
+        if: env.EXPO_TOKEN != '' && inputs.apk
+        run: npx eas-cli@latest build -p android --profile preview --non-interactive --no-wait
+      - name: Publier
+        if: env.EXPO_TOKEN != ''
+        env:
+          MESSAGE: ${{ github.event.head_commit.message || 'Publication manuelle' }}
+        run: npx eas-cli@latest update --channel preview --environment preview --platform android --non-interactive --message "$(echo "$MESSAGE" | head -1)"
