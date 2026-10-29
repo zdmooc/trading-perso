@@ -12,11 +12,12 @@ import { Decisions } from './src/ui/Decisions';
 import { Choix } from './src/ui/Onglets';
 import { CarteSwing, ResumeSwing } from './src/ui/Swing';
 import { BilanEcran } from './src/ui/Bilan';
+import { EtoroEcran } from './src/ui/Etoro';
 import { PrendreTrade, type Proposition } from './src/ui/PrendreTrade';
 import { useMesDonnees } from './src/ui/mesTrades';
 import { espace, useCouleurs } from './src/ui/theme';
 
-const ONGLETS = [{ cle: 'intraday' as const, texte: '⚡ Intraday' }, { cle: 'swing' as const, texte: '📈 Swing' }, { cle: 'bilan' as const, texte: '📒 Bilan' }];
+const ONGLETS = [{ cle: 'intraday' as const, texte: '⚡ Intraday' }, { cle: 'swing' as const, texte: '📈 Swing' }, { cle: 'bilan' as const, texte: '📒 Bilan' }, { cle: 'etoro' as const, texte: '🟢 eToro' }];
 const PUCES = INDICES.map((i) => ({ cle: i.symbole, texte: i.nom.replace(' 40', '').replace(' 100', '') }));
 const RAFRAICHIR_MS = 5 * 60_000;
 
@@ -26,7 +27,7 @@ export default function App() {
   const [marche, setMarche] = useState<Marche | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
-  const [onglet, setOnglet] = useState<'intraday' | 'swing' | 'bilan'>('intraday');
+  const [onglet, setOnglet] = useState<'intraday' | 'swing' | 'bilan' | 'etoro'>('intraday');
   const [proposition, setProposition] = useState<Proposition | null>(null);
   const donnees = useMesDonnees();
   const [choisi, setChoisi] = useState(INDICES[0].symbole);
@@ -98,6 +99,9 @@ export default function App() {
                     Montants en € pour la taille du plan (DAX et Nasdaq 0,5 contrat, S&P 500 1 contrat).
                   </Text>
                 </>
+              ) : onglet === 'etoro' ? (
+                <EtoroEcran resumes={marche.resumes} swing={marche.swing} risqueEur={donnees.reglages.risqueEur} eurUsd={marche.eurUsd}
+                  actualisation={marche.maintenant} />
               ) : onglet === 'bilan' ? (
                 <BilanEcran donnees={donnees} planJournal={marche.planJournal} journal={marche.journal} journalTout={marche.journalTout}
                   cours={Object.fromEntries(marche.resumes.map((r) => [r.indice.symbole, r.prix]))} />
