@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { type Resume, eur, nombre, pts } from '../domain';
 import { type Couleurs, espace, useCouleurs } from './theme';
 
@@ -69,18 +69,19 @@ function Niveaux({ c, entree, stop, objectif }: { c: Couleurs; entree: string; s
   );
 }
 
-export function Decisions({ resumes }: { resumes: Resume[] }) {
+export function Decisions({ resumes, choisi, onChoisir }: { resumes: Resume[]; choisi: string; onChoisir: (s: string) => void }) {
   const c = useCouleurs();
   return (
     <View style={[styles.carte, { backgroundColor: c.carte, borderColor: c.ligne }]}>
       <Text style={[styles.titre, { color: c.texte }]}>🎯 Que faire maintenant</Text>
       {resumes.map((r, i) => (
-        <View key={r.indice.symbole} style={i > 0 && { borderTopWidth: 1, borderTopColor: c.ligne }}>
+        <Pressable key={r.indice.symbole} onPress={() => onChoisir(r.indice.symbole)}
+          style={[i > 0 && { borderTopWidth: 1, borderTopColor: c.ligne }, r.indice.symbole === choisi && styles.choisi, r.indice.symbole === choisi && { borderLeftColor: c.bleu }]}>
           <Ligne r={r} c={c} />
-        </View>
+        </Pressable>
       ))}
       <Text style={{ color: c.doux, fontSize: 12, marginTop: espace(2) }}>
-        Un seul trade par indice et par jour. Dès qu’une entrée est touchée, l’autre est annulée.
+        Touche un indice pour voir son détail. Un seul trade par indice et par jour. Dès qu’une entrée est touchée, l’autre est annulée.
       </Text>
     </View>
   );
@@ -92,5 +93,6 @@ export const styles = StyleSheet.create({
   ligne: { paddingVertical: espace(3), gap: espace(1) },
   nom: { fontSize: 16, fontWeight: '700' },
   badge: { alignSelf: 'flex-start', color: '#FFFFFF', fontSize: 12, fontWeight: '800', paddingHorizontal: espace(2), paddingVertical: 2, borderRadius: 6, overflow: 'hidden' },
+  choisi: { borderLeftWidth: 3, paddingLeft: espace(2) },
   niveaux: { flexDirection: 'row', flexWrap: 'wrap', columnGap: espace(4), marginTop: 2 },
 });

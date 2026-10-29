@@ -3,15 +3,19 @@ import { ActivityIndicator, AppState, RefreshControl, ScrollView, Text, View } f
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { bougiesYahoo } from './src/adapters/yahoo';
-import { planDepot, statsDepot } from './src/adapters/depot';
+import { journalDepot, planDepot, statsDepot } from './src/adapters/depot';
 import { type Marche, charger } from './src/application/marche';
-import { dateFr, hhmm, paris, weekEnd } from './src/domain';
+import { INDICES, dateFr, hhmm, paris, weekEnd } from './src/domain';
 import { BandeauMiseAJour } from './src/ui/BandeauMiseAJour';
 import { CarteIndice } from './src/ui/CarteIndice';
 import { Decisions } from './src/ui/Decisions';
+import { Choix } from './src/ui/Onglets';
+import { CarteSwing, ResumeSwing } from './src/ui/Swing';
 import { espace, useCouleurs } from './src/ui/theme';
 
-const SOURCES = { bougies: bougiesYahoo, stats: statsDepot, plan: planDepot };
+const SOURCES = { bougies: bougiesYahoo, stats: statsDepot, plan: planDepot, journal: journalDepot };
+const ONGLETS = [{ cle: 'intraday' as const, texte: '⚡ Intraday' }, { cle: 'swing' as const, texte: '📈 Swing' }];
+const PUCES = INDICES.map((i) => ({ cle: i.symbole, texte: i.nom.replace(' 40', '').replace(' 100', '') }));
 const RAFRAICHIR_MS = 5 * 60_000;
 
 /** Écran unique : marché DAX / Nasdaq 100 / S&P 500, plan du jour et graphiques. Lecture seule, aucun ordre. */
@@ -20,6 +24,8 @@ export default function App() {
   const [marche, setMarche] = useState<Marche | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
+  const [onglet, setOnglet] = useState<'intraday' | 'swing'>('intraday');
+  const [choisi, setChoisi] = useState(INDICES[0].symbole);
 
   const rafraichir = useCallback(async () => {
     setEnCours(true);
@@ -67,16 +73,30 @@ export default function App() {
           )}
           {marche && (
             <View>
-              {!weekEnd(marche.maintenant) && <Decisions resumes={marche.resumes} />}
-              {marche.resumes.map((r) => (
-                <CarteIndice key={r.indice.symbole} r={r} quotidien={marche.quotidien[r.indice.symbole] ?? []}
-                  stats={marche.stats[r.indice.symbole]} debutTest={marche.debutTest} />
-              ))}
-              <Text style={{ color: c.doux, fontSize: 12, marginBottom: espace(8) }}>
-                Lignes pleines : entrées du plan. Pointillés gris : stops. Pointillés bleus : objectifs (3 fois le risque).
-                Orange : pivots de la semaine. Les niveaux IG et les cours Yahoo peuvent différer de quelques points.
-                Montants en € pour la taille du plan (DAX et Nasdaq 0,5 contrat, S&P 500 1 contrat).
-              </Text>
+              <Choix options={ONGLETS} valeur={onglet} onChoisir={setOnglet} grand />
+              {onglet === 'intraday' ? (
+                <>
+                  {!weekEnd(marche.maintenant) && <Decisions resumes={marche.resumes} choisi={choisi} onChoisir={setChoisi} />}
+                  <Choix options={PUCES} valeur={choisi} onChoisir={setChoisi} />
+                  {marche.resumes.filter((r) => r.indice.symbole === choisi).map((r) => (
+                    <CarteIndice key={r.indice.symbole} r={r} stats={marche.stats[r.indice.symbole]} debutTest={marche.debutTest} />
+                  ))}
+                  <Text style={{ color: c.doux, fontSize: 12, marginBottom: espace(8) }}>
+                    Lignes pleines : entrées du plan. Pointillés gris : stops. Pointillés bleus : objectifs (3 fois le risque).
+                    Orange : pivots de la semaine. Les niveaux IG et les cours Yahoo peuvent différer de quelques points.
+                    Montants en € pour la taille du plan (DAX et Nasdaq 0,5 contrat, S&P 500 1 contrat).
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <ResumeSwing indices={INDICES} swing={marche.swing} journal={marche.journal} choisi={choisi} onChoisir={setChoisi} />
+                  <Choix options={PUCES} valeur={choisi} onChoisir={setChoisi} />
+                  {INDICES.filter((i) => i.symbole === choisi).map((i) => (
+                    <CarteSwing key={i.symbole} ind={i} s={marche.swing[i.symbole]} quotidien={marche.quotidien[i.symbole] ?? []} journal={marche.journal} />
+                  ))}
+                  <View style={{ height: espace(8) }} />
+                </>
+              )}
             </View>
           )}
         </ScrollView>
