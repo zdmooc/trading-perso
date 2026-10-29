@@ -1,13 +1,17 @@
 import { Text, View } from 'react-native';
-import { type Resume, dateFr, eur, nombre, pts, variation } from '../domain';
+import { type Resume, dateFr, eur, fenetre, nombre, pts, variation } from '../domain';
 import type { StatsRegle } from '../adapters/depot';
 import { Graphique, type Niveau } from './Graphique';
 import { styles } from './Decisions';
+import { LigneTaille } from './LigneTaille';
+import { BoutonPris, type Proposition } from './PrendreTrade';
 import { espace, useCouleurs } from './theme';
 
 const n = (x: number) => nombre(x, 0);
 
-export function CarteIndice({ r, stats, debutTest }: { r: Resume; stats?: StatsRegle; debutTest?: string }) {
+export function CarteIndice({ r, stats, debutTest, risqueEur, eurUsd, onPrendre }: {
+  r: Resume; stats?: StatsRegle; debutTest?: string; risqueEur: number; eurUsd: number; onPrendre: (p: Proposition) => void;
+}) {
   const c = useCouleurs();
   const niveaux: Niveau[] = [];
   for (const o of r.ordres) {
@@ -36,7 +40,7 @@ export function CarteIndice({ r, stats, debutTest }: { r: Resume; stats?: StatsR
       )}
       {r.plan && (
         <Text style={[doux, { marginTop: espace(1) }]}>
-          Plan {r.plan.source === 'IG' ? 'de 8h45 (cours IG)' : 'calculé sur le téléphone (cours Yahoo)'} · veille du {dateFr(r.plan.veille)} · {r.indice.fenetre}
+          Plan {r.plan.source === 'IG' ? 'de 8h45 (cours IG)' : 'calculé sur le téléphone (cours Yahoo)'} · veille du {dateFr(r.plan.veille)} · {fenetre(r.indice, r.date)}
         </Text>
       )}
       {stats && (
@@ -45,6 +49,16 @@ export function CarteIndice({ r, stats, debutTest }: { r: Resume; stats?: StatsR
         </Text>
       )}
       {ctx && <Text style={doux}>Mouvement moyen d’une journée {n(ctx.atr)} pts</Text>}
+      {(r.etat.type === 'position' ? [{ sens: r.etat.trade.sens, entree: r.etat.trade.entree, stop: r.etat.trade.stop, objectif: r.etat.trade.objectif }]
+        : r.etat.type === 'attendre' ? r.ordres.map((o) => ({ sens: o.sens, entree: o.niveau, stop: o.stop, objectif: o.objectif })) : []).map((o) => (
+        <View key={o.sens} style={{ marginTop: espace(3) }}>
+          <Text style={{ color: o.sens > 0 ? c.vert : c.rouge, fontWeight: '700' }}>
+            {o.sens > 0 ? 'Achat' : 'Vente'} {n(o.entree)} · stop {n(o.stop)} · objectif {n(o.objectif)}
+          </Text>
+          <LigneTaille ind={r.indice} entree={o.entree} stop={o.stop} risqueEur={risqueEur} eurUsd={eurUsd} />
+          <BoutonPris onPress={() => onPrendre({ symbole: r.indice.symbole, type: 'intraday', ...o })} />
+        </View>
+      ))}
       <Text style={[doux, { marginTop: espace(4), marginBottom: espace(1) }]}>{r.jour.length ? 'Aujourd’hui (bougies de 30 min)' : 'Dernière séance (bougies de 30 min)'}</Text>
       {r.graphe.length ? <Graphique bougies={r.graphe} niveaux={niveaux} hauteur={260} /> : <Text style={doux}>Pas de cours.</Text>}
     </View>

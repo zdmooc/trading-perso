@@ -375,8 +375,11 @@ def pareto(data, noms, indices, regime, breakeven_r, frais, ratio_min) -> str:
 
 
 PHASES = {7: "matin", 10: "ouverture", 17: "bilan"}
-PHASES_PLAN = {8: "plan", 14: "point", 17: "bilan"}
+PHASES_PLAN = {8: "plan", 14: "point", 17: "bilan", 22: "veille", 23: "veille"}
 RETARD_MAX = 45  # minutes
+# Le plan du lendemain ne dépend que des séances finies : un départ très en retard (GitHub lance souvent
+# les tâches planifiées avec plusieurs heures de retard) reste utile tant qu'il arrive avant l'ouverture.
+RETARD_PAR_PHASE = {"veille": 9 * 60}
 
 
 def phase_du_cron(cron: str, maintenant: pd.Timestamp | None = None, phases: dict | None = None) -> str | None:
@@ -384,10 +387,13 @@ def phase_du_cron(cron: str, maintenant: pd.Timestamp | None = None, phases: dic
     On ne garde que celui qui tombe à la bonne heure de Paris aujourd'hui."""
     minute, heure = (int(x) for x in cron.split()[:2])
     maintenant = (maintenant or pd.Timestamp.now(tz="UTC")).tz_convert("UTC")
-    prevu = (maintenant.normalize() + pd.Timedelta(hours=heure, minutes=minute)).tz_convert(matin.PARIS)
-    if maintenant - prevu > pd.Timedelta(minutes=RETARD_MAX):
+    prevu = maintenant.normalize() + pd.Timedelta(hours=heure, minutes=minute)
+    phase = (phases or PHASES).get(prevu.tz_convert(matin.PARIS).hour)
+    if phase == "veille" and prevu > maintenant:
+        prevu -= pd.Timedelta(days=1)  # tâche du soir partie après minuit
+    if maintenant - prevu > pd.Timedelta(minutes=RETARD_PAR_PHASE.get(phase, RETARD_MAX)):
         return None  # GitHub lance parfois les tâches planifiées avec des heures de retard : message périmé
-    return (phases or PHASES).get(prevu.hour)
+    return phase
 
 
 def _sig(x: float, dec: int = 1) -> str:
@@ -558,7 +564,7 @@ def cmd_ig_test(out: Path) -> None:
 def main() -> None:
     p = argparse.ArgumentParser(prog="tradeperso")
     p.add_argument("commande", choices=["scan", "backtest", "matin", "plan", "ig-test", "ig-marches", "horaire", "serveur"])
-    p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan", "plan", "point"])
+    p.add_argument("--phase", default="auto", choices=["auto", "matin", "ouverture", "bilan", "plan", "point", "veille"])
     p.add_argument("--cron", default="", help="horaire de la tâche GitHub (pour --phase auto)")
     p.add_argument("--silencieux", action="store_true", help="pas de message Telegram")
     p.add_argument("--config", default="config.toml")
@@ -585,7 +591,7 @@ def main() -> None:
         return
     if a.commande == "plan":
         phase = a.phase if a.phase != "auto" else (phase_du_cron(a.cron, phases=PHASES_PLAN) if a.cron else None)
-        if phase not in ("plan", "point", "bilan"):
+        if phase not in ("plan", "point", "bilan", "veille"):
             print("Hors horaire (heure d'été ou d'hiver) ou trop en retard : rien à faire.")
             return
         from . import plan

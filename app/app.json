@@ -2,7 +2,7 @@
   "expo": {
     "name": "Marché",
     "slug": "marche-trading-perso",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -24,6 +24,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-sqlite",
+      [
+        "expo-notifications",
+        {
+          "color": "#22A06B"
+        }
+      ],
+      "expo-background-task",
       [
         "expo-splash-screen",
         {

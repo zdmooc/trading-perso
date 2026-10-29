@@ -12,6 +12,22 @@ export function decalageParis(ms: number): number {
   return ms >= dernierDimanche(a, 2) && ms < dernierDimanche(a, 9) ? 2 * HEURE : HEURE;
 }
 
+/** Heure d'été de New York : du 2e dimanche de mars au 1er dimanche de novembre, à 2h locales. */
+function dimanche(annee: number, mois: number, rang: number, heureUtc: number): number {
+  const premier = Date.UTC(annee, mois, 1, heureUtc);
+  return premier + (((7 - new Date(premier).getUTCDay()) % 7) + 7 * (rang - 1)) * 24 * HEURE;
+}
+
+export function decalageNewYork(ms: number): number {
+  const a = new Date(ms).getUTCFullYear();
+  return ms >= dimanche(a, 2, 2, 7) && ms < dimanche(a, 10, 1, 6) ? -4 * HEURE : -5 * HEURE;
+}
+
+/** 1 les semaines où New York n'est qu'à 5 h de Paris (séance américaine une heure plus tôt), sinon 0. */
+export function avanceUs(ms: number): number {
+  return Math.round(6 - (decalageParis(ms) - decalageNewYork(ms)) / HEURE);
+}
+
 export interface HeureParis {
   /** AAAA-MM-JJ */
   date: string;

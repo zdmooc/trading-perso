@@ -83,16 +83,17 @@ def resume(s: str, jour_df: pd.DataFrame, d: pd.DataFrame | None, pl: dict | Non
         for o in pl["ordres"]:
             stop, obj = o["niveau"] - o["sens"] * o["risque"], o["niveau"] + o["sens"] * plan.RATIO * o["risque"]
             r["ordres"].append({**o, "stop": stop, "objectif": obj, "distance": o["niveau"] - r["prix"] if "prix" in r else None})
-        ses = plan.seances(jour_df, info["heures"], info.get("debut_min", 0)).get(maintenant.date()) if len(jour_df) else None
-        fin = maintenant.normalize() + pd.Timedelta(hours=info["heures"][1] + 1)
-        r["entree_possible"] = maintenant.hour <= info["fin_entree"]
+        us = info.get("us", False)
+        ses = plan.seances(jour_df, info["heures"], info.get("debut_min", 0), us).get(maintenant.date()) if len(jour_df) else None
+        fin = plan.fin_seance(info, maintenant.date())
+        r["entree_possible"] = plan.heure_normale(maintenant, us) <= info["fin_entree"]
         r["fenetre"] = info["fenetre"]
         if ses is not None and len(ses):
-            t = plan.rejouer(ses, [plan.Ordre(**o) for o in pl["ordres"]], info["fin_entree"], info["spread"], maintenant >= fin)
+            t = plan.rejouer(ses, [plan.Ordre(**o) for o in pl["ordres"]], info["fin_entree"], info["spread"], maintenant >= fin, us=us)
             r["etat"] = plan.ligne_trade(t, info["taille"], maintenant >= fin)
             r["trade"] = t
         else:
-            debut = maintenant.normalize() + pd.Timedelta(hours=info["heures"][0], minutes=info.get("debut_min", 0))
+            debut = plan.debut_seance(info, maintenant.date())
             r["etat"] = "séance pas encore ouverte" if maintenant < debut else \
                 "pas de séance aujourd'hui" if maintenant >= fin else "cours pas encore disponibles"
     if d is not None and len(d) > 60:

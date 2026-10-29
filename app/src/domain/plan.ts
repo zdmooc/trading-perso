@@ -3,7 +3,7 @@
  * Portage fidèle de src/tradeperso/plan.py (ordres, seances, rejouer, preparer). Lecture seule : aucun ordre passé.
  */
 import { atr, sma } from './indicateurs';
-import { paris } from './temps';
+import { avanceUs, depuisParis, paris } from './temps';
 
 export const RATIO = 3;
 
@@ -28,12 +28,14 @@ export interface Indice {
   taille: number;
   spread: number;
   fenetre: string;
+  /** heures données pour une semaine normale (New York à 6 h de Paris) ; une heure plus tôt sinon */
+  us: boolean;
 }
 
 export const INDICES: Indice[] = [
-  { symbole: '^GDAXI', nom: 'DAX 40', drapeau: '🇩🇪', heures: [9, 17], debutMin: 0, finEntree: 15, taille: 0.5, spread: 1.2, fenetre: 'entrée 9h-16h, tout fermé à 17h30' },
-  { symbole: '^NDX', nom: 'Nasdaq 100', drapeau: '🇺🇸', heures: [15, 21], debutMin: 30, finEntree: 20, taille: 0.5, spread: 1.0, fenetre: 'entrée 15h30-21h, tout fermé à 22h' },
-  { symbole: '^GSPC', nom: 'S&P 500', drapeau: '🇺🇸', heures: [15, 21], debutMin: 30, finEntree: 20, taille: 1, spread: 0.4, fenetre: 'entrée 15h30-21h, tout fermé à 22h' },
+  { symbole: '^GDAXI', nom: 'DAX 40', drapeau: '🇩🇪', heures: [9, 17], debutMin: 0, finEntree: 15, taille: 0.5, spread: 1.2, fenetre: 'entrée 9h-16h, tout fermé à 17h30', us: false },
+  { symbole: '^NDX', nom: 'Nasdaq 100', drapeau: '🇺🇸', heures: [15, 21], debutMin: 30, finEntree: 20, taille: 0.5, spread: 1.0, fenetre: 'entrée 15h30-21h, tout fermé à 22h', us: true },
+  { symbole: '^GSPC', nom: 'S&P 500', drapeau: '🇺🇸', heures: [15, 21], debutMin: 30, finEntree: 20, taille: 1, spread: 0.4, fenetre: 'entrée 15h30-21h, tout fermé à 22h', us: true },
 ];
 
 /** Règle choisie par le test de 2 ans (reports/plan/stats.json), si le dépôt est injoignable. */
@@ -82,24 +84,47 @@ export function ordres(cle: string, haut: number, bas: number, a: number, tendan
   return liste;
 }
 
+/** Heure de Paris d'une semaine normale : 14h30 devient 15h30 les semaines où New York a une heure d'avance. */
+export function heureNormale(t: number, us: boolean): number {
+  return paris(t).heure + (us ? avanceUs(t) : 0);
+}
+
+export function debutSeance(ind: Indice, date: string): number {
+  const midi = depuisParis(date, 12);
+  return depuisParis(date, ind.heures[0] - (ind.us ? avanceUs(midi) : 0), ind.debutMin);
+}
+
+/** Fin de la dernière bougie de la séance. */
+export function finSeance(ind: Indice, date: string): number {
+  const midi = depuisParis(date, 12);
+  return depuisParis(date, ind.heures[1] + 1 - (ind.us ? avanceUs(midi) : 0));
+}
+
+/** Fenêtre du jour en clair, avec les heures avancées quand New York n'est qu'à 5 h de Paris. */
+export function fenetre(ind: Indice, date: string): string {
+  if (!ind.us || !avanceUs(depuisParis(date, 12))) return ind.fenetre;
+  return 'entrée 14h30-20h, tout fermé à 21h (une heure plus tôt cette semaine : changement d’heure décalé avec New York)';
+}
+
 /** Bougies de chaque séance, de heures[0]h{debutMin} à la fin de la bougie de heures[1]h, par date de Paris. */
-export function seances(b: Bougie[], ind: Pick<Indice, 'heures' | 'debutMin'>): Map<string, Bougie[]> {
+export function seances(b: Bougie[], ind: Pick<Indice, 'heures' | 'debutMin'> & { us?: boolean }): Map<string, Bougie[]> {
   const out = new Map<string, Bougie[]>();
   for (const x of b) {
     const p = paris(x.t);
-    if (p.heure * 60 + p.minute < ind.heures[0] * 60 + ind.debutMin || p.heure > ind.heures[1]) continue;
+    const h = p.heure + (ind.us ? avanceUs(x.t) : 0);
+    if (h * 60 + p.minute < ind.heures[0] * 60 + ind.debutMin || h > ind.heures[1]) continue;
     out.set(p.date, [...(out.get(p.date) ?? []), x]);
   }
   return out;
 }
 
 /** Rejoue une séance : un seul trade, le premier niveau touché. */
-export function rejouer(barres: Bougie[], liste: Ordre[], finEntree: number, spread: number, fini = true): Trade | null {
+export function rejouer(barres: Bougie[], liste: Ordre[], finEntree: number, spread: number, fini = true, us = false): Trade | null {
   let pos: Trade | null = null;
   for (const b of barres) {
     if (pos === null) {
       const p = paris(b.t);
-      if (p.heure > finEntree) continue;
+      if (heureNormale(b.t, us) > finEntree) continue;
       const touches = liste.filter((o) => (o.cote === 'haut' ? b.h >= o.niveau : b.l <= o.niveau));
       if (!touches.length) continue;
       const o = touches.reduce((m, x) => (Math.abs(b.o - x.niveau) < Math.abs(b.o - m.niveau) ? x : m));

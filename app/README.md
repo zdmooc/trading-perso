@@ -17,6 +17,21 @@ réinstaller via EAS Update depuis GitHub Actions.
 Les calculs (`src/domain/plan.ts`) sont un portage de `src/tradeperso/plan.py`. Le test de parité compare
 avec des cas produits par le code Python : `python app/scripts/parite.py` les régénère.
 
+## Trois onglets
+
+- **⚡ Intraday** : plan du jour par indice, avec la taille de position (IG en contrats, eToro en unités,
+  spread compris) pour le risque en € choisi dans les réglages.
+- **📈 Swing** : règles longues du scanner, filtre S&P 500 / moyenne 200 jours.
+- **📒 Bilan** : mes trades (bouton « ✋ J'ai pris ce trade », puis clôture), mes résultats, résultats
+  réels du plan et du scanner, réglages.
+
+Les trades notés restent sur le téléphone (`expo-sqlite`). Les alertes (entrée proche, entrée touchée,
+stop, objectif) sont des notifications locales : à chaque rafraîchissement quand l'app est ouverte,
+et au mieux toutes les 15 min en arrière-plan (Android décide du moment exact).
+
+Depuis la version 0.2.0 (modules natifs ajoutés), un nouvel APK est nécessaire : Actions → app-publier
+→ Run workflow avec « apk » coché.
+
 ## Installer sur Android (une seule fois, depuis le PC)
 
 ```bash
