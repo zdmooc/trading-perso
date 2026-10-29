@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { type Resume, dateFr, eur, nombre, pts, variation } from '../domain';
+import { type Resume, dateFr, eur, fenetre, nombre, pts, variation } from '../domain';
 import type { StatsRegle } from '../adapters/depot';
 import { Graphique, type Niveau } from './Graphique';
 import { styles } from './Decisions';
@@ -36,7 +36,7 @@ export function CarteIndice({ r, stats, debutTest }: { r: Resume; stats?: StatsR
       )}
       {r.plan && (
         <Text style={[doux, { marginTop: espace(1) }]}>
-          Plan {r.plan.source === 'IG' ? 'de 8h45 (cours IG)' : 'calculé sur le téléphone (cours Yahoo)'} · veille du {dateFr(r.plan.veille)} · {r.indice.fenetre}
+          Plan {r.plan.source === 'IG' ? 'de 8h45 (cours IG)' : 'calculé sur le téléphone (cours Yahoo)'} · veille du {dateFr(r.plan.veille)} · {fenetre(r.indice, r.date)}
         </Text>
       )}
       {stats && (

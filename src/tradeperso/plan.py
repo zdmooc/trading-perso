@@ -3,6 +3,8 @@
 - 8h45 : le plan (2 entrées au plus par indice). Il ne change pas de la journée.
 - 14h15 : point avant l'ouverture américaine (plan inchangé, seulement l'état des entrées).
 - 17h45 : bilan du DAX. Les indices américains finissent à 22h : leur résultat arrive le lendemain matin.
+- le soir (« veille ») : résultat final du jour et plan du lendemain, publié dans le dépôt avant l'ouverture
+  même si GitHub lance la tâche avec des heures de retard. Aucun message.
 
 Pour chaque indice, la règle retenue est la meilleure de quelques règles simples sur les niveaux de la séance
 de la veille, testées sur 2 ans de bougies horaires (Yahoo). Objectif toujours à 3 fois le risque.
@@ -24,11 +26,45 @@ from .indicators import atr, sma
 INDICES = {
     "^GDAXI": dict(nom="DAX 40", ig="Germany 40", drapeau="🇩🇪", heures=(9, 17), fin_entree=15, taille=0.5,
                    spread=1.2, fenetre="entrée 9h-16h, tout fermé à 17h30"),
+    # Heures américaines données pour une semaine normale (New York à 6 h de Paris). Les semaines où les deux pays
+    # ne changent pas d'heure le même jour (fin mars, fin octobre), New York n'est qu'à 5 h : tout avance d'une heure.
     "^NDX": dict(nom="Nasdaq 100", ig="US Tech 100", drapeau="🇺🇸", heures=(15, 21), debut_min=30, fin_entree=20, taille=0.5,
-                 spread=1.0, resolution="MINUTE_30", fenetre="entrée 15h30-21h, tout fermé à 22h"),
+                 spread=1.0, resolution="MINUTE_30", fenetre="entrée 15h30-21h, tout fermé à 22h", us=True),
     "^GSPC": dict(nom="S&P 500", ig="US 500", drapeau="🇺🇸", heures=(15, 21), debut_min=30, fin_entree=20, taille=1.0,
-                  spread=0.4, resolution="MINUTE_30", fenetre="entrée 15h30-21h, tout fermé à 22h"),
+                  spread=0.4, resolution="MINUTE_30", fenetre="entrée 15h30-21h, tout fermé à 22h", us=True),
 }
+NEW_YORK = "America/New_York"
+
+
+def avance_us(t) -> int:
+    """1 les semaines où New York n'est qu'à 5 h de Paris (séance américaine une heure plus tôt), sinon 0."""
+    t = pd.Timestamp(t)
+    t = t.tz_localize(matin.PARIS) if t.tzinfo is None else t
+    ecart = (t.tz_convert(matin.PARIS).utcoffset() - t.tz_convert(NEW_YORK).utcoffset()) / pd.Timedelta(hours=1)
+    return int(round(6 - ecart))
+
+
+def _avances(index: pd.DatetimeIndex) -> np.ndarray:
+    """avance_us de chaque bougie (index en heure de Paris)."""
+    ecart = (index.tz_convert(matin.PARIS).tz_localize(None) - index.tz_convert(NEW_YORK).tz_localize(None)) / pd.Timedelta(hours=1)
+    return np.round(6 - np.asarray(ecart)).astype(int)
+
+
+def heure_normale(t, us: bool) -> int:
+    """Heure de Paris d'une semaine normale : 14h30 devient 15h30 les semaines où New York a une heure d'avance."""
+    return t.hour + (avance_us(t) if us else 0)
+
+
+def debut_seance(info: dict, jour) -> pd.Timestamp:
+    d = pd.Timestamp(jour, tz=matin.PARIS)
+    return d + pd.Timedelta(hours=info["heures"][0] - (avance_us(d + pd.Timedelta(hours=12)) if info.get("us") else 0),
+                            minutes=info.get("debut_min", 0))
+
+
+def fin_seance(info: dict, jour) -> pd.Timestamp:
+    """Fin de la dernière bougie de la séance."""
+    d = pd.Timestamp(jour, tz=matin.PARIS)
+    return d + pd.Timedelta(hours=info["heures"][1] + 1 - (avance_us(d + pd.Timedelta(hours=12)) if info.get("us") else 0))
 RATIO = 3.0
 MIN_TRADES = 30
 
@@ -86,14 +122,15 @@ def ordres(regle: Regle, haut: float, bas: float, a: float, tendance: int) -> li
 
 
 def rejouer(barres: pd.DataFrame, liste: list[Ordre], fin_entree: int, spread: float, fini: bool = True,
-            gap_max: float | None = None, stop_entree: bool = False) -> Trade | None:
+            gap_max: float | None = None, stop_entree: bool = False, us: bool = False) -> Trade | None:
     """Rejoue une séance (bougies horaires, heure de Paris). Un seul trade : le premier niveau touché.
     gap_max : pas d'entrée si la bougie ouvre déjà au-delà du niveau de plus de gap_max fois le risque.
-    stop_entree : stop remonté au prix d'entrée dès que le gain atteint 1 fois le risque."""
+    stop_entree : stop remonté au prix d'entrée dès que le gain atteint 1 fois le risque.
+    us : heure limite comptée en heure normale (voir heure_normale)."""
     pos, risque = None, 0.0
     for b in barres.itertuples():
         if pos is None:
-            if b.Index.hour > fin_entree:
+            if heure_normale(b.Index, us) > fin_entree:
                 continue
             touches = [o for o in liste if (b.High >= o.niveau if o.cote == "haut" else b.Low <= o.niveau)]
             if not touches:
@@ -126,10 +163,13 @@ def rejouer(barres: pd.DataFrame, liste: list[Ordre], fin_entree: int, spread: f
     return pos
 
 
-def seances(h: pd.DataFrame, heures: tuple[int, int], debut_min: int = 0) -> dict:
-    """Bougies de la séance, de heures[0]h{debut_min} à la fin de la bougie de heures[1]h (heure de Paris)."""
-    minutes = h.index.hour * 60 + h.index.minute
-    s = h[(minutes >= heures[0] * 60 + debut_min) & (h.index.hour <= heures[1])]
+def seances(h: pd.DataFrame, heures: tuple[int, int], debut_min: int = 0, us: bool = False) -> dict:
+    """Bougies de la séance, de heures[0]h{debut_min} à la fin de la bougie de heures[1]h (heure de Paris,
+    une heure plus tôt pour les indices américains les semaines où New York n'est qu'à 5 h de Paris)."""
+    avance = _avances(h.index) if us and len(h) else 0
+    heure = np.asarray(h.index.hour) + avance
+    minutes = heure * 60 + np.asarray(h.index.minute)
+    s = h[(minutes >= heures[0] * 60 + debut_min) & (heure <= heures[1])]
     return {d: g for d, g in s.groupby(s.index.date)}
 
 
@@ -142,7 +182,7 @@ def contexte(d: pd.DataFrame) -> pd.DataFrame:
 
 def backtest(h: pd.DataFrame, d: pd.DataFrame, info: dict) -> dict[str, list[float]]:
     """Points gagnés ou perdus par trade, pour chaque règle."""
-    ses, ctx = seances(h, info["heures"], info.get("debut_min", 0)), contexte(d)
+    ses, ctx = seances(h, info["heures"], info.get("debut_min", 0), info.get("us", False)), contexte(d)
     jours = sorted(ses)
     res = {r.cle: [] for r in REGLES}
     for veille, jour in zip(jours, jours[1:]):
@@ -151,7 +191,7 @@ def backtest(h: pd.DataFrame, d: pd.DataFrame, info: dict) -> dict[str, list[flo
         g, c = ses[veille], ctx.loc[veille]
         for r in REGLES:
             t = rejouer(ses[jour], ordres(r, float(g["High"].max()), float(g["Low"].min()), float(c["atr"]),
-                                          int(c["tendance"])), info["fin_entree"], info["spread"])
+                                          int(c["tendance"])), info["fin_entree"], info["spread"], us=info.get("us", False))
             if t is not None:
                 res[r.cle].append(round(t.pts, 1))
     return res
@@ -292,7 +332,7 @@ def preparer(maintenant: pd.Timestamp, st: dict, d: dict, h: dict, ig: dict) -> 
         if s not in st["indices"] or s not in d:
             continue
         source = "IG" if len(ig.get(s, [])) else "Yahoo"
-        ses = seances(ig[s] if source == "IG" else h[s], info["heures"], info.get("debut_min", 0))
+        ses = seances(ig[s] if source == "IG" else h[s], info["heures"], info.get("debut_min", 0), info.get("us", False))
         passees = [j for j in sorted(ses) if j < maintenant.date()]
         ctx = contexte(d[s])
         ctx = ctx[ctx.index < maintenant.date()]
@@ -321,14 +361,14 @@ def evaluer(plan: dict, barres: dict, maintenant: pd.Timestamp) -> dict[str, tup
         df = barres.get(s)
         if df is None or not len(df):
             continue
-        ses = seances(df, info["heures"], info.get("debut_min", 0)).get(jour)
-        fin = pd.Timestamp(jour, tz=matin.PARIS) + pd.Timedelta(hours=info["heures"][1] + 1)
+        ses = seances(df, info["heures"], info.get("debut_min", 0), info.get("us", False)).get(jour)
+        fin = fin_seance(info, jour)
         fini = maintenant >= fin
         if ses is None or not len(ses):
             out[s] = (None, fini)
             continue
         liste = [Ordre(**o) for o in p["ordres"]]
-        out[s] = (rejouer(ses, liste, info["fin_entree"], info["spread"], fini), fini)
+        out[s] = (rejouer(ses, liste, info["fin_entree"], info["spread"], fini, us=info.get("us", False)), fini)
     return out
 
 
@@ -459,27 +499,41 @@ def tableau(j: pd.DataFrame) -> list[str]:
         ["| " + " | ".join("" if pd.isna(v) else str(v) for v in r) + " |" for r in j.itertuples(index=False)]
 
 
+def prochain_jour(t: pd.Timestamp) -> pd.Timestamp:
+    """Prochain jour de semaine à 8h45 (jours fériés non gérés)."""
+    j = t.normalize() + pd.Timedelta(days=1)
+    while j.weekday() >= 5:
+        j += pd.Timedelta(days=1)
+    return j + pd.Timedelta(hours=8, minutes=45)
+
+
 def executer(out: Path, phase: str, telegram: bool = True) -> None:
     maintenant = pd.Timestamp.now(tz=matin.PARIS)
     rep = dossier(out)
-    ig = charger_ig(maintenant, 4 if phase == "plan" else 1)  # quota IG : 10 000 bougies par semaine
+    ig = charger_ig(maintenant, 4 if phase in ("plan", "veille") else 1)  # quota IG : 10 000 bougies par semaine
     jr = rep / "journal.csv"
     j = pd.read_csv(jr) if jr.exists() else pd.DataFrame(columns=COLONNES)
-    if phase == "plan":
+    if phase in ("plan", "veille"):
+        # Le soir, on prépare le plan du lendemain ; le matin, on reprend celui de la veille s'il existe.
+        quand = prochain_jour(maintenant) if phase == "veille" else maintenant
         d = matin.telecharger(INDICES, "5y", "1d")
         h = matin.telecharger(INDICES, "730d", "1h")
         st = charger_stats(out, d, h)
         # Résultat final de la veille (les indices américains finissent à 22h).
         hier = []
         precedents = sorted(rep.glob("plan_*.json"))
-        precedents = [p for p in precedents if p.stem[5:] < str(maintenant.date())]
+        precedents = [p for p in precedents if p.stem[5:] < str(quand.date())]
         if precedents and ig:
             pv = json.loads(precedents[-1].read_text(encoding="utf-8"))
             res = evaluer(pv, ig, maintenant)
             j = journal_maj(jr, pv, res)
             hier = [f"{INDICES[s]['nom']} : {ligne_trade(t, INDICES[s]['taille'], f)}" for s, (t, f) in res.items()]
-        plan = preparer(maintenant, st, d, h, ig)
-        (rep / f"plan_{plan['date']}.json").write_text(json.dumps(plan, indent=1) + "\n", encoding="utf-8")
+        chemin = rep / f"plan_{quand.date()}.json"
+        if phase == "plan" and chemin.exists():
+            plan = json.loads(chemin.read_text(encoding="utf-8"))
+        else:
+            plan = preparer(quand, st, d, h, ig)
+            chemin.write_text(json.dumps(plan, indent=1) + "\n", encoding="utf-8")
         try:
             import tomllib
             zones = tomllib.loads(Path("config.toml").read_text(encoding="utf-8")).get("zones", {})
@@ -503,5 +557,5 @@ def executer(out: Path, phase: str, telegram: bool = True) -> None:
             texte += "\nNasdaq et S&P 500 finissent à 22h : résultat demain matin."
     rapport(out, plan, st, j, texte)
     print(texte)
-    if telegram:
+    if telegram and phase != "veille":
         alerts.send_telegram([texte])

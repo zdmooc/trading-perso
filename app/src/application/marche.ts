@@ -2,7 +2,7 @@
  * Charge tout l'écran : cours Yahoo, plan du jour (celui d'IG publié à 8h45 s'il existe, sinon calculé
  * sur le téléphone avec la même règle), état de chaque indice. Lecture seule : aucun ordre passé.
  */
-import { type Bougie, INDICES, type PlanIndice, REGLES_PAR_DEFAUT, type Resume, type Swing, analyserSwing, depuisParis, paris, preparer, resumer, sma, weekEnd } from '../domain';
+import { type Bougie, type Indice, INDICES, type PlanIndice, REGLES_PAR_DEFAUT, type Resume, type Swing, analyserSwing, finSeance, paris, preparer, resumer, sma, weekEnd } from '../domain';
 import type { LigneJournal, StatsDepot, StatsRegle } from '../adapters/depot';
 
 export interface Sources {
@@ -25,9 +25,9 @@ export interface Marche {
 }
 
 /** Bougies journalières terminées : celle du jour seulement après la fin de la séance. */
-export function terminees(d: Bougie[], heureFin: number, maintenant: number): Bougie[] {
+export function terminees(d: Bougie[], ind: Indice, maintenant: number): Bougie[] {
   const date = paris(maintenant).date;
-  const fini = maintenant >= depuisParis(date, heureFin + 1);
+  const fini = maintenant >= finSeance(ind, date);
   return d.filter((b) => paris(b.t).date < date || fini);
 }
 
@@ -53,12 +53,12 @@ export async function charger(src: Sources, maintenant = Date.now()): Promise<Ma
     st[ind.symbole] = s?.regles[s.choisie];
   }
   // Filtre de marché du scanner : S&P 500 au-dessus de sa moyenne 200 jours = achats seulement, sinon ventes seulement.
-  const spx = terminees(quotidien['^GSPC'] ?? [], 21, maintenant).map((b) => b.c);
+  const spx = terminees(quotidien['^GSPC'] ?? [], INDICES[2], maintenant).map((b) => b.c);
   const m200 = sma(spx, 200)[spx.length - 1];
   const marcheHaussier = m200 === null || m200 === undefined ? null : spx[spx.length - 1] > m200;
   const swing: Record<string, Swing | null> = {};
   for (const ind of INDICES) {
-    const d = terminees(quotidien[ind.symbole], ind.heures[1], maintenant);
+    const d = terminees(quotidien[ind.symbole], ind, maintenant);
     swing[ind.symbole] = d.length ? analyserSwing(d, paris(d[d.length - 1].t).date, marcheHaussier) : null;
   }
   const symboles = new Set(INDICES.map((i) => i.symbole));

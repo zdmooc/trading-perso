@@ -270,6 +270,41 @@ def test_phase_du_cron():
     assert phase_du_cron("5 8 * * 1-5", pd.Timestamp("2026-10-06 13:00", tz="UTC")) is None  # parti trop tard
 
 
+def test_phase_veille_meme_tres_en_retard():
+    from tradeperso.cli import PHASES_PLAN, phase_du_cron
+    # 21h30 UTC = 22h30 à Paris en hiver, 23h30 en été
+    assert phase_du_cron("30 21 * * 1-5", pd.Timestamp("2026-11-02 21:40", tz="UTC"), PHASES_PLAN) == "veille"
+    assert phase_du_cron("30 21 * * 1-5", pd.Timestamp("2026-10-06 21:40", tz="UTC"), PHASES_PLAN) == "veille"
+    # partie après minuit, 5 h plus tard : toujours utile avant l'ouverture
+    assert phase_du_cron("30 21 * * 1-5", pd.Timestamp("2026-11-03 02:30", tz="UTC"), PHASES_PLAN) == "veille"
+    assert phase_du_cron("30 21 * * 1-5", pd.Timestamp("2026-11-03 08:00", tz="UTC"), PHASES_PLAN) is None
+
+
+def test_prochain_jour():
+    from tradeperso.plan import prochain_jour
+    assert str(prochain_jour(pd.Timestamp("2026-10-30 22:30", tz="Europe/Paris"))) == "2026-11-02 08:45:00+01:00"
+    assert str(prochain_jour(pd.Timestamp("2026-10-28 22:30", tz="Europe/Paris"))) == "2026-10-29 08:45:00+01:00"
+
+
+def test_heures_americaines_avancees():
+    from tradeperso.plan import INDICES, avance_us, fin_seance, rejouer, seances, Ordre
+    # fin octobre : Paris est passé à l'heure d'hiver, pas encore New York (ouverture à 14h30 à Paris)
+    assert avance_us(pd.Timestamp("2026-10-28 16:00", tz="Europe/Paris")) == 1
+    assert avance_us(pd.Timestamp("2026-11-03 16:00", tz="Europe/Paris")) == 0
+    assert avance_us(pd.Timestamp("2026-03-10 16:00", tz="Europe/Paris")) == 1
+    assert str(fin_seance(INDICES["^NDX"], "2026-10-28")) == "2026-10-28 21:00:00+01:00"
+    idx = pd.date_range("2026-10-28 13:00", "2026-10-28 22:30", freq="30min", tz="Europe/Paris")
+    h = pd.DataFrame({"Open": 100.0, "High": 101.0, "Low": 99.0, "Close": 100.0}, index=idx)
+    ses = seances(h, (15, 21), 30, us=True)[pd.Timestamp("2026-10-28").date()]
+    assert f"{ses.index[0]:%H:%M}" == "14:30" and f"{ses.index[-1]:%H:%M}" == "20:30"
+    # niveau touché à 19h30 (20h30 en heure normale) : encore permis ; à 20h00 (21h) : trop tard
+    ses = ses.copy()
+    ses.loc[ses.index >= pd.Timestamp("2026-10-28 20:00", tz="Europe/Paris"), "High"] = 120.0
+    assert rejouer(ses, [Ordre(1, 110, "haut", 5)], 20, 1, us=True) is None
+    ses.loc[ses.index == pd.Timestamp("2026-10-28 19:30", tz="Europe/Paris"), "High"] = 120.0
+    assert rejouer(ses, [Ordre(1, 110, "haut", 5)], 20, 1, us=True).heure == "19h30"
+
+
 def _barres(prix, debut="2026-10-07 09:00"):
     idx = pd.date_range(debut, periods=len(prix), freq="h", tz="Europe/Paris")
     return pd.DataFrame([dict(Open=o, High=h, Low=l, Close=c) for o, h, l, c in prix], index=idx)

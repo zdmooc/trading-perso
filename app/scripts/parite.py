@@ -40,11 +40,12 @@ for s, info in plan.INDICES.items():
                        {s: d.assign()}, {s: h}, {})
     c = d["Close"]
     rejeux = []
-    for jour, g in plan.seances(h, info["heures"], info.get("debut_min", 0)).items():
+    us = info.get("us", False)
+    for jour, g in plan.seances(h, info["heures"], info.get("debut_min", 0), us).items():
         for k in (0.1, 0.3):
             liste = plan.ordres(plan.PAR_CLE[f"cassure-{0.25}-aucun"], float(g["High"].iloc[:3].max()) + k * 10,
                                 float(g["Low"].iloc[:3].min()) - k * 10, depart * 0.004, 1)
-            t = plan.rejouer(g, liste, info["fin_entree"], info["spread"], True)
+            t = plan.rejouer(g, liste, info["fin_entree"], info["spread"], True, us=us)
             rejeux.append({"jour": str(jour), "ordres": [o.__dict__ for o in liste],
                            "trade": None if t is None else {**t.__dict__}})
     from tradeperso.horaire import pivots_semaine
