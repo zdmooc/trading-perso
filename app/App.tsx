@@ -99,7 +99,7 @@ export default function App() {
                   </Text>
                 </>
               ) : onglet === 'bilan' ? (
-                <BilanEcran donnees={donnees} planJournal={marche.planJournal} journal={marche.journal}
+                <BilanEcran donnees={donnees} planJournal={marche.planJournal} journal={marche.journal} journalTout={marche.journalTout}
                   cours={Object.fromEntries(marche.resumes.map((r) => [r.indice.symbole, r.prix]))} />
               ) : (
                 <>
