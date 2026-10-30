@@ -17,6 +17,7 @@ Swing (bougies journalières, 10 ans) :
 from __future__ import annotations
 
 import gzip
+import os
 import pickle
 from dataclasses import replace
 from pathlib import Path
@@ -31,7 +32,7 @@ import ameliorations  # noqa: E402  (même dossier)
 
 COUPURE = pd.Timestamp("2026-01-01").date()
 COUPURE_SWING = pd.Timestamp("2023-01-01")
-DONNEES = Path("reports/tmp/donnees.pkl.gz")
+DONNEES = Path(os.environ.get("DONNEES", "reports/tmp/donnees.pkl.gz"))
 
 # Annonces de la Fed (le soir, pendant la séance américaine).
 FED = {pd.Timestamp(x).date() for x in [
@@ -80,7 +81,7 @@ def rejouer(barres, liste, fin_entree, spread, us, ratio: float | None = 3.0, pa
     return (fin if pos["demi"] is None else (pos["demi"] + fin) / 2) - spread, pos["s"], pos["t0"], barres.index[-1]
 
 
-SORTIES = {"3R (actuel)": dict(ratio=3.0), "2R": dict(ratio=2.0), "4R": dict(ratio=4.0),
+SORTIES = {"3R (ancien)": dict(ratio=3.0), "2R": dict(ratio=2.0), "4R": dict(ratio=4.0),
            "moitié à 1,5R puis 3R": dict(ratio=3.0, partiel=1.5), "sans objectif, sortie à la clôture": dict(ratio=None)}
 
 
@@ -129,7 +130,7 @@ def section_jour(T: dict, actuelles: dict) -> tuple[list[str], dict]:
     for s, info in plan.INDICES.items():
         if s not in T:
             continue
-        t = T[s][T[s]["sortie"] == "3R (actuel)"]
+        t = T[s][T[s]["sortie"] == "3R (ancien)"]
         app, ctl = t[t["jour"] < COUPURE], t[t["jour"] >= COUPURE]
         tot = app.groupby("regle")["pts"].agg(["sum", "count"])
         tot = tot[tot["count"] >= plan.MIN_TRADES]
@@ -157,19 +158,19 @@ def filtres(t: pd.DataFrame) -> dict[str, pd.Series]:
 
 def section_variantes(T: dict, choix: dict) -> list[str]:
     md = ["# Jours à éviter et sorties", "",
-          "Pour chaque indice, avec la règle choisie avant 2026. Une colonne par période.", ""]
+          "Pour chaque indice, avec la règle actuelle du plan. Une colonne par période.", ""]
     for s, info in plan.INDICES.items():
         if s not in T:
             continue
         t = T[s][T[s]["regle"] == choix[s]]
         app, ctl = (lambda x: x[x["jour"] < COUPURE]), (lambda x: x[x["jour"] >= COUPURE])
-        base = t[t["sortie"] == "3R (actuel)"]
+        base = t[t["sortie"] == "3R (ancien)"]
         md += [f"## {info['nom']} : {plan.PAR_CLE[choix[s]].nom}", "", "| Variante | Avant 2026 | 2026 |", "| --- | --- | --- |"]
         for nom, m in filtres(base).items():
             x = base[m]
             md.append(f"| {nom} | {cellule(app(x)['pts'], info['taille'])} | {cellule(ctl(x)['pts'], info['taille'])} |")
         for nom in SORTIES:
-            if nom == "3R (actuel)":
+            if nom == "3R (ancien)":
                 continue
             x = t[t["sortie"] == nom]
             md.append(f"| Sortie {nom} | {cellule(app(x)['pts'], info['taille'])} | {cellule(ctl(x)['pts'], info['taille'])} |")
@@ -182,9 +183,9 @@ def ensemble(T: dict, choix: dict, correlation: bool, pertes_max: int | None) ->
     lignes = []
     for s, info in plan.INDICES.items():
         if s in T:
-            t = T[s][(T[s]["regle"] == choix[s]) & (T[s]["sortie"] == "3R (actuel)")]
+            t = T[s][(T[s]["regle"] == choix[s]) & (T[s]["sortie"] == "3R (ancien)")]
             lignes.append(t.assign(sym=s, eur=t["pts"] * info["taille"]))
-    t = pd.concat(lignes).sort_values(["jour", "t0", "sym"])
+    t = pd.concat(lignes).sort_values(["jour", "t0", "sym"]).reset_index(drop=True)
     garde = []
     for _, j in t.groupby("jour"):
         pris = []
@@ -298,6 +299,22 @@ def section_swing(cfg, data) -> list[str]:
     return md + [""]
 
 
+CONCLUSION = """## Ce qui a été retenu (30/10/2026)
+
+- **Objectif à 4 fois le risque au lieu de 3** : mieux sur le DAX et le Nasdaq dans les deux périodes, égal sur le S&P.
+  Sur les 3 indices : environ +2 300 pts avant 2026 et +850 pts en 2026. Seul changement adopté.
+- **Règles du plan inchangées** : Nasdaq et S&P, choisies avant 2026, restent dans les 2 meilleures en 2026.
+  Le DAX est fragile : la meilleure règle d'avant 2026 perd en 2026. Les cassures « dans le sens de la tendance »
+  (la règle actuelle) gagnent dans les deux périodes : on les garde.
+- **Rejeté** (moins bien ou pareil sur la période de contrôle) : jours d'annonce, veille étroite ou large, moitié à 1,5R,
+  un seul trade Nasdaq / S&P, arrêt après 2 pertes (presque aucun effet), vente DAX RSI 4 h haut (trop peu de trades,
+  résultat qui change d'une période à l'autre), classement des signaux swing, sortie swing au bout de N jours
+  (la meilleure durée d'avant 2023 ne fait pas mieux après).
+- **Coûts réels** : l'onglet eToro de l'app affiche maintenant le spread eToro du moment et l'écart entre tes prix
+  d'entrée et ceux du plan, dès que tu prends un trade du plan.
+"""
+
+
 def main() -> None:
     if DONNEES.exists():
         with gzip.open(DONNEES, "rb") as fh:
@@ -313,15 +330,23 @@ def main() -> None:
     if st.exists():
         import json
         actuelles = {k: v["choisie"] for k, v in json.loads(st.read_text(encoding="utf-8"))["indices"].items()}
-    T = {s: trades_indice(h[s], d[s], info) for s, info in plan.INDICES.items() if s in h and s in d}
+    cache = os.environ.get("CACHE_TRADES")
+    if cache and Path(cache).exists():
+        T = pd.read_pickle(cache)
+    else:
+        T = {s: trades_indice(h[s], d[s], info) for s, info in plan.INDICES.items() if s in h and s in d}
+        if cache:
+            pd.to_pickle(T, cache)
     md1, choix = section_jour(T, actuelles)
+    regles = {s: actuelles.get(s, choix[s]) for s in choix}  # la suite porte sur les règles du plan actuel
     md = (["# Pistes pour améliorer les signaux", "",
-           "Réglage choisi sur une période, vérifié sur une autre jamais utilisée pour choisir. Points nets du spread IG.", ""]
-          + md1 + section_variantes(T, choix) + section_ensemble(T, choix) + section_rsi_dax(h["^GDAXI"], d["^GDAXI"])
+           "Réglage choisi sur une période, vérifié sur une autre jamais utilisée pour choisir. Points nets du spread IG.", "",
+           CONCLUSION]
+          + md1 + section_variantes(T, regles) + section_ensemble(T, regles) + section_rsi_dax(h["^GDAXI"], d["^GDAXI"])
           + section_swing(cfg, j)
           + ["Résultats passés : aucune garantie pour l'avenir.", ""])
     texte = "\n".join(md)
-    Path("reports/signaux.md").write_text(texte, encoding="utf-8")
+    Path("reports/pistes_signaux.md").write_text(texte, encoding="utf-8")
     print(texte)
 
 

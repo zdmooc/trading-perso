@@ -1,11 +1,11 @@
 /**
- * Plan du jour : cassure (ou rejet) du plus haut / plus bas de la séance de la veille, objectif 3 fois le risque.
+ * Plan du jour : cassure (ou rejet) du plus haut / plus bas de la séance de la veille, objectif 4 fois le risque.
  * Portage fidèle de src/tradeperso/plan.py (ordres, seances, rejouer, preparer). Lecture seule : aucun ordre passé.
  */
 import { atr, sma } from './indicateurs';
 import { avanceUs, depuisParis, paris } from './temps';
 
-export const RATIO = 3;
+export const RATIO = 4;
 
 export interface Bougie {
   /** instant UTC en ms */

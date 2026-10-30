@@ -10,7 +10,7 @@ réinstaller via EAS Update depuis GitHub Actions.
 
 - **Cours** : Yahoo Finance, directement depuis le téléphone (gratuit, sans clé, sans serveur).
 - **Plan du jour** : celui de 8h45 en cours IG s'il a été publié dans `reports/plan/`, sinon calculé sur
-  le téléphone avec la même règle (cassure du plus haut / plus bas de la veille, objectif 3 fois le risque).
+  le téléphone avec la même règle (cassure du plus haut / plus bas de la veille, objectif 4 fois le risque).
   Les niveaux Yahoo et IG peuvent différer de quelques points.
 - **Règle de chaque indice et résultats du test** : `reports/plan/stats.json`.
 

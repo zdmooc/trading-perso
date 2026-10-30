@@ -7,7 +7,7 @@
   même si GitHub lance la tâche avec des heures de retard. Aucun message.
 
 Pour chaque indice, la règle retenue est la meilleure de quelques règles simples sur les niveaux de la séance
-de la veille, testées sur 2 ans de bougies horaires (Yahoo). Objectif toujours à 3 fois le risque.
+de la veille, testées sur 2 ans de bougies horaires (Yahoo). Objectif toujours à 4 fois le risque.
 Hypothèses prudentes du test : dans la bougie d'entrée, le stop compte si la bougie clôture au-delà ;
 ensuite, si stop et objectif tombent dans la même bougie, on compte le stop.
 """
@@ -65,7 +65,7 @@ def fin_seance(info: dict, jour) -> pd.Timestamp:
     """Fin de la dernière bougie de la séance."""
     d = pd.Timestamp(jour, tz=matin.PARIS)
     return d + pd.Timedelta(hours=info["heures"][1] + 1 - (avance_us(d + pd.Timedelta(hours=12)) if info.get("us") else 0))
-RATIO = 3.0
+RATIO = 4.0  # 4R plutôt que 3R : mieux sur 2023-2025 et sur 2026 (reports/pistes_signaux.md)
 MIN_TRADES = 30
 
 
@@ -475,7 +475,7 @@ def message_suivi(titre: str, plan: dict, res: dict, ig: dict) -> str:
 def rapport(out: Path, plan: dict, st: dict, j: pd.DataFrame, texte: str) -> None:
     import re
     l = ["# Plan du jour", "", re.sub(r"</?b>", "**", texte).replace("\n", "  \n"), "", f"## Statistiques depuis le {st.get('debut', '?')} (bougies horaires)",
-         "", "Points nets du spread IG. Objectif à 3 fois le risque. La règle retenue a le meilleur total.", ""]
+         "", "Points nets du spread IG. Objectif à 4 fois le risque. La règle retenue a le meilleur total.", ""]
     for s, info in INDICES.items():
         if s not in st["indices"]:
             continue

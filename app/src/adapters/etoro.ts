@@ -3,7 +3,7 @@
  * Aucune route d'ordre, de clôture ou de modification n'est appelée, et la clé à créer sur eToro est une clé « lecture ».
  * Les clés restent sur le téléphone.
  */
-import { type CompteEtoro, type Cotation, INSTRUMENTS, lireCompte } from '../domain';
+import { type CompteEtoro, type Cotation, type TradeReel, INDICES, INSTRUMENTS, lireCompte, lireHistorique } from '../domain';
 
 const BASE = 'https://public-api.etoro.com';
 
@@ -58,14 +58,20 @@ export interface DonneesEtoro {
   indices: Record<string, Cotation>;
   /** suggestions personnalisées d'eToro (des instruments, pas des signaux d'achat) */
   suggestions: { id: number; nom: string; cote?: Cotation }[];
+  /** trades des 60 derniers jours (fermés et ouverts), pour comparer les prix réels au plan */
+  trades: TradeReel[];
+  /** nom de l'indice du plan (« DAX 40 ») de chaque instrument eToro des indices */
+  idsIndices: Record<number, string>;
 }
 
 export async function chargerEtoro(cles: ClesEtoro): Promise<DonneesEtoro> {
   const symboles = Object.values(INSTRUMENTS).map((i) => i.etoro);
-  const [pnl, idx, reco] = await Promise.all([
+  const depuis = new Date(Date.now() - 60 * 86_400_000).toISOString().slice(0, 10);
+  const [pnl, idx, reco, histo] = await Promise.all([
     lire(cles, '/api/v1/trading/info/real/pnl'),
     instruments(cles, `symbols=${symboles.join(',')}`),
     lire(cles, '/api/v1/market-recommendations/10').catch(() => null),
+    lire(cles, `/api/v1/trading/info/trade/history?minDate=${depuis}`).catch(() => null),
   ]);
   const compte = lireCompte(pnl);
   const recoIds = ((reco as { Recommendations?: number[] } | null)?.Recommendations ?? []).slice(0, 10);
@@ -78,5 +84,12 @@ export async function chargerEtoro(cles: ClesEtoro): Promise<DonneesEtoro> {
   for (const i of [...idx, ...infos]) noms[i.id] = i.nom || i.symbole;
   const indices: Record<string, Cotation> = {};
   for (const i of idx) if (cotes[i.id]) indices[i.symbole.toUpperCase()] = cotes[i.id];
-  return { compte, noms, indices, suggestions: recoIds.map((id) => ({ id, nom: noms[id] ?? `#${id}`, cote: cotes[id] })) };
+  const idsIndices: Record<number, string> = {};
+  for (const i of idx) {
+    const s = Object.keys(INSTRUMENTS).find((k) => INSTRUMENTS[k].etoro === i.symbole.toUpperCase());
+    const nom = INDICES.find((x) => x.symbole === s)?.nom;
+    if (nom) idsIndices[i.id] = nom;
+  }
+  const trades = [...lireHistorique(histo), ...compte.positions.map((p) => ({ instrumentId: p.instrumentId, achat: p.achat, ouverture: p.ouverture, date: p.depuis }))];
+  return { compte, noms, indices, suggestions: recoIds.map((id) => ({ id, nom: noms[id] ?? `#${id}`, cote: cotes[id] })), trades, idsIndices };
 }

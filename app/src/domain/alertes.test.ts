@@ -18,7 +18,7 @@ describe('alertes', () => {
   });
 
   it('entrée touchée puis objectif atteint', () => {
-    const r = resumer(dax, t9 + 3_600_000, [b(0, 24050, 24120, 24040, 24110), b(1, 24110, 24260, 24100, 24255)], [], plan);
+    const r = resumer(dax, t9 + 3_600_000, [b(0, 24050, 24120, 24040, 24110), b(1, 24110, 24310, 24100, 24305)], [], plan);
     expect(alertes([r], new Set()).map((x) => x.titre)).toEqual(['🇩🇪 DAX 40 : entrée touchée', '🇩🇪 DAX 40 : objectif atteint ✅']);
   });
 });
