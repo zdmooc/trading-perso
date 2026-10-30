@@ -15,7 +15,7 @@ describe('état du plan', () => {
     const r = resumer(dax, Date.parse('2026-10-28T07:00:00Z'), [], [], plan);
     expect(r.etat.type).toBe('attendre');
     expect(r.info).toBe('séance pas encore ouverte');
-    expect(r.ordres.map((o) => [o.stop, o.objectif])).toEqual([[24050, 24250], [23950, 23750]]);
+    expect(r.ordres.map((o) => [o.stop, o.objectif])).toEqual([[24050, 24300], [23950, 23700]]);
   });
 
   it('niveau touché : en position, écart avec la veille en points', () => {

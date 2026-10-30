@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { type Resume, eur, nombre, pts } from '../domain';
+import { type Resume, RATIO, eur, nombre, pts } from '../domain';
 import { type Couleurs, espace, useCouleurs } from './theme';
 
 const n = (x: number) => nombre(x, 0);
@@ -51,7 +51,7 @@ function Ligne({ r, c }: { r: Resume; c: Couleurs }) {
               si le cours <Text style={{ fontWeight: '700' }}>{o.cote === 'haut' ? 'monte' : 'descend'}</Text> à {n(o.niveau)}
               {o.distance !== null && <Text style={{ color: c.doux }}> · encore {n(Math.abs(o.distance))} pts</Text>}
             </Text>
-            <Niveaux c={c} entree={n(o.niveau)} stop={`${n(o.stop)} (${eur(-o.risque * taille)})`} objectif={`${n(o.objectif)} (${eur(3 * o.risque * taille)})`} />
+            <Niveaux c={c} entree={n(o.niveau)} stop={`${n(o.stop)} (${eur(-o.risque * taille)})`} objectif={`${n(o.objectif)} (${eur(RATIO * o.risque * taille)})`} />
           </View>
         );
       })}

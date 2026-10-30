@@ -313,9 +313,9 @@ def _barres(prix, debut="2026-10-07 09:00"):
 def test_plan_rejouer():
     from tradeperso.plan import Ordre, rejouer
     vente = [Ordre(-1, 110, "haut", 10)]
-    # monte à 110 (vente), puis baisse jusqu'à l'objectif 80
-    t = rejouer(_barres([(100, 105, 99, 104), (104, 111, 103, 108), (108, 109, 95, 96), (96, 97, 79, 81)]), vente, 15, 1)
-    assert t.motif == "objectif" and t.entree == 110 and t.pts == 29
+    # monte à 110 (vente), puis baisse jusqu'à l'objectif 70 (4 fois le risque)
+    t = rejouer(_barres([(100, 105, 99, 104), (104, 111, 103, 108), (108, 109, 95, 96), (96, 97, 69, 71)]), vente, 15, 1)
+    assert t.motif == "objectif" and t.entree == 110 and t.pts == 39
     # stop au-dessus de 120
     t = rejouer(_barres([(100, 105, 99, 104), (104, 111, 103, 108), (108, 121, 107, 119)]), vente, 15, 1)
     assert t.motif == "stop" and t.pts == -11

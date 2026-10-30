@@ -100,7 +100,7 @@ export default function App() {
                   </Text>
                 </>
               ) : onglet === 'etoro' ? (
-                <EtoroEcran resumes={marche.resumes} swing={marche.swing} risqueEur={donnees.reglages.risqueEur} eurUsd={marche.eurUsd}
+                <EtoroEcran planJournal={marche.planJournal} resumes={marche.resumes} swing={marche.swing} risqueEur={donnees.reglages.risqueEur} eurUsd={marche.eurUsd}
                   actualisation={marche.maintenant} />
               ) : onglet === 'bilan' ? (
                 <BilanEcran donnees={donnees} planJournal={marche.planJournal} journal={marche.journal} journalTout={marche.journalTout}

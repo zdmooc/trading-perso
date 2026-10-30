@@ -69,12 +69,12 @@ describe('rejouer', () => {
 
   it('séance pas finie : trade en cours, gain latent moins le spread', () => {
     const t = rejouer([b(0, 95, 101, 94, 100), b(1, 100, 112, 99, 110)], [achat], 15, 1, false);
-    expect(t).toMatchObject({ entree: 100, stop: 90, objectif: 130, motif: 'en cours', heure: '09h', pts: 9 });
+    expect(t).toMatchObject({ entree: 100, stop: 90, objectif: 140, motif: 'en cours', heure: '09h', pts: 9 });
   });
 
-  it('objectif à 3 fois le risque', () => {
-    const t = rejouer([b(0, 95, 101, 94, 100), b(1, 100, 131, 99, 125)], [achat], 15, 1);
-    expect(t).toMatchObject({ motif: 'objectif', pts: 29 });
+  it('objectif à 4 fois le risque', () => {
+    const t = rejouer([b(0, 95, 101, 94, 100), b(1, 100, 141, 99, 135)], [achat], 15, 1);
+    expect(t).toMatchObject({ motif: 'objectif', pts: 39 });
   });
 
   it('pas d’entrée après l’heure limite', () => {

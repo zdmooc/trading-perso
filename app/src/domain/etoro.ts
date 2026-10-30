@@ -129,3 +129,55 @@ export function recosEtoro(resumes: Resume[], swing: Record<string, Swing | null
   }
   return out;
 }
+
+/** Un trade réel sur eToro (position ouverte ou fermée). */
+export interface TradeReel {
+  instrumentId: number;
+  achat: boolean;
+  ouverture: number;
+  /** date d'ouverture, AAAA-MM-JJ */
+  date: string;
+}
+
+/** Historique eToro (/trade/history) : la liste peut être à la racine ou sous une clé. */
+export function lireHistorique(rep: unknown): TradeReel[] {
+  const liste = Array.isArray(rep) ? rep
+    : (Object.values((rep ?? {}) as Brut).find(Array.isArray) as unknown[] | undefined) ?? [];
+  return (liste as Brut[]).map((p) => ({
+    instrumentId: num(champ(p, 'instrumentId')) ?? 0,
+    achat: champ(p, 'isBuy') !== false,
+    ouverture: num(champ(p, 'openRate')) ?? 0,
+    date: String(champ(p, 'openTimestamp', 'openDateTime', 'openDate') ?? '').slice(0, 10),
+  })).filter((t) => t.instrumentId && t.ouverture && t.date);
+}
+
+export interface EcartReel {
+  date: string;
+  indice: string;
+  sens: 1 | -1;
+  plan: number;
+  reel: number;
+  /** points perdus par rapport à l'entrée du plan (négatif : meilleur prix que le plan) */
+  ecart: number;
+}
+
+/**
+ * Entrées réelles eToro comparées aux entrées du plan intraday : même jour, même indice, même sens.
+ * `indices` donne le nom de l'indice du plan (« DAX 40 ») pour chaque instrument eToro.
+ */
+export function ecartsReels(trades: TradeReel[], plan: { date: string; indice: string; sens: string; entree: number }[],
+  indices: Record<number, string>): EcartReel[] {
+  const out: EcartReel[] = [];
+  const vus = new Set<string>();
+  for (const t of trades) {
+    const nom = indices[t.instrumentId];
+    if (!nom) continue;
+    const l = plan.find((x) => x.date === t.date && x.indice === nom && x.sens === (t.achat ? 'achat' : 'vente') && Number.isFinite(x.entree));
+    const cle = `${t.date}|${nom}|${t.ouverture}`;
+    if (!l || vus.has(cle)) continue;
+    vus.add(cle);
+    const sens = t.achat ? 1 : -1;
+    out.push({ date: t.date, indice: nom, sens, plan: l.entree, reel: t.ouverture, ecart: sens * (t.ouverture - l.entree) });
+  }
+  return out.sort((a, b) => a.date.localeCompare(b.date));
+}

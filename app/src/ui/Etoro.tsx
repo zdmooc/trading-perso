@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
-import { type Resume, type Swing, INDICES, INSTRUMENTS, eur, nombre, pointsPosition, pts, recosEtoro } from '../domain';
+import { type Resume, type Swing, INDICES, INSTRUMENTS, dateFr, ecartsReels, eur, nombre, pointsPosition, pts, recosEtoro } from '../domain';
+import type { LignePlan } from '../adapters/depot';
 import { type ClesEtoro, type DonneesEtoro, chargerEtoro } from '../adapters/etoro';
 import { ecrireClesEtoro, lireClesEtoro } from '../adapters/stockage';
 import { styles } from './Decisions';
@@ -44,8 +45,43 @@ function SaisieCles({ c, onValider }: { c: Couleurs; onValider: (k: ClesEtoro) =
   );
 }
 
-export function EtoroEcran({ resumes, swing, risqueEur, eurUsd, actualisation }: {
-  resumes: Resume[]; swing: Record<string, Swing | null>; risqueEur: number; eurUsd: number; actualisation: number;
+/** Coûts réels : spread eToro du moment et prix d'entrée réels comparés au plan. */
+function PrixReels({ d, planJournal, c }: { d: DonneesEtoro; planJournal: LignePlan[]; c: Couleurs }) {
+  const doux = { color: c.doux, fontSize: 13 };
+  const ecarts = ecartsReels(d.trades, planJournal, d.idsIndices);
+  const moyenne = ecarts.length ? ecarts.reduce((a, e) => a + e.ecart, 0) / ecarts.length : 0;
+  return (
+    <Carte titre="📏 Coûts réels sur eToro" c={c}>
+      {INDICES.map((i) => {
+        const q = d.indices[INSTRUMENTS[i.symbole].etoro];
+        return q ? (
+          <Text key={i.symbole} style={{ color: c.texte, marginTop: espace(1) }}>
+            {i.nom} : spread {nombre(q.ask - q.bid, 1)} pts maintenant <Text style={doux}>(les tests comptent {nombre(i.spread, 1)} pts)</Text>
+          </Text>
+        ) : null;
+      })}
+      {ecarts.length > 0 ? (
+        <>
+          <Text style={{ color: moyenne > 0 ? c.rouge : c.vert, fontWeight: '600', marginTop: espace(3) }}>
+            Tes entrées : {pts(-moyenne)} en moyenne par rapport au plan ({ecarts.length} trade{ecarts.length > 1 ? 's' : ''})
+          </Text>
+          {ecarts.slice(-5).map((e, k) => (
+            <Text key={k} style={doux}>
+              {dateFr(e.date)} · {e.indice} · {e.sens > 0 ? 'achat' : 'vente'} : plan {n(e.plan)}, eToro {n(e.reel)} ({pts(-e.ecart)})
+            </Text>
+          ))}
+        </>
+      ) : (
+        <Text style={[doux, { marginTop: espace(3) }]}>
+          Pas encore de trade du plan pris sur eToro (60 derniers jours). Dès que tu en prends un, l’écart entre ton prix et l’entrée du plan s’affiche ici.
+        </Text>
+      )}
+    </Carte>
+  );
+}
+
+export function EtoroEcran({ resumes, swing, risqueEur, eurUsd, actualisation, planJournal }: {
+  resumes: Resume[]; swing: Record<string, Swing | null>; risqueEur: number; eurUsd: number; actualisation: number; planJournal: LignePlan[];
 }) {
   const c = useCouleurs();
   const [cles, setCles] = useState<ClesEtoro | null>(lireClesEtoro);
@@ -159,6 +195,8 @@ export function EtoroEcran({ resumes, swing, risqueEur, eurUsd, actualisation }:
           </Text>
         </Carte>
       )}
+
+      {d && <PrixReels d={d} planJournal={planJournal} c={c} />}
 
       {d && d.suggestions.length > 0 && (
         <Carte titre="👀 Sélection eToro pour toi" c={c}>

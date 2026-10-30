@@ -285,7 +285,7 @@ def page(maintenant: pd.Timestamp, source: str, resumes: dict[str, dict], figure
 <h1>Marché à {maintenant:%Hh%M}</h1>
 <p class="muted">{alerts.date_fr(maintenant.date())} · cours du jour {source} · lecture seule, aucun ordre passé</p>
 {cartes}
-<p class="note">Lignes pleines : entrées du plan de 8h45. Pointillés gris : stops. Pointillés bleus : objectifs (3 fois le risque).
+<p class="note">Lignes pleines : entrées du plan de 8h45. Pointillés gris : stops. Pointillés bleus : objectifs (4 fois le risque).
 Les niveaux du plan sont en cours IG ; si les cours du jour viennent de Yahoo, comptez quelques points d'écart.
 Orange : pivots de la semaine (calculés sur Yahoo, quelques points d'écart possibles avec IG).
 Les montants en € sont pour la taille du plan (DAX et Nasdaq 0,5 contrat, S&P 500 1 contrat).</p>
