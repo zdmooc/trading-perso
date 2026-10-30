@@ -1,0 +1,62 @@
+{
+ "date": "2026-11-02",
+ "indices": {
+  "^GDAXI": {
+   "source": "IG",
+   "regle": "cassure-0.25-tendance",
+   "veille": "2026-10-29",
+   "cloture": 26123.95,
+   "variation": 379.7000000000007,
+   "ordres": [
+    {
+     "sens": 1,
+     "niveau": 26154.619050353667,
+     "cote": "haut",
+     "risque": 76.67262588416573
+    }
+   ]
+  },
+  "^NDX": {
+   "source": "IG",
+   "regle": "cassure-0.25-aucun",
+   "veille": "2026-10-29",
+   "cloture": 29407.35,
+   "variation": -425.6000000000022,
+   "ordres": [
+    {
+     "sens": 1,
+     "niveau": 29568.169368289105,
+     "cote": "haut",
+     "risque": 115.29842072276482
+    },
+    {
+     "sens": -1,
+     "niveau": 29202.730631710892,
+     "cote": "bas",
+     "risque": 115.29842072276482
+    }
+   ]
+  },
+  "^GSPC": {
+   "source": "IG",
+   "regle": "cassure-0.25-aucun",
+   "veille": "2026-10-29",
+   "cloture": 7719.3099999999995,
+   "variation": -30.910000000000764,
+   "ordres": [
+    {
+     "sens": 1,
+     "niveau": 7739.516771230444,
+     "cote": "haut",
+     "risque": 17.091928076107617
+    },
+    {
+     "sens": -1,
+     "niveau": 7683.753228769557,
+     "cote": "bas",
+     "risque": 17.091928076107617
+    }
+   ]
+  }
+ }
+}
