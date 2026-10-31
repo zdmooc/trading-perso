@@ -8,31 +8,31 @@ Règle : les actions qui montent le plus par rapport au S&P 500 sur 6 mois, au-d
 
 | Action | Rang | Force relative 6 mois | Cours | Moyenne 50 jours | Montant |
 | --- | --- | --- | --- | --- | --- |
-| AbbVie | 4 | +32.3 % | 290.79 | 267.37 | 200 € |
-| Eli Lilly | 3 | +40.4 % | 1373.7 | 1193.68 | 200 € |
-| Thermo Fisher | 2 | +41.2 % | 709.18 | 653.1 | 200 € |
-| AMD | 1 | +52.7 % | 566.42 | 547.58 | 200 € |
-| Amgen | 6 | +27.8 % | 460.73 | 419.27 | 200 € |
+| AbbVie | 3 | +39.8 % | 294.89 | 268.07 | 200 € |
+| Eli Lilly | 2 | +42.8 % | 1417.54 | 1197.14 | 200 € |
+| Thermo Fisher | 1 | +44.0 % | 697.0 | 654.49 | 200 € |
+| Amgen | 4 | +38.4 % | 466.01 | 419.96 | 200 € |
+| Merck | 6 | +30.2 % | 149.52 | 146.58 | 200 € |
 
-**À vendre** : Salesforce, ServiceNow.
+**À vendre** : AMD.
 
 
 ## Classement complet (15 premiers)
 
 | Rang | Action | Force relative 6 mois | Au-dessus de la MM50 |
 | --- | --- | --- | --- |
-| 1 | AMD | +52.7 % | oui |
-| 2 | Thermo Fisher | +41.2 % | oui |
-| 3 | Eli Lilly | +40.4 % | oui |
-| 4 | AbbVie | +32.3 % | oui |
-| 5 | Merck | +28.7 % | non |
-| 6 | Amgen | +27.8 % | oui |
-| 7 | Salesforce | +24.3 % | non |
-| 8 | Microsoft | +23.4 % | oui |
-| 9 | Apple | +21.7 % | oui |
-| 10 | Philip Morris | +21.4 % | oui |
-| 11 | Mastercard | +19.7 % | oui |
-| 12 | Visa | +17.9 % | oui |
-| 13 | ServiceNow | +17.1 % | non |
-| 14 | Chevron | +14.8 % | oui |
-| 15 | Johnson & Johnson | +13.9 % | oui |
+| 1 | Thermo Fisher | +44.0 % | oui |
+| 2 | Eli Lilly | +42.8 % | oui |
+| 3 | AbbVie | +39.8 % | oui |
+| 4 | Amgen | +38.4 % | oui |
+| 5 | AMD | +35.2 % | non |
+| 6 | Merck | +30.2 % | oui |
+| 7 | Mastercard | +24.3 % | oui |
+| 8 | Philip Morris | +22.8 % | oui |
+| 9 | Visa | +21.7 % | oui |
+| 10 | Microsoft | +21.6 % | oui |
+| 11 | Chevron | +20.9 % | oui |
+| 12 | Salesforce | +20.4 % | non |
+| 13 | Exxon Mobil | +19.4 % | oui |
+| 14 | Apple | +18.4 % | oui |
+| 15 | Johnson & Johnson | +16.7 % | oui |
